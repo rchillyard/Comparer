@@ -146,18 +146,50 @@ case object Same extends Comparison {
   * Companion object for Comparison.
   */
 object Comparison {
-  val more: Comparison = Different(false)
-  val less: Comparison = Different(true)
+  /**
+    * Different(false)
+    */
+  val More: Comparison = Different(false)
+  /**
+    * Different(true)
+    */
+  val Less: Comparison = Different(true)
 
+  /**
+    * Method to construct a Comparison from a Boolean.
+    * @param b true or false.
+    * @return Different(b)
+    */
   def apply(b: Boolean): Comparison = Different(b)
 
-  def apply(x: Option[Boolean]): Comparison = x match {
+  /**
+    * Method to construct a Comparison from an Option[Boolean].
+    * @param bo an optional Boolean.
+    * @return the homologous Comparison for the input.
+    */
+  def apply(bo: Option[Boolean]): Comparison = bo match {
     case Some(b) => apply(b);
     case _ => Same
   }
 
+  /**
+    * Method to construct a Comparison from a Java-style comparison result.
+    * @param x an integer which is either less than 0, equal to 0, or greater than 0.
+    *          Typically, this is the result of a Java-style comparison.
+    * @return the homologous Comparison for x, either Same or Different(b) where b is true if x is negative.
+    */
   def apply(x: Int): Comparison = x match {
     case 0 => Same;
     case _ => Comparison(Some(x < 0))
   }
+
+  /**
+    * Method to construct a Comparison from two objects of type T.
+    * @param t1 the first T.
+    * @param t2 the second T.
+    * @param comparer an implicit Comparer[T].
+    * @tparam T the type of both t1 and t2, and also the underlying type of the Comparer[T].
+    * @return a Comparison, resulting from applying the comparer to the tuple of t1 and t2.
+    */
+  def apply[T](t1: T, t2: T)(implicit comparer: Comparer[T]): Comparison = comparer((t1, t2))
 }

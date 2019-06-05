@@ -4,7 +4,7 @@
 
 package com.phasmidsoftware.comparer
 
-import com.phasmidsoftware.comparer.Comparison.{less, more}
+import com.phasmidsoftware.comparer.Comparison.{Less, More}
 import org.scalatest.concurrent.{Futures, ScalaFutures}
 import org.scalatest.{FlatSpec, Matchers}
 
@@ -19,8 +19,8 @@ class ComparisonSpec extends FlatSpec with Matchers with Futures with ScalaFutur
 
   it should "apply(Int)" in {
     Comparison(0) shouldBe Same
-    Comparison(1) shouldBe more
-    Comparison(-1) shouldBe less
+    Comparison(1) shouldBe More
+    Comparison(-1) shouldBe Less
   }
   it should "toInt" in {
     Comparison(-1).toInt shouldBe -1
@@ -29,66 +29,66 @@ class ComparisonSpec extends FlatSpec with Matchers with Futures with ScalaFutur
   }
   it should "apply(Option[Boolean])" in {
     Comparison(None) shouldBe Same
-    Comparison(Some(false)) shouldBe more
-    Comparison(Some(true)) shouldBe less
+    Comparison(Some(false)) shouldBe More
+    Comparison(Some(true)) shouldBe Less
   }
   it should "flip" in {
-    more.flip shouldBe less
-    less.flip shouldBe more
+    More.flip shouldBe Less
+    Less.flip shouldBe More
     Same.flip shouldBe Same
   }
   it should "orElse" in {
-    more orElse more shouldBe more
-    more orElse less shouldBe more
-    less orElse more shouldBe less
-    less orElse less shouldBe less
-    Same orElse less shouldBe less
-    Same orElse more shouldBe more
+    More orElse More shouldBe More
+    More orElse Less shouldBe More
+    Less orElse More shouldBe Less
+    Less orElse Less shouldBe Less
+    Same orElse Less shouldBe Less
+    Same orElse More shouldBe More
     Same orElse Same shouldBe Same
   }
   it should "implement | correctly" in {
-    more | Same shouldBe more
-    Same | more shouldBe more
-    less | Same shouldBe Same
-    Same | less shouldBe Same
-    more | more shouldBe more
-    more | less shouldBe more
-    less | more shouldBe more
+    More | Same shouldBe More
+    Same | More shouldBe More
+    Less | Same shouldBe Same
+    Same | Less shouldBe Same
+    More | More shouldBe More
+    More | Less shouldBe More
+    Less | More shouldBe More
     Same | Same shouldBe Same
-    less | less shouldBe less
+    Less | Less shouldBe Less
   }
   it should "implement & correctly" in {
-    more & Same shouldBe Same
-    Same & more shouldBe Same
-    less & Same shouldBe less
-    Same & less shouldBe less
-    more & more shouldBe more
-    more & less shouldBe less
-    less & more shouldBe less
+    More & Same shouldBe Same
+    Same & More shouldBe Same
+    Less & Same shouldBe Less
+    Same & Less shouldBe Less
+    More & More shouldBe More
+    More & Less shouldBe Less
+    Less & More shouldBe Less
     Same & Same shouldBe Same
-    less & less shouldBe less
+    Less & Less shouldBe Less
   }
 
   it should "implement || correctly" in {
-    more || Same shouldBe more
-    Same || more shouldBe more
-    less || Same shouldBe Same
-    Same || less shouldBe Same
-    more || more shouldBe more
-    more || less shouldBe more
-    less || more shouldBe more
+    More || Same shouldBe More
+    Same || More shouldBe More
+    Less || Same shouldBe Same
+    Same || Less shouldBe Same
+    More || More shouldBe More
+    More || Less shouldBe More
+    Less || More shouldBe More
     Same || Same shouldBe Same
-    less || less shouldBe less
+    Less || Less shouldBe Less
   }
   it should "implement && correctly" in {
-    more && Same shouldBe Same
-    Same && more shouldBe Same
-    less && Same shouldBe less
-    Same && less shouldBe less
-    more && more shouldBe more
-    more && less shouldBe less
-    less && more shouldBe less
+    More && Same shouldBe Same
+    Same && More shouldBe Same
+    Less && Same shouldBe Less
+    Same && Less shouldBe Less
+    More && More shouldBe More
+    More && Less shouldBe Less
+    Less && More shouldBe Less
     Same && Same shouldBe Same
-    less && less shouldBe less
+    Less && Less shouldBe Less
   }
 }

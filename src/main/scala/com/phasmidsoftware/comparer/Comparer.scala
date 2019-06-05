@@ -76,14 +76,21 @@ trait Comparer[T] extends (((T, T)) => Comparison) {
   def !=(tt: (T, T)): Boolean = ! ==(tt)
 
   /**
-    * The infamous unMap method which is part of an un-monad.
-    * In case you're wondering, an un-monad is the wrappee as opposed to the wrapper (which would be a monad).
+    * Method to apply a lens function U=>T to this Comparer[T], resulting in a Comparer[U].
+    * The U values that are the inputs to the resulting Comparer, are passed to the lens function to
+    * yield a suitable pair of T values which can then be passed into this Comparer.
     *
-    * @param f a function which takes a U and returns a T.
+    * I originally considered this the infamous "unMap" method which is part of an un-monad.
+    * Observe that the lens function is U=>T instead of T=>U which would be the parameter of a monadic map method.
+    * In case you're wondering, an un-monad is the wrappee as opposed to the wrapper (which would be a monad).
+    * However, I think it makes slightly more sense to call this snap because it creates something (kind of like a picture)
+    * by using a lens.
+    *
+    * @param lens a function which takes a U and returns a T.
     * @tparam U the underlying type of the returned Comparer.
     * @return a Comparer[U].
     */
-  def unMap[U](f: U => T): Comparer[U] = (uU: (U, U)) => self((f(uU._1), f(uU._2)))
+  def snap[U](lens: U => T): Comparer[U] = (uU: (U, U)) => self((lens(uU._1), lens(uU._2)))
 
   /**
     * A method to compose this Comparer with another Comparer of a different underlying type.
@@ -117,6 +124,23 @@ trait Comparer[T] extends (((T, T)) => Comparison) {
     * @return a Compare[T] which, given the same tuple of Ts, yields the complementary Comparison to this Comparer.
     */
   def invert: Comparer[T] = map(_ flip)
+
+  /**
+    * Method to compose this Comparer[T] with a "lens" function that operates on a T.
+    * See, for example, the definition of the Comparer in object DateF (in CompareSpec).
+    *
+    * The resulting Comparer[T] is formed by using orElse to compose this Comparer[T] with a Comparer[T] that:
+    * is formed by using the "lens" function lens to snap (the implicit) comparer (which is a Comparer[U]) into a Comparer[T].
+    *
+    * This method is used primarily when chaining together several Comparers, each of which is derived from the given function
+    * by invoking snap on an implicitly-defined Comparer, with the a specified function.
+    * The initial value is typically provided by the "same" method of Comparer's companion object.
+    *
+    * @param lens a function which takes a T (the underlying type of this and the result) and returns a U.
+    * @tparam U the underlying type of the implicit comparer.
+    * @return a Comparer[T] which is composed from this and the unmapped form of comparer.
+    */
+  def :|[U: Comparer](lens: T => U): Comparer[T] = orElse(implicitly[Comparer[U]].snap(lens))
 }
 
 /**
@@ -124,6 +148,32 @@ trait Comparer[T] extends (((T, T)) => Comparison) {
   * This is where you will find standard Comparer definitions.
   */
 object Comparer {
+
+  /**
+    * A method to construct a Comparer which always evaluates to Same.
+    * This is used, for example, in the apply method following.
+    *
+    * @tparam T the underlying type of the Comparer.
+    * @return a Comparer[T] which always evaluates to Same.
+    */
+  def same[T]: Comparer[T] = new Comparer[T] { def apply(tt: (T, T)): Comparison = Same }
+
+  /**
+    * Method to construct a Comparer from a variable-length list of Comparers.
+    * @param comparers the Comparers.
+    * @tparam T the underlying type of all Comparers and the result.
+    * @return a Comparer[T] which applies each Comparer in turn.
+    */
+  def create[T](comparers: Comparer[T]*): Comparer[T] = comparers.foldLeft[Comparer[T]](same)(_.orElse(_))
+
+  /**
+    * Method to construct a Comparer from a variable-length list of Lenses.
+    * @param lenses the Lens functions, which must all be of the same type (T=>U).
+    *               Note that if you want to have varying types, then use same and :| rather than apply.
+    * @tparam T the underlying type of all Comparers and the result.
+    * @return a Comparer[T] which applies each Comparer in turn.
+    */
+  def apply[T,U: Comparer](lenses: (T=>U)*): Comparer[T] = lenses.foldLeft[Comparer[T]](same)(_ :| _)
 
   /**
     * Following are the Comparer definitions for the common scalar types.
