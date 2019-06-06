@@ -22,10 +22,7 @@ trait Comparer[T] extends (((T, T)) => Comparison) {
     *
     * @return a new Ordering[T].
     */
-  //noinspection ConvertExpressionToSAM
-  def toOrdering: Ordering[T] = new Ordering[T]() {
-    def compare(x: T, y: T): Int = self(x, y).toInt
-  }
+  def toOrdering: Ordering[T] = (x: T, y: T) => self(x, y).toInt
 
   /**
     * Method to yield a Boolean from this Comparer, given a tuple of two Ts.
@@ -156,7 +153,7 @@ object Comparer {
     * @tparam T the underlying type of the Comparer.
     * @return a Comparer[T] which always evaluates to Same.
     */
-  def same[T]: Comparer[T] = new Comparer[T] { def apply(tt: (T, T)): Comparison = Same }
+  def same[T]: Comparer[T] = (_: (T, T)) => Same
 
   /**
     * Method to construct a Comparer from a variable-length list of Comparers.

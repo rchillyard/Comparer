@@ -4,7 +4,7 @@ name := "Comparer"
 
 version := "1.0.0"
 
-scalaVersion := "2.12.5"
+scalaVersion := "2.12.8"
 
 val scalaTestVersion = "3.0.5"
 

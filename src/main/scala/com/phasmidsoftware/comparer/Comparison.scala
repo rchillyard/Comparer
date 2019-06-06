@@ -32,32 +32,32 @@ sealed trait Comparison extends (() => Option[Boolean]) {
   /**
     * Method to yield logical AND.
     *
-    * @param c the other Comparison (eagerly evaluated)
-    * @return a Comparison according to Kleenean logic
+    * @param c the other Comparison (eagerly evaluated).
+    * @return a Comparison according to Kleenean logic.
     */
   def &(c: Comparison): Comparison = Comparison(math.min(toInt, c.toInt))
 
   /**
     * Method to yield logical OR.
     *
-    * @param c the other Comparison (eagerly evaluated)
-    * @return a Comparison according to Kleenean logic
+    * @param c the other Comparison (eagerly evaluated).
+    * @return a Comparison according to Kleenean logic.
     */
   def |(c: Comparison): Comparison = Comparison(math.max(toInt, c.toInt))
 
   /**
     * Method to yield logical AND with short-circuit logic.
     *
-    * @param c the other Comparison (lazily evaluated)
-    * @return a Comparison according to Kleenean logic
+    * @param c the other Comparison (lazily evaluated).
+    * @return a Comparison according to Kleenean logic.
     */
   def &&(c: => Comparison): Comparison
 
   /**
     * Method to yield logical OR with short-circuit logic.
     *
-    * @param c the other Comparison (lazily evaluated)
-    * @return a Comparison according to Kleenean logic
+    * @param c the other Comparison (lazily evaluated).
+    * @return a Comparison according to Kleenean logic.
     */
   def ||(c: => Comparison): Comparison
 
@@ -69,7 +69,7 @@ sealed trait Comparison extends (() => Option[Boolean]) {
   override def toString(): String = ().toString
 
   /**
-    * Method to return the Java-style value of this Comparison
+    * Method to return the Java-style value of this Comparison.
     *
     * @return if Same then 0 else if Different(true) then -1 else 1
     */
@@ -82,7 +82,7 @@ sealed trait Comparison extends (() => Option[Boolean]) {
     * @param c the other Comparison (lazily evaluated).
     * @return the composition of this and c.
     */
-  def orElse(c: => Comparison): Comparison = Comparison(apply.orElse(c()))
+  def orElse(c: => Comparison): Comparison = Comparison(apply().orElse(c()))
 
   /**
     * Method to yield the complementary Comparison to this Comparison, that's to say the result is flipped (i.e. negated).
@@ -107,11 +107,16 @@ case class Different(less: Boolean) extends Comparison {
 
   /**
     *
-    * @param c the other Comparison (lazily evaluated)
-    * @return a Comparison according to Kleenean logic
+    * @param c the other Comparison (lazily evaluated).
+    * @return if (less) this else c.
     */
   def &&(c: => Comparison): Comparison = if (less) this else c
 
+  /**
+    *
+    * @param c the other Comparison (lazily evaluated).
+    * @return if (less) c else this.
+    */
   def ||(c: => Comparison): Comparison = if (less) c else this
 
   /**
@@ -119,7 +124,11 @@ case class Different(less: Boolean) extends Comparison {
     */
   def flip: Comparison = Different(!less)
 
-  override def toInt: Int = if (less) -1 else 1
+  /**
+    *
+    * @return if less then -1 else 1.
+    */
+  def toInt: Int = if (less) -1 else 1
 }
 
 /**
@@ -129,17 +138,35 @@ case object Same extends Comparison {
   /**
     * Eagerly evaluate this Same.
     *
-    * @return an Option[Boolean].
+    * @return None.
     */
   def apply(): Option[Boolean] = None
 
+  /**
+    *
+    * @param c the other Comparison (lazily evaluated).
+    * @return c & this.
+    */
   def &&(c: => Comparison): Comparison = c & this
 
+  /**
+    *
+    * @param c the other Comparison (lazily evaluated).
+    * @return c | this.
+    */
   def ||(c: => Comparison): Comparison = c | this
 
+  /**
+    *
+    * @return this.
+    */
   def flip: Comparison = this
 
-  override def toInt: Int = 0
+  /**
+    *
+    * @return 0.
+    */
+  def toInt: Int = 0
 }
 
 /**

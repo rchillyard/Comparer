@@ -132,12 +132,22 @@ class ComparerSpec extends FlatSpec with Matchers with Futures with ScalaFutures
   }
   private val c2b = Composite(2, "b")
   private val c3c = Composite(3, "c")
+  it should "sort List[Composite] by Int then String the easy way" in {
+    val list = List(c3c, c1a, c1z, c2b)
+    val sorted = Sorted(list)(Comparer.same[Composite] :| (_.i) :| (_.s))
+    sorted() shouldBe List(c1a, c1z, c2b, c3c)
+  }
   it should "sort List[Composite] by Int then String" in {
     val list = List(c3c, c1a, c1z, c2b)
     val comparer1: Comparer[Composite] = Composite.OrderingCompositeInt
     val comparer2: Comparer[Composite] = Composite.OrderingCompositeString
     val sorted = Sorted(list)(comparer1).sort(comparer2)
     sorted() shouldBe List(c1a, c1z, c2b, c3c)
+  }
+  it should "sort List[Composite] by String then Int the really easy way" in {
+    val list = List(c3c, c1a, c1z, c2b)
+    val sorted = Sorted(list)
+    sorted() shouldBe List(c1a, c2b, c3c, c1z)
   }
   it should "sort List[Composite] by String then Int" in {
     val list = List(c3c, c1a, c1z, c2b)
@@ -146,6 +156,7 @@ class ComparerSpec extends FlatSpec with Matchers with Futures with ScalaFutures
     val sorted = Sorted(list)(comparer1).sort(comparer2)
     sorted() shouldBe List(c1a, c2b, c3c, c1z)
   }
+
   it should "sort asynchronously" in {
     import scala.concurrent.ExecutionContext.Implicits.global
     val list = List(3, 1, 2)
@@ -204,6 +215,8 @@ case class Composite(i: Int, s: String)
 
 object Composite {
 
+  implicit val comparer: Comparer[Composite] = Comparer.same[Composite] :| (_.s) :| (_.i)
+
   object OrderingCompositeInt extends Ordering[Composite] {
     def compare(x: Composite, y: Composite): Int = x.i.compare(y.i)
   }
@@ -243,8 +256,8 @@ object DateJ {
 case class DateF(year: Int, month: Int, day: Int)
 
 object DateF {
-//  implicit val dateComparer: Comparer[DateF] = Comparer.same[DateF] :| (_.year) :| (_.month) :| (_.day)
+  implicit val dateComparer: Comparer[DateF] = Comparer.same[DateF] :| (_.year) :| (_.month) :| (_.day)
 
-  implicit val dateComparer: Comparer[DateF] = Comparer(_.year, _.month, _.day)
+  //  implicit val dateComparer: Comparer[DateF] = Comparer(_.year, _.month, _.day)
 
 }
