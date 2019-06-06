@@ -1,4 +1,4 @@
-organization := "com.com.phasmidsoftware"
+organization := "com.phasmidsoftware"
 
 name := "Comparer"
 

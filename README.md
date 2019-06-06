@@ -24,7 +24,7 @@ Let's take a look at a typical date comparison using the built-in comparisons pr
 Yes, I know that we could also have used _Ordering_, which would have involved declaring an _Ordering[Date]_
 in the companion object of _Date_.
 It would, then, have looked a little more similar to the functional version below.
-It would have had its own set of complications then.
+But it would have had its own set of complications then.
 
 A typical usage of this in a specification might be:
 
@@ -39,11 +39,11 @@ They have a significance that is far above their actual values.
 Indeed, if you performed the same comparison on an object with Strings, the negative and positive
 values could be anything at all.
 
-Now, lets look at the functional way of doing comparisons, using this library:
+Now, lets look at the functional way of doing comparisons, using the _Comparer_ library:
 
     case class Date(year: Int, month: Int, day: Int)
     
-Note that this is just the same as a previous Date, except that we no longer need to extend _Ordering_.
+Note that this is just the same as a previous _Date_, except that we no longer need to extend _Ordering_.
 
     object Date {
       implicit val dateComparer: Comparer[Date] = {
@@ -65,7 +65,7 @@ The _:|_ method composes (using _orElse_) two _Comparers_ where the one on the r
 constructed from an implicitly discovered _Comparer_ of the type yielded by the "lens" function lambda
 and which is then snapped by the given lens.
 
-Actually, since the lens functions are all of type Date=>Int, we can do even better:
+Actually, since the lens functions are all of type _Date=>Int_, we can do even better:
 
     object Date {
       implicit val dateComparer: Comparer[DateF] = Comparer(_.year, _.month, _.day)

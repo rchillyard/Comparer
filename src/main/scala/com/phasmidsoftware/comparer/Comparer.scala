@@ -156,6 +156,14 @@ object Comparer {
   def same[T]: Comparer[T] = (_: (T, T)) => Same
 
   /**
+    * A method to construct a Comparer which always evaluates to Different(less).
+    *
+    * @tparam T the underlying type of the Comparer.
+    * @return a Comparer[T] which always evaluates to Different(less).
+    */
+  def different[T](less: Boolean): Comparer[T] = (_: (T, T)) => Different(less)
+
+  /**
     * Method to construct a Comparer from a variable-length list of Comparers.
     * @param comparers the Comparers.
     * @tparam T the underlying type of all Comparers and the result.

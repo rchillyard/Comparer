@@ -106,6 +106,7 @@ case class Different(less: Boolean) extends Comparison {
   def apply(): Option[Boolean] = Some(less)
 
   /**
+    * Short-circuited AND.
     *
     * @param c the other Comparison (lazily evaluated).
     * @return if (less) this else c.
@@ -113,6 +114,7 @@ case class Different(less: Boolean) extends Comparison {
   def &&(c: => Comparison): Comparison = if (less) this else c
 
   /**
+    * Short-circuited OR.
     *
     * @param c the other Comparison (lazily evaluated).
     * @return if (less) c else this.
@@ -120,11 +122,14 @@ case class Different(less: Boolean) extends Comparison {
   def ||(c: => Comparison): Comparison = if (less) c else this
 
   /**
+    * Flip the sense of this Different Comparison.
+    *
     * @return Different(!less).
     */
   def flip: Comparison = Different(!less)
 
   /**
+    * Yield the Java-style comparison value, i.e. -1 or 1.
     *
     * @return if less then -1 else 1.
     */
@@ -143,6 +148,7 @@ case object Same extends Comparison {
   def apply(): Option[Boolean] = None
 
   /**
+    * Short-circuited AND.
     *
     * @param c the other Comparison (lazily evaluated).
     * @return c & this.
@@ -150,6 +156,7 @@ case object Same extends Comparison {
   def &&(c: => Comparison): Comparison = c & this
 
   /**
+    * Short-circuited OR.
     *
     * @param c the other Comparison (lazily evaluated).
     * @return c | this.
@@ -157,12 +164,14 @@ case object Same extends Comparison {
   def ||(c: => Comparison): Comparison = c | this
 
   /**
+    * No-op.
     *
     * @return this.
     */
   def flip: Comparison = this
 
   /**
+    * Return the Java-style comparison value, in this case, always 0.
     *
     * @return 0.
     */
