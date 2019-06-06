@@ -1,4 +1,5 @@
-# Comparer
+# Comparer [![CircleCI](https://circleci.com/gh/rchillyard/Comparer.svg?style=svg)](https://circleci.com/gh/rchillyard/Comparer)
+
 A functional (three-way) comparer
 
 ## Introduction
