@@ -1,6 +1,5 @@
 # Comparer [![CircleCI](https://circleci.com/gh/rchillyard/Comparer.svg?style=svg)](https://circleci.com/gh/rchillyard/Comparer)
-
-A functional (three-way) comparer
+A functional (three-way) comparer.
 
 ## Introduction
 
@@ -73,10 +72,10 @@ Actually, since the lens functions are all of type _Date=>Int_, we can do even b
 
 Now, isn't that a lot more elegant?
 
-The apply method takes a variable list of lens functions, but they must all be of the same type.
+The _apply_ method takes a variable list of lens functions, but they must all be of the same type.
 
 Now, we've got the compiler doing some serious work for us.
-For each of the lens functions, the compiler will find an implicit Comparer and do apply the lens function to it (via snap).
+For each of the lens functions, the compiler will find an implicit _Comparer_ and do apply the lens function to it (via _snap_).
 
 A typical usage of this in a specification might be:
 
@@ -92,7 +91,14 @@ The chief methods of the API are as follows:
 
 ### Comparer
 
-    trait Comparer[T] extends (((T, T)) => Comparison) {
+Comparer extends the (curried) function _T => T => Comparison_.
+This makes sense since the T values being compared are not related and so don't naturally form
+part of a tuple.
+It also allows the use of a partially applied comparer.
+Note that, when curried parameters are used, we compare the outer (last) parameter with the inner,
+whereas when tupled parameters are used, it is conventional to compare the first parameter the second.
+
+    trait Comparer[T] extends (T => T => Comparison) {
     
       /**
         * Method to convert this Comparer[T] into an Ordering[T] which can then be used for more typical Java/Scala-style comparisons.
@@ -102,10 +108,8 @@ The chief methods of the API are as follows:
       def toOrdering: Ordering[T]
     
       /**
-        * Methods to yield a Boolean from this Comparer, given a tuple of two Ts.
-        *
-        * @param tt the tuple of Ts. Try saying that a few times!
-        * @return a Boolean which is true if the relationship with respect to first then second is true.
+        * The following methods are defined both in tupled and curried signatures (only the tupled forms are shown here).
+        * When you use these tupled forms, the compiler doesn't need an extra set of parentheses.
         */
       def >(tt: (T, T)): Boolean
     
@@ -219,7 +223,7 @@ The chief methods of the API are as follows:
 
 ### Comparison
 
-From the application programmer's perspective, the following methods of Comparison are important:
+From the application programmer's perspective, the following methods of _Comparison_ are important:
 
     sealed trait Comparison extends (() => Option[Boolean]) {
     
@@ -300,12 +304,25 @@ From the application programmer's perspective, the following methods of Comparis
       val Less: Comparison
     
       /**
-        * Method to construct a Comparison from two objects of type T.
-        * @param t1 the first T.
-        * @param t2 the second T.
+        * Method to construct a Comparison from two objects of type T (curried).
+        * @param t1 the inner T.
+        * @param t2 the outer T.
         * @param comparer an implicit Comparer[T].
         * @tparam T the type of both t1 and t2, and also the underlying type of the Comparer[T].
         * @return a Comparison, resulting from applying the comparer to the tuple of t1 and t2.
         */
-      def apply[T](t1: T, t2: T)(implicit comparer: Comparer[T]): Comparison
+      def apply[T](t1: T)(t2: T)(implicit comparer: Comparer[T]): Comparison
+      
+      /**
+        * And, similarly a tupled version using the method name compare...
+       */
+      def compare[T](t1: T, t2: T)(implicit comparer: Comparer[T]): Comparison = comparer(t1)(t2)
     }
+
+This project has 100% coverage so it makes sense to resolve any doubtful points about usage by consulting
+the specifications (i.e. unit tests).
+
+### Versioning
+Version 1.0.1 introduces the notion of curried parameters for the internal workings and for some of the
+application-oriented methods.
+This is a more functional approach and gives us the invaluable option of easily creating partially applied functions.

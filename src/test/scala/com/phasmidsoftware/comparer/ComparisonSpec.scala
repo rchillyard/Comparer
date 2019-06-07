@@ -91,4 +91,9 @@ class ComparisonSpec extends FlatSpec with Matchers with Futures with ScalaFutur
     Same && Same shouldBe Same
     Less && Less shouldBe Less
   }
+  it should "implement toString correctly" in {
+    Same.toString() shouldBe "Same"
+    More.toString() shouldBe "More"
+    Less.toString() shouldBe "Less"
+  }
 }

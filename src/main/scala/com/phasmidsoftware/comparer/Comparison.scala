@@ -18,7 +18,7 @@ import scala.language.{implicitConversions, postfixOps}
   * Although it would be possible to write this eagerly, or simply replace it with an Option[Boolean],
   * there is some slight advantage in defining it lazily.
   *
-  * This trait is sealed because there should be only two concrete sub-types.
+  * This trait is sealed because there can only be two concrete sub-types.
   */
 sealed trait Comparison extends (() => Option[Boolean]) {
 
@@ -60,13 +60,6 @@ sealed trait Comparison extends (() => Option[Boolean]) {
     * @return a Comparison according to Kleenean logic.
     */
   def ||(c: => Comparison): Comparison
-
-  /**
-    * Method to yield a String representing this Comparison.
-    *
-    * @return a String formed from the evaluated Comparison.
-    */
-  override def toString(): String = ().toString
 
   /**
     * Method to return the Java-style value of this Comparison.
@@ -134,6 +127,13 @@ case class Different(less: Boolean) extends Comparison {
     * @return if less then -1 else 1.
     */
   def toInt: Int = if (less) -1 else 1
+
+  /**
+    * Method to yield a String representing this Comparison.
+    *
+    * @return "Less" if less, otherwise "More".
+    */
+  override def toString(): String = if (less) "Less" else "More"
 }
 
 /**
@@ -176,6 +176,13 @@ case object Same extends Comparison {
     * @return 0.
     */
   def toInt: Int = 0
+
+  /**
+    * Method to yield a String representing this Comparison.
+    *
+    * @return "Same".
+    */
+  override def toString(): String = "Same"
 }
 
 /**
@@ -183,11 +190,11 @@ case object Same extends Comparison {
   */
 object Comparison {
   /**
-    * Different(false)
+    * Different(false).
     */
   val More: Comparison = Different(false)
   /**
-    * Different(true)
+    * Different(true).
     */
   val Less: Comparison = Different(true)
 
@@ -220,12 +227,22 @@ object Comparison {
   }
 
   /**
-    * Method to construct a Comparison from two objects of type T.
+    * Method to construct a Comparison from two objects of type T (curried form).
+    *
+    * @param t1 the inner T.
+    * @param t2 the outer T.
+    * @tparam T the type of both t1 and t2, and also the underlying type of the Comparer[T].
+    * @return a Comparison, resulting from applying the comparer to t1 and its result to t2.
+    */
+  def apply[T: Comparer](t1: T)(t2: T): Comparison = implicitly[Comparer[T]].apply(t1)(t2)
+
+  /**
+    * Method to construct a Comparison from two objects of type T (tupled form).
+    *
     * @param t1 the first T.
     * @param t2 the second T.
-    * @param comparer an implicit Comparer[T].
     * @tparam T the type of both t1 and t2, and also the underlying type of the Comparer[T].
     * @return a Comparison, resulting from applying the comparer to the tuple of t1 and t2.
     */
-  def apply[T](t1: T, t2: T)(implicit comparer: Comparer[T]): Comparison = comparer((t1, t2))
+  def compare[T: Comparer](t1: T, t2: T): Comparison = implicitly[Comparer[T]].apply(t2)(t1)
 }

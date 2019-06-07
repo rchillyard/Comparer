@@ -34,6 +34,11 @@ class SortedSpec extends FlatSpec with Matchers with Futures with ScalaFutures {
     val sorted = Sorted(list)
     sorted() shouldBe List(1.5, 2.4, 3.0)
   }
+  it should "sort List[Double] using create" in {
+    val list = List(3.0, 1.5, 2.4)
+    val sorted = Sorted.create(list)
+    sorted() shouldBe List(1.5, 2.4, 3.0)
+  }
   it should "sort List[Float] using create because there isn't an implicitly defined Comparer for float" in {
     val list = List(3.0F, 1.5F, 2.4F)
     val sorted = Sorted.create(list)
@@ -47,12 +52,40 @@ class SortedSpec extends FlatSpec with Matchers with Futures with ScalaFutures {
   }
   private val c2b = Composite(2, "b")
   private val c3c = Composite(3, "c")
+  it should "sort List[Composite] by Int then String the easy way" in {
+    val list = List(c3c, c1a, c1z, c2b)
+    val sorted = Sorted(list)(Comparer.same[Composite] :| (_.i) :| (_.s))
+    sorted() shouldBe List(c1a, c1z, c2b, c3c)
+  }
+  it should "sort List[DateF] by explicit create" in {
+    val list = List(c3c, c1a, c1z, c2b)
+    val comparerS = implicitly[Comparer[String]].snap[Composite](_.s)
+    val comparerI = implicitly[Comparer[Int]].snap[Composite](_.i)
+    val comparer = Comparer.create(comparerI, comparerS)
+    val sorted = Sorted(list)(comparer)
+    sorted() shouldBe List(c1a, c1z, c2b, c3c)
+  }
+  it should "sort List[DateF] by explicit apply" in {
+    val d1 = DateF(1951, 11, 12)
+    val d2 = DateF(1963, 1, 5)
+    val d3 = DateF(1978, 9, 12)
+    val d4 = DateF(1984, 6, 6)
+    val d5 = DateF(2000, 3, 2)
+    val list = List(d3, d5, d1, d2, d4)
+    val sorted: Sorted[DateF] = Sorted(list)(Comparer.apply[DateF, Int](_.year, _.month, _.day))
+    sorted() shouldBe List(d1, d2, d3, d4, d5)
+  }
   it should "sort List[Composite] by Int then String" in {
     val list = List(c3c, c1a, c1z, c2b)
     val comparer1: Comparer[Composite] = Composite.OrderingCompositeInt
     val comparer2: Comparer[Composite] = Composite.OrderingCompositeString
     val sorted = Sorted(list)(comparer1).sort(comparer2)
     sorted() shouldBe List(c1a, c1z, c2b, c3c)
+  }
+  it should "sort List[Composite] by String then Int the really easy way" in {
+    val list = List(c3c, c1a, c1z, c2b)
+    val sorted = Sorted(list)
+    sorted() shouldBe List(c1a, c2b, c3c, c1z)
   }
   it should "sort List[Composite] by String then Int" in {
     val list = List(c3c, c1a, c1z, c2b)
