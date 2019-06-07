@@ -9,12 +9,20 @@ import scala.language.{implicitConversions, postfixOps}
 /**
   * Type class trait Comparer[T].
   *
-  * The behavior of this trait is that it is a lazy comparer of two T instances, presented in the form of a tuple.
+  * The behavior of this trait is that it is a lazy comparer of two T instances, presented as two curried parameters,
+  * the inner (first) and the outer (second).
+  * In all (curried) comparisons, the outer instance is compared with the inner instance.
   * The result of the comparison is a Comparison object.
+  *
+  * This class extends the function T => T => Comparison, i.e. a curried function.
+  * This is more appropriate here because the two T values being compared are not related in any way--they
+  * do not form part of something.
+  * Furthermore, using a curried function allows us to yield a partially applied function which is a closure
+  * on just one of the comparands.
   *
   * @tparam T the underlying type of the comparer. That's to say the type this Comparer knows about.
   */
-trait Comparer[T] extends (((T, T)) => Comparison) {
+trait Comparer[T] extends (T => T => Comparison) {
   self =>
 
   /**
@@ -22,34 +30,89 @@ trait Comparer[T] extends (((T, T)) => Comparison) {
     *
     * @return a new Ordering[T].
     */
-  def toOrdering: Ordering[T] = (x: T, y: T) => self(x, y).toInt
+  def toOrdering: Ordering[T] = (t1: T, t2: T) => self(t2)(t1).toInt
 
   /**
-    * Method to yield a Boolean from this Comparer, given a tuple of two Ts.
+    * Method to yield a Boolean from this Comparer, given two curried Ts.
+    *
+    * @param t1 the first value of T.
+    * @param t2 the second value of T.
+    * @return a Boolean which is true if the left T is greater than the right T.
+    */
+  def >(t1: T)(t2: T): Boolean = self(t1)(t2).flip().getOrElse(false)
+
+  /**
+    * Method to yield a Boolean from this Comparer, given two curried Ts.
+    *
+    * @param t1 the first value of T.
+    * @param t2 the second value of T.
+    * @return a Boolean which is true if the left T is less than the right T.
+    */
+  def <(t1: T)(t2: T): Boolean = self(t1)(t2)().getOrElse(false)
+
+  /**
+    * Method to yield a Boolean from this Comparer, given two curried Ts.
+    *
+    * @param t1 the first value of T.
+    * @param t2 the second value of T.
+    * @return a Boolean which is true if the Ts compare as the same.
+    */
+  def ==(t1: T)(t2: T): Boolean = self(t1)(t2)().isEmpty
+
+  /**
+    * Method to yield a Boolean from this Comparer, given two curried Ts.
+    *
+    * @param t1 the first value of T.
+    * @param t2 the second value of T.
+    * @return a Boolean which is true if the left T is greater than or equal to the right T.
+    */
+  def >=(t1: T)(t2: T): Boolean = ! <(t1)(t2)
+
+  /**
+    * Method to yield a Boolean from this Comparer, given two curried Ts.
+    *
+    * @param t1 the first value of T.
+    * @param t2 the second value of T.
+    * @return a Boolean which is true if the left T is less than or equal to the right T.
+    */
+  def <=(t1: T)(t2: T): Boolean = ! >(t1)(t2)
+
+  /**
+    * Method to yield a Boolean from this Comparer, given two curried Ts.
+    *
+    * @param t1 the first value of T.
+    * @param t2 the second value of T.
+    * @return a Boolean which is true if the two Ts do not compare as the same.
+    */
+  def !=(t1: T)(t2: T): Boolean = ! ==(t1)(t2)
+
+  /**
+    * Method to yield a Boolean from this Comparer, given two tupled Ts.
+    * NOTE: When you use these tupled forms, the compiler doesn't need an extra set of parentheses.
     *
     * @param tt the tuple of Ts. Try saying that a few times!
     * @return a Boolean which is true if the left T is greater than the right T.
     */
-  def >(tt: (T, T)): Boolean = self(tt).flip().getOrElse(false)
+  def >(tt: (T, T)): Boolean = >(tt._2)(tt._1)
 
   /**
-    * Method to yield a Boolean from this Comparer, given a tuple of two Ts.
+    * Method to yield a Boolean from this Comparer, given two tupled Ts.
     *
     * @param tt the tuple of Ts.
     * @return a Boolean which is true if the left T is less than the right T.
     */
-  def <(tt: (T, T)): Boolean = self(tt)().getOrElse(false)
+  def <(tt: (T, T)): Boolean = <(tt._2)(tt._1)
 
   /**
-    * Method to yield a Boolean from this Comparer, given a tuple of two Ts.
+    * Method to yield a Boolean from this Comparer, given two tupled Ts.
     *
     * @param tt the tuple of Ts.
     * @return a Boolean which is true if the Ts compare as the same.
     */
-  def ==(tt: (T, T)): Boolean = self(tt)().isEmpty
+  def ==(tt: (T, T)): Boolean = ==(tt._2)(tt._1)
 
   /**
-    * Method to yield a Boolean from this Comparer, given a tuple of two Ts.
+    * Method to yield a Boolean from this Comparer, given two tupled Ts.
     *
     * @param tt the tuple of Ts.
     * @return a Boolean which is true if the left T is greater than or equal to the right T.
@@ -57,7 +120,7 @@ trait Comparer[T] extends (((T, T)) => Comparison) {
   def >=(tt: (T, T)): Boolean = ! <(tt)
 
   /**
-    * Method to yield a Boolean from this Comparer, given a tuple of two Ts.
+    * Method to yield a Boolean from this Comparer, given two tupled Ts.
     *
     * @param tt the tuple of Ts.
     * @return a Boolean which is true if the left T is less than or equal to the right T.
@@ -65,7 +128,7 @@ trait Comparer[T] extends (((T, T)) => Comparison) {
   def <=(tt: (T, T)): Boolean = ! >(tt)
 
   /**
-    * Method to yield a Boolean from this Comparer, given a tuple of two Ts.
+    * Method to yield a Boolean from this Comparer, given two tupled Ts.
     *
     * @param tt the tuple of Ts.
     * @return a Boolean which is true if the two Ts do not compare as the same.
@@ -87,7 +150,7 @@ trait Comparer[T] extends (((T, T)) => Comparison) {
     * @tparam U the underlying type of the returned Comparer.
     * @return a Comparer[U].
     */
-  def snap[U](lens: U => T): Comparer[U] = (uU: (U, U)) => self((lens(uU._1), lens(uU._2)))
+  def snap[U](lens: U => T): Comparer[U] = { u1: U => { u2: U => self(lens(u1))(lens(u2)) } }
 
   /**
     * A method to compose this Comparer with another Comparer of a different underlying type.
@@ -96,7 +159,7 @@ trait Comparer[T] extends (((T, T)) => Comparison) {
     * @tparam U the underlying type of uc.
     * @return a Comparer of tuples each comprising a T and a U.
     */
-  def compose[U](uc: => Comparer[U]): Comparer[(T, U)] = (tut: ((T, U), (T, U))) => self(tut._1._1 -> tut._2._1) orElse uc(tut._1._2 -> tut._2._2)
+  def compose[U](uc: => Comparer[U]): Comparer[(T, U)] = { tu1: (T, U) => { tu2: (T, U) => self(tu2._1)(tu1._1) orElse uc(tu2._2)(tu1._2) } }
 
   /**
     * Compose this Comparer with another Comparer of the same underlying type.
@@ -104,7 +167,7 @@ trait Comparer[T] extends (((T, T)) => Comparison) {
     * @param tc the other Comparer (lazily evaluated).
     * @return the result of applying this Comparer unless it yields Same, in which case we invoke the other Comparer.
     */
-  def orElse(tc: => Comparer[T]): Comparer[T] = (tt: (T, T)) => self(tt).orElse(tc(tt))
+  def orElse(tc: => Comparer[T]): Comparer[T] = { t1: T => { t2: T => self(t1)(t2).orElse(tc(t1)(t2)) } }
 
   /**
     * A non-monadic map method which maps this Comparer into a different Comparer,
@@ -113,7 +176,7 @@ trait Comparer[T] extends (((T, T)) => Comparison) {
     * @param f the function which takes a Comparison and yields a different Comparison.
     * @return a new Comparer[T].
     */
-  def map(f: Comparison => Comparison): Comparer[T] = (tt: (T, T)) => f(self(tt))
+  def map(f: Comparison => Comparison): Comparer[T] = { t1: T => { t2: T => f(self(t1)(t2)) } }
 
   /**
     * Method to invert the sense of a Comparer.
@@ -125,6 +188,7 @@ trait Comparer[T] extends (((T, T)) => Comparison) {
   /**
     * Method to compose this Comparer[T] with a "lens" function that operates on a T.
     * See, for example, the definition of the Comparer in object DateF (in CompareSpec).
+    * Of all the methods which result in a new Comparer, this one is probably the most useful.
     *
     * The resulting Comparer[T] is formed by using orElse to compose this Comparer[T] with a Comparer[T] that:
     * is formed by using the "lens" function lens to snap (the implicit) comparer (which is a Comparer[U]) into a Comparer[T].
@@ -142,7 +206,7 @@ trait Comparer[T] extends (((T, T)) => Comparison) {
 
 /**
   * Companion object for Comparer.
-  * This is where you will find standard Comparer definitions.
+  * This is where you will find standard, implicit Comparer definitions.
   */
 object Comparer {
 
@@ -153,7 +217,7 @@ object Comparer {
     * @tparam T the underlying type of the Comparer.
     * @return a Comparer[T] which always evaluates to Same.
     */
-  def same[T]: Comparer[T] = (_: (T, T)) => Same
+  def same[T]: Comparer[T] = { _: T => { _: T => Same } }
 
   /**
     * A method to construct a Comparer which always evaluates to Different(less).
@@ -161,7 +225,7 @@ object Comparer {
     * @tparam T the underlying type of the Comparer.
     * @return a Comparer[T] which always evaluates to Different(less).
     */
-  def different[T](less: Boolean): Comparer[T] = (_: (T, T)) => Different(less)
+  def different[T](less: Boolean): Comparer[T] = { _: T => { _: T => Different(less) } }
 
   /**
     * Method to construct a Comparer from a variable-length list of Comparers.
@@ -173,9 +237,11 @@ object Comparer {
 
   /**
     * Method to construct a Comparer from a variable-length list of Lenses.
+    *
     * @param lenses the Lens functions, which must all be of the same type (T=>U).
     *               Note that if you want to have varying types, then use same and :| rather than apply.
     * @tparam T the underlying type of all Comparers and the result.
+    * @tparam U the type by which the actual comparisons will be made.
     * @return a Comparer[T] which applies each Comparer in turn.
     */
   def apply[T,U: Comparer](lenses: (T=>U)*): Comparer[T] = lenses.foldLeft[Comparer[T]](same)(_ :| _)
@@ -196,5 +262,5 @@ object Comparer {
     * @tparam T the underlying type of to and the result.
     * @return a Comparer[T] which has the same intrinsic behavior as "to".
     */
-  implicit def convert[T](to: Ordering[T]): Comparer[T] = (tt: (T, T)) => Comparison(to.compare(tt._1, tt._2))
+  implicit def convert[T](to: Ordering[T]): Comparer[T] = { t1: T => { t2: T => Comparison(to.compare(t2, t1)) } }
 }
