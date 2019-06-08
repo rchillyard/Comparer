@@ -350,18 +350,27 @@ From the application programmer's perspective, the following methods of _Compari
     
 ### Comparers
 
-This trait provides methods to create a Comparer for a case class (or other Product).
+This trait provides methods to create a _Comparer_ for a case class (or other _Product_).
 It assumes that the parameters of the case class are in order of significance: most to least.
-All the programmer needs to do is to create an object which extends Comparers, and
-create a variable using the comparerN method with the appropriate value of N (according to the number of parameters).
+All the programmer needs to do is to create an object which extends _Comparers_, and
+create a variable using the _comparerN_ method with the appropriate value of _N_ (according to the number of parameters).
 
     case class Composite(i: Int, s: String)
     object MyComparers extends Comparers {
       val compositeComparer: Comparer[Composite] = comparer2(Composite)
     }
 
-You may have to give the name of the apply function explicitly in some cases (for example, when
+You may have to give the name of the _apply_ function explicitly in some cases (for example, when
 there is a companion object).
+
+There are additionally, implicit methods which will create a _Comparer_ for a wrapper of a type.
+Currently defined are:
+ 
+* comparerSeq: Comparer[Seq[T]] and
+* comparerOpt: Comparer[Option[T]]
+
+So, if your case class happens to include sequences or optional types, you can still use
+one of the _comparerN_ methods and the types will be handled.
 
 ### Colophon
 
@@ -373,5 +382,5 @@ Version 1.0.1 introduces the notion of curried parameters for the internal worki
 application-oriented methods.
 This is a more functional approach and gives us the invaluable option of easily creating partially applied functions.
 
-Version 1.0.2 introduces a Comparers trait which allows a programmer easily to get a comparer
+Version 1.0.2 introduces a _Comparers_ trait which allows a programmer easily to get a comparer
 for a case class, assuming that the fields are in order from most to least significant.
