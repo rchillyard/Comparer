@@ -9,7 +9,7 @@ Let's take a look at a typical date comparison using the built-in comparisons pr
 (and, ultimately, Java):
 
     case class Date(year: Int, month: Int, day: Int) extends Ordered[Date] {
-      def compare(that: Date): Int = {
+      def compareTo(that: Date): Int = {
         val cfy = year.compareTo(that.year)
         if (cfy!=0) cfy
         else {
@@ -20,18 +20,47 @@ Let's take a look at a typical date comparison using the built-in comparisons pr
       }
     }
     
+A typical usage of this in a specification might be:
+
+    val today = Date(2019, 6, 5)
+    val tomorrow = Date(2019, 6, 6)
+    today.compareTo(today) shouldBe 0
+    today.compareTo(tomorrow) shouldBe -1
+    tomorrow.compareTo(today) shouldBe 1
+
 Yes, I know that we could also have used _Ordering_, which would have involved declaring an _Ordering[Date]_
 in the companion object of _Date_.
-It would, then, have looked a little more similar to the functional version below.
-But it would have had its own set of complications then.
+
+It would look like this:
+
+      object Date {
+        trait OrderingDate extends Ordering[Date] {
+          def compare(d1: Date, d2: Date): Int = {
+            val cfy = d1.year.compareTo(d2.year)
+            if (cfy != 0) cfy
+            else {
+              val cfm = d1.month.compareTo(d2.month)
+              if (cfm != 0) cfm
+              else d1.day.compareTo(d2.day)
+            }
+          }
+        }
+        implicit object OrderingDate extends OrderingDate
+      }
+    
+And we wouldn't need the mixin of Ordered[Date] in the case class any more.
 
 A typical usage of this in a specification might be:
 
     val today = Date(2019, 6, 5)
     val tomorrow = Date(2019, 6, 6)
-    today.compare(today) shouldBe 0
-    today.compare(tomorrow) shouldBe -1
-    tomorrow.compare(today) shouldBe 1
+    val ordering = implicitly[Ordering[DateJ]]
+    ordering.compare(today, today) shouldBe 0
+    ordering.compare(today, tomorrow) shouldBe -1
+    ordering.compare(tomorrow, today) shouldBe 1
+
+This looks a little more like the functional version below.
+But the compare method itself is still very inelegant with all of those temporary variables.
 
 Note that the 0, 1 and -1 values almost rise to the level of magic numbers.
 They have a significance that is far above their actual values.
@@ -42,7 +71,7 @@ Now, lets look at the functional way of doing comparisons, using the _Comparer_ 
 
     case class Date(year: Int, month: Int, day: Int)
     
-Note that this is just the same as a previous _Date_, except that we no longer need to extend _Ordering_.
+Note that this (the case class) is just the same as the previous _Date_.
 
     object Date {
       implicit val dateComparer: Comparer[Date] = {
@@ -51,7 +80,8 @@ Note that this is just the same as a previous _Date_, except that we no longer n
       }
     }
 
-We find an implicit value of a type class for the integer comparer, and we make this a variable called _cf_.  
+We find an implicit value of a type class for the integer comparer, and we make this a variable called _cf_.
+The _snap_ method takes a lens function as its parameter and transforms the _Comparer[Int]_ into a _Comparer[Date]_.
 
 Actually, we can come up with something rather more elegant than this:
 
@@ -64,18 +94,17 @@ The _:|_ method composes (using _orElse_) two _Comparers_ where the one on the r
 constructed from an implicitly discovered _Comparer_ of the type yielded by the "lens" function lambda
 and which is then snapped by the given lens.
 
-Actually, since the lens functions are all of type _Date=>Int_, we can do even better:
+Actually, since in this case the lens functions are all of type _Date=>Int_, we can do even better:
 
     object Date {
       implicit val dateComparer: Comparer[DateF] = Comparer(_.year, _.month, _.day)
     }
 
 Now, isn't that a lot more elegant?
-
 The _apply_ method takes a variable list of lens functions, but they must all be of the same type.
 
 Now, we've got the compiler doing some serious work for us.
-For each of the lens functions, the compiler will find an implicit _Comparer_ and do apply the lens function to it (via _snap_).
+For each of the lens functions, the compiler will find an implicit _Comparer_ and apply the lens function to it (via _snap_).
 
 A typical usage of this in a specification might be:
 
@@ -83,7 +112,7 @@ A typical usage of this in a specification might be:
     val tomorrow = Date(2019, 6, 6)
     Comparison(today, today) shouldBe Same
     Comparison(today, tomorrow) shouldBe Less
-    Comparison(tomorrow, today) shouldBe More
+    Comparison(tomorrow, today) shouldBe Moreglp
 
 ## API
 

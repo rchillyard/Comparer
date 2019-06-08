@@ -17,15 +17,15 @@ class ComparisonSpec extends FlatSpec with Matchers with Futures with ScalaFutur
 
   behavior of "Comparison"
 
-  it should "apply(Int)" in {
-    Comparison(0) shouldBe Same
-    Comparison(1) shouldBe More
-    Comparison(-1) shouldBe Less
+  it should "convert(Int)" in {
+    Comparison.convert(0) shouldBe Same
+    Comparison.convert(1) shouldBe More
+    Comparison.convert(-1) shouldBe Less
   }
   it should "toInt" in {
-    Comparison(-1).toInt shouldBe -1
-    Comparison(0).toInt shouldBe 0
-    Comparison(1).toInt shouldBe 1
+    Comparison.convert(-1).toInt shouldBe -1
+    Comparison.convert(0).toInt shouldBe 0
+    Comparison.convert(1).toInt shouldBe 1
   }
   it should "apply(Option[Boolean])" in {
     Comparison(None) shouldBe Same
