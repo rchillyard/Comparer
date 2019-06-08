@@ -347,6 +347,23 @@ From the application programmer's perspective, the following methods of _Compari
        */
       def compare[T](t1: T, t2: T)(implicit comparer: Comparer[T]): Comparison = comparer(t1)(t2)
     }
+    
+### Comparers
+
+This trait provides methods to create a Comparer for a case class (or other Product).
+It assumes that the parameters of the case class are in order of significance: most to least.
+All the programmer needs to do is to create an object which extends Comparers, and
+create a variable using the comparerN method with the appropriate value of N (according to the number of parameters).
+
+    case class Composite(i: Int, s: String)
+    object MyComparers extends Comparers {
+      val compositeComparer: Comparer[Composite] = comparer2(Composite)
+    }
+
+You may have to give the name of the apply function explicitly in some cases (for example, when
+there is a companion object).
+
+### Colophon
 
 This project has 100% coverage so it makes sense to resolve any doubtful points about usage by consulting
 the specifications (i.e. unit tests).
@@ -355,3 +372,6 @@ the specifications (i.e. unit tests).
 Version 1.0.1 introduces the notion of curried parameters for the internal workings and for some of the
 application-oriented methods.
 This is a more functional approach and gives us the invaluable option of easily creating partially applied functions.
+
+Version 1.0.2 introduces a Comparers trait which allows a programmer easily to get a comparer
+for a case class, assuming that the fields are in order from most to least significant.
