@@ -17,46 +17,59 @@ class SortedSpec extends FlatSpec with Matchers with Futures with ScalaFutures {
   behavior of "Sorted"
 
   private val c1a = Composite(1, "a")
+  private val c2a = Composite(2, "a")
   private val c1z = Composite(1, "z")
+  private val c2b = Composite(2, "b")
+  private val c3c = Composite(3, "c")
 
   it should "sort List[Int]" in {
     val list = List(3, 1, 2)
     val sorted = Sorted(list)
     sorted() shouldBe List(1, 2, 3)
   }
+
   it should "sort List[String]" in {
     val list = List("b", "c", "a")
     val sorted = Sorted(list)
     sorted() shouldBe List("a", "b", "c")
   }
+
   it should "sort List[Double]" in {
     val list = List(3.0, 1.5, 2.4)
     val sorted = Sorted(list)
     sorted() shouldBe List(1.5, 2.4, 3.0)
   }
+
   it should "sort List[Double] using create" in {
     val list = List(3.0, 1.5, 2.4)
     val sorted = Sorted.create(list)
     sorted() shouldBe List(1.5, 2.4, 3.0)
   }
+
   it should "sort List[Float] using create because there isn't an implicitly defined Comparer for float" in {
     val list = List(3.0F, 1.5F, 2.4F)
     val sorted = Sorted.create(list)
     sorted() shouldBe List(1.5F, 2.4F, 3.0F)
   }
+
   it should "sort List[Char] given an explicit Comparer" in {
     val charComparer: Comparer[Char] = Ordering[Char]
     val list = List('b', 'c', 'a')
     val sorted = Sorted(list)(charComparer.invert)
     sorted() shouldBe List('c', 'b', 'a')
   }
-  private val c2b = Composite(2, "b")
-  private val c3c = Composite(3, "c")
+
   it should "sort List[Composite] by Int then String the easy way" in {
     val list = List(c3c, c1a, c1z, c2b)
     val sorted = Sorted(list)(Comparer.same[Composite] :| (_.i) :| (_.s))
     sorted() shouldBe List(c1a, c1z, c2b, c3c)
   }
+  it should "sort List[Composite] by String then the inverse of Int" in {
+    val list = List(c3c, c1a, c1z, c2b, c2a)
+    val sorted = Sorted(list)(Comparer.same[Composite] :| (_.s) :|! (_.i))
+    sorted() shouldBe List(c2a, c1a, c2b, c3c, c1z)
+  }
+
   it should "sort List[DateF] by explicit create" in {
     val list = List(c3c, c1a, c1z, c2b)
     val comparerS = implicitly[Comparer[String]].snap[Composite](_.s)

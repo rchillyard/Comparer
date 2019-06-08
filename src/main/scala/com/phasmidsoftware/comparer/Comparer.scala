@@ -150,7 +150,7 @@ trait Comparer[T] extends (T => T => Comparison) {
     * @tparam U the underlying type of the returned Comparer.
     * @return a Comparer[U].
     */
-  def snap[U](lens: U => T): Comparer[U] = { u1: U => { u2: U => self(lens(u1))(lens(u2)) } }
+  def snap[U](lens: U => T): Comparer[U] = u1 => u2 => self(lens(u1))(lens(u2))
 
   /**
     * A method to compose this Comparer with another Comparer of a different underlying type.
@@ -159,15 +159,25 @@ trait Comparer[T] extends (T => T => Comparison) {
     * @tparam U the underlying type of uc.
     * @return a Comparer of tuples each comprising a T and a U.
     */
-  def compose[U](uc: => Comparer[U]): Comparer[(T, U)] = { tu1: (T, U) => { tu2: (T, U) => self(tu2._1)(tu1._1) orElse uc(tu2._2)(tu1._2) } }
+  def compose[U](uc: => Comparer[U]): Comparer[(T, U)] = tu1 => tu2 => self(tu2._1)(tu1._1) orElse uc(tu2._2)(tu1._2)
 
   /**
     * Compose this Comparer with another Comparer of the same underlying type.
+    * If the result of applying this Comparer is Same, then Comparer tc is invoked.
     *
     * @param tc the other Comparer (lazily evaluated).
     * @return the result of applying this Comparer unless it yields Same, in which case we invoke the other Comparer.
     */
-  def orElse(tc: => Comparer[T]): Comparer[T] = { t1: T => { t2: T => self(t1)(t2).orElse(tc(t1)(t2)) } }
+  def orElse(tc: => Comparer[T]): Comparer[T] = t1 => t2 => self(t1)(t2).orElse(tc(t1)(t2))
+
+  /**
+    * Compose this Comparer with another Comparer of the same underlying type.
+    * If the result of applying this Comparer is Same, then Comparer tc is inverted and then invoked.
+    *
+    * @param tc the other Comparer (lazily evaluated) which is evaluated in the contrary sense.
+    * @return the result of applying this Comparer unless it yields Same, in which case we invoke the inverse of the other Comparer.
+    */
+  def orElseNot(tc: => Comparer[T]): Comparer[T] = t1 => t2 => self(t1)(t2).orElse(tc.invert(t1)(t2))
 
   /**
     * A non-monadic map method which maps this Comparer into a different Comparer,
@@ -176,7 +186,7 @@ trait Comparer[T] extends (T => T => Comparison) {
     * @param f the function which takes a Comparison and yields a different Comparison.
     * @return a new Comparer[T].
     */
-  def map(f: Comparison => Comparison): Comparer[T] = { t1: T => { t2: T => f(self(t1)(t2)) } }
+  def map(f: Comparison => Comparison): Comparer[T] = t1 => t2 => f(self(t1)(t2))
 
   /**
     * Method to invert the sense of a Comparer.
@@ -186,7 +196,7 @@ trait Comparer[T] extends (T => T => Comparison) {
   def invert: Comparer[T] = map(_ flip)
 
   /**
-    * Method to compose this Comparer[T] with a "lens" function that operates on a T.
+    * Method to compose this Comparer[T] with a Comparer[U] that is formed from the given "lens" function.
     * See, for example, the definition of the Comparer in object DateF (in CompareSpec).
     * Of all the methods which result in a new Comparer, this one is probably the most useful.
     *
@@ -194,7 +204,7 @@ trait Comparer[T] extends (T => T => Comparison) {
     * is formed by using the "lens" function lens to snap (the implicit) comparer (which is a Comparer[U]) into a Comparer[T].
     *
     * This method is used primarily when chaining together several Comparers, each of which is derived from the given function
-    * by invoking snap on an implicitly-defined Comparer, with the a specified function.
+    * by invoking snap on an implicitly-defined Comparer, with the specified function.
     * The initial value is typically provided by the "same" method of Comparer's companion object.
     *
     * @param lens a function which takes a T (the underlying type of this and the result) and returns a U.
@@ -202,6 +212,23 @@ trait Comparer[T] extends (T => T => Comparison) {
     * @return a Comparer[T] which is composed from this and the unmapped form of comparer.
     */
   def :|[U: Comparer](lens: T => U): Comparer[T] = orElse(implicitly[Comparer[U]].snap(lens))
+
+  /**
+    * Method to compose this Comparer[T] with a "lens" function that operates on a T.
+    * See, for example, the definition of the Comparer in object DateF (in CompareSpec).
+    *
+    * The resulting Comparer[T] is formed by using orElseNot to compose this Comparer[T] with a Comparer[T] that:
+    * is formed by using the "lens" function lens to snap (the implicit) comparer (which is a Comparer[U]) into a Comparer[T].
+    *
+    * This method is used primarily when chaining together several Comparers, each of which is derived from the given function
+    * by invoking snap on an implicitly-defined Comparer, with the specified function.
+    * The initial value is typically provided by the "same" method of Comparer's companion object.
+    *
+    * @param lens a function which takes a T (the underlying type of this and the result) and returns a U.
+    * @tparam U the underlying type of the implicit comparer.
+    * @return a Comparer[T] which is composed from this and the unmapped form of comparer.
+    */
+  def :|![U: Comparer](lens: T => U): Comparer[T] = orElseNot(implicitly[Comparer[U]].snap(lens))
 }
 
 /**
@@ -217,7 +244,7 @@ object Comparer {
     * @tparam T the underlying type of the Comparer.
     * @return a Comparer[T] which always evaluates to Same.
     */
-  def same[T]: Comparer[T] = { _: T => { _: T => Same } }
+  def same[T]: Comparer[T] = _ => _ => Same
 
   /**
     * A method to construct a Comparer which always evaluates to Different(less).
@@ -225,7 +252,7 @@ object Comparer {
     * @tparam T the underlying type of the Comparer.
     * @return a Comparer[T] which always evaluates to Different(less).
     */
-  def different[T](less: Boolean): Comparer[T] = { _: T => { _: T => Different(less) } }
+  def different[T](less: Boolean): Comparer[T] = _ => _ => Different(less)
 
   /**
     * Method to construct a Comparer from a variable-length list of Comparers.
@@ -262,5 +289,8 @@ object Comparer {
     * @tparam T the underlying type of to and the result.
     * @return a Comparer[T] which has the same intrinsic behavior as "to".
     */
-  implicit def convert[T](to: Ordering[T]): Comparer[T] = { t1: T => { t2: T => Comparison(to.compare(t2, t1)) } }
+  implicit def convert[T](to: Ordering[T]): Comparer[T] = t1 => t2 => Comparison.convert(to.compare(t2, t1))
+
+  // TODO test and check (or dump)
+  def comparer[T, U: Comparer](lens: T => U): Comparer[T] = t1 => t2 => implicitly[Comparer[U]].apply(lens(t1))(lens(t2))
 }

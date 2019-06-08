@@ -35,7 +35,7 @@ sealed trait Comparison extends (() => Option[Boolean]) {
     * @param c the other Comparison (eagerly evaluated).
     * @return a Comparison according to Kleenean logic.
     */
-  def &(c: Comparison): Comparison = Comparison(math.min(toInt, c.toInt))
+  def &(c: Comparison): Comparison = Comparison.convert(math.min(toInt, c.toInt))
 
   /**
     * Method to yield logical OR.
@@ -43,7 +43,7 @@ sealed trait Comparison extends (() => Option[Boolean]) {
     * @param c the other Comparison (eagerly evaluated).
     * @return a Comparison according to Kleenean logic.
     */
-  def |(c: Comparison): Comparison = Comparison(math.max(toInt, c.toInt))
+  def |(c: Comparison): Comparison = Comparison.convert(math.max(toInt, c.toInt))
 
   /**
     * Method to yield logical AND with short-circuit logic.
@@ -221,7 +221,7 @@ object Comparison {
     *          Typically, this is the result of a Java-style comparison.
     * @return the homologous Comparison for x, either Same or Different(b) where b is true if x is negative.
     */
-  def apply(x: Int): Comparison = x match {
+  def convert(x: Int): Comparison = x match {
     case 0 => Same;
     case _ => Comparison(Some(x < 0))
   }

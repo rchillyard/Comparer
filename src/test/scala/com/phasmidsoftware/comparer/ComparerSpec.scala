@@ -19,6 +19,27 @@ class ComparerSpec extends FlatSpec with Matchers with Futures with ScalaFutures
   private val c2a = Composite(2, "a")
   private val c1z = Composite(1, "z")
 
+  case class DateJ(year: Int, month: Int, day: Int)
+
+  object DateJ {
+
+    trait OrderingDate extends Ordering[DateJ] {
+
+      def compare(d1: DateJ, d2: DateJ): Int = {
+        val cfy = d1.year.compareTo(d2.year)
+        if (cfy != 0) cfy
+        else {
+          val cfm = d1.month.compareTo(d2.month)
+          if (cfm != 0) cfm
+          else d1.day.compareTo(d2.day)
+        }
+      }
+    }
+
+    implicit object OrderingDate extends OrderingDate
+
+  }
+
   behavior of "Comparer"
 
   it should "compare Ints (1)" in {
@@ -27,6 +48,7 @@ class ComparerSpec extends FlatSpec with Matchers with Futures with ScalaFutures
     comparer(1)(1) shouldBe Same
     comparer(2)(1) shouldBe Comparison.Less
   }
+
   it should "evaluate operators on Int" in {
     val comparer: Comparer[Int] = Ordering[Int]
     comparer.>(1)(2) shouldBe true
@@ -48,6 +70,7 @@ class ComparerSpec extends FlatSpec with Matchers with Futures with ScalaFutures
     comparer.!=(1)(1) shouldBe false
     comparer.!=(2)(1) shouldBe true
   }
+
   it should "evaluate operators on Int (tupled)" in {
     val comparer: Comparer[Int] = Ordering[Int]
     comparer.>(1, 2) shouldBe false
@@ -73,6 +96,7 @@ class ComparerSpec extends FlatSpec with Matchers with Futures with ScalaFutures
     val comparer: Comparer[Int] = Comparer.intComparer.map(_ flip)
     comparer(1)(2) shouldBe Comparison.Less
   }
+
   it should "invert" in {
     val comparer = Comparer.intComparer.invert
     comparer(1)(2) shouldBe Comparison.Less
@@ -106,6 +130,7 @@ class ComparerSpec extends FlatSpec with Matchers with Futures with ScalaFutures
     // TODO double-check this one.
     comparer3(x)(y) shouldBe Less
   }
+
   it should "compose using orElse" in {
     val comparer1: Comparer[Composite] = Composite.OrderingCompositeString
     val comparer2: Comparer[Composite] = Composite.OrderingCompositeInt
@@ -125,6 +150,25 @@ class ComparerSpec extends FlatSpec with Matchers with Futures with ScalaFutures
     comparer4(c1a)(c1z) shouldBe More
   }
 
+  it should "compose using orElseNot" in {
+    val comparer1: Comparer[Composite] = Composite.OrderingCompositeString
+    val comparer2: Comparer[Composite] = Composite.OrderingCompositeInt
+    val comparer3 = comparer1 orElseNot comparer2
+    comparer3(c1z)(c1a) shouldBe Less
+    comparer3(c2a)(c1a) shouldBe More
+    comparer3(c2a)(c1z) shouldBe More
+    comparer3(c1a)(c1a) shouldBe Same
+    comparer3(c1a)(c2a) shouldBe Less
+    comparer3(c1a)(c1z) shouldBe More
+    val comparer4 = comparer2 orElseNot comparer1
+    comparer4(c1z)(c1a) shouldBe More
+    comparer4(c2a)(c1a) shouldBe Less
+    comparer4(c2a)(c1z) shouldBe Less
+    comparer4(c1a)(c1a) shouldBe Same
+    comparer4(c1a)(c2a) shouldBe More
+    comparer4(c1a)(c1z) shouldBe Less
+  }
+
   behavior of "partially applied comparer"
 
   it should "compare Ints (1)" in {
@@ -133,6 +177,7 @@ class ComparerSpec extends FlatSpec with Matchers with Futures with ScalaFutures
     compareWithOne(2) shouldBe Comparison.More
     compareWithOne(1) shouldBe Same
   }
+
   it should "evaluate operators on Int" in {
     val comparer: Comparer[Int] = Ordering[Int]
     val greaterThanOne: Int => Boolean = comparer.>(1)
@@ -154,11 +199,13 @@ class ComparerSpec extends FlatSpec with Matchers with Futures with ScalaFutures
     notEqualToOne(2) shouldBe true
     notEqualToOne(1) shouldBe false
   }
+
   it should "map with function" in {
     val comparer: Comparer[Int] = Comparer.intComparer.map(_ flip)
     val inverseCompareWithOne: Int => Comparison = comparer(1)
     inverseCompareWithOne(2) shouldBe Comparison.Less
   }
+
   it should "invert" in {
     val comparer = Comparer.intComparer.invert
     val inverseCompareWithOne: Int => Comparison = comparer(1)
@@ -191,8 +238,8 @@ class ComparerSpec extends FlatSpec with Matchers with Futures with ScalaFutures
     val x: (Int, String) = Composite.unapply(c1a).get
     val y: (Int, String) = Composite.unapply(c1z).get
     comparer3(x)(y) shouldBe Less
-    //    comparer3(Composite(1, "a") -> Composite(1, "z")) shouldBe less
   }
+
   it should "compose using orElse" in {
     val comparer1: Comparer[Composite] = Composite.OrderingCompositeString
     val comparer2: Comparer[Composite] = Composite.OrderingCompositeInt
@@ -224,64 +271,6 @@ class ComparerSpec extends FlatSpec with Matchers with Futures with ScalaFutures
     target1(1)(2) shouldBe Same
   }
 
-  //  behavior of "Sorted"
-  //
-  //  it should "sort List[Int]" in {
-  //    val list = List(3, 1, 2)
-  //    val sorted = Sorted(list)
-  //    sorted() shouldBe List(1, 2, 3)
-  //  }
-  //  it should "sort List[String]" in {
-  //    val list = List("b", "c", "a")
-  //    val sorted = Sorted(list)
-  //    sorted() shouldBe List("a", "b", "c")
-  //  }
-  //  it should "sort List[Double] using create" in {
-  //    val list = List(3.0, 1.5, 2.4)
-  //    val sorted = Sorted.create(list)
-  //    sorted() shouldBe List(1.5, 2.4, 3.0)
-  //  }
-  //  it should "sort List[Char] given an explicit Comparer" in {
-  //    val charComparer: Comparer[Char] = Ordering[Char]
-  //    val list = List('b', 'c', 'a')
-  //    val sorted = Sorted(list)(charComparer.invert)
-  //    sorted() shouldBe List('c', 'b', 'a')
-  //  }
-  //  private val c2b = Composite(2, "b")
-  //  private val c3c = Composite(3, "c")
-  //  it should "sort List[Composite] by Int then String the easy way" in {
-  //    val list = List(c3c, c1a, c1z, c2b)
-  //    val sorted = Sorted(list)(Comparer.same[Composite] :| (_.i) :| (_.s))
-  //    sorted() shouldBe List(c1a, c1z, c2b, c3c)
-  //  }
-  //  it should "sort List[Composite] by Int then String" in {
-  //    val list = List(c3c, c1a, c1z, c2b)
-  //    val comparer1: Comparer[Composite] = Composite.OrderingCompositeInt
-  //    val comparer2: Comparer[Composite] = Composite.OrderingCompositeString
-  //    val sorted = Sorted(list)(comparer1).sort(comparer2)
-  //    sorted() shouldBe List(c1a, c1z, c2b, c3c)
-  //  }
-  //  it should "sort List[Composite] by String then Int the really easy way" in {
-  //    val list = List(c3c, c1a, c1z, c2b)
-  //    val sorted = Sorted(list)
-  //    sorted() shouldBe List(c1a, c2b, c3c, c1z)
-  //  }
-  //  it should "sort List[Composite] by String then Int" in {
-  //    val list = List(c3c, c1a, c1z, c2b)
-  //    val comparer1: Comparer[Composite] = Composite.OrderingCompositeString
-  //    val comparer2: Comparer[Composite] = Composite.OrderingCompositeInt
-  //    val sorted = Sorted(list)(comparer1).sort(comparer2)
-  //    sorted() shouldBe List(c1a, c2b, c3c, c1z)
-  //  }
-  //
-  //  it should "sort asynchronously" in {
-  //    import scala.concurrent.ExecutionContext.Implicits.global
-  //    val list = List(3, 1, 2)
-  //    val sorted = Sorted.create(list)
-  //    val xsf = sorted.async
-  //    whenReady(xsf) { xs => xs shouldBe List(1, 2, 3) }
-  //  }
-
   behavior of "merge"
   it should "work" in {
     val l1 = List(1, 5, 8, 10, 11, 15)
@@ -298,14 +287,40 @@ class ComparerSpec extends FlatSpec with Matchers with Futures with ScalaFutures
     val lastMonth = DateJ(2019, 5, 5)
     val nextYear = DateJ(2020, 6, 5)
     val lastYear = DateJ(2018, 6, 5)
-    today.compare(today) shouldBe 0
-    tomorrow.compare(today) shouldBe 1
-    today.compare(tomorrow) shouldBe -1
-    today.compare(yesterday) shouldBe 1
-    today.compare(nextMonth) shouldBe -1
-    today.compare(lastMonth) shouldBe 1
-    today.compare(nextYear) shouldBe -1
-    today.compare(lastYear) shouldBe 1
+    val ordering = implicitly[Ordering[DateJ]]
+    ordering.compare(today, today) shouldBe 0
+    ordering.compare(tomorrow, today) shouldBe 1
+    ordering.compare(today, tomorrow) shouldBe -1
+    ordering.compare(today, yesterday) shouldBe 1
+    ordering.compare(today, nextMonth) shouldBe -1
+    ordering.compare(today, lastMonth) shouldBe 1
+    ordering.compare(today, nextYear) shouldBe -1
+    ordering.compare(today, lastYear) shouldBe 1
+  }
+
+  it should "compare in a somewhat more functional way" in {
+    val today = DateJ(2019, 6, 5)
+    val tomorrow = DateJ(2019, 6, 6)
+    val yesterday = DateJ(2019, 6, 4)
+    val nextMonth = DateJ(2019, 7, 5)
+    val lastMonth = DateJ(2019, 5, 5)
+    val nextYear = DateJ(2020, 6, 5)
+    val lastYear = DateJ(2018, 6, 5)
+
+    val orderingYear: Comparer[DateJ] = t1 => t2 => Comparison(t1.year)(t2.year)
+    val orderingMonth: Comparer[DateJ] = t1 => t2 => Comparison(t1.month)(t2.month)
+    val orderingDay: Comparer[DateJ] = t1 => t2 => Comparison(t1.day)(t2.day)
+    implicit val orderingDate: Comparer[DateJ] = orderingYear orElse orderingMonth orElse orderingDay
+    Comparison.compare(today, today) shouldBe Same
+    Comparison.compare(tomorrow, today) shouldBe More
+    Comparison.compare(today, tomorrow) shouldBe Less
+    Comparison.compare(today, yesterday) shouldBe More
+    Comparison.compare(today, nextMonth) shouldBe Less
+    Comparison.compare(today, lastMonth) shouldBe More
+    Comparison.compare(today, nextYear) shouldBe Less
+    Comparison.compare(today, lastYear) shouldBe More
+
+
   }
 
   it should "functional-style compare (curried)" in {
@@ -380,31 +395,6 @@ object Composite {
 
 }
 
-case class DateJ(year: Int, month: Int, day: Int) extends Ordered[DateJ] {
-  def compare(that: DateJ): Int = {
-    val cfy = year.compareTo(that.year)
-    if (cfy!=0) cfy
-    else {
-      val cfm = month.compareTo(that.month)
-      if (cfm!=0) cfm
-      else day.compareTo(that.day)
-    }
-  }
-}
-
-object DateJ {
-  implicit object dateOrdering extends Ordering[DateF] {
-    def compare(d1: DateF, d2: DateF): Int = {
-      val cfy = d1.year.compareTo(d2.year)
-      if (cfy!=0) cfy
-      else {
-        val cfm = d1.month.compareTo(d2.month)
-        if (cfm!=0) cfm
-        else d1.day.compareTo(d2.day)
-      }
-    }
-  }
-}
 
 case class DateF(year: Int, month: Int, day: Int)
 
