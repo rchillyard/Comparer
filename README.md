@@ -258,7 +258,8 @@ whereas when tupled parameters are used, it is conventional to compare the first
         * Following are the Comparer definitions for the common scalar types.
         */
       implicit val intComparer: Comparer[Int] = Ordering[Int]
-      implicit val strComparer: Comparer[String] = Ordering[String]
+      implicit val booleanComparer: Comparer[Boolean] = Ordering[Boolean]
+      implicit val stringComparer: Comparer[String] = Ordering[String]
       implicit val doubleComparer: Comparer[Double] = Ordering[Double]
       implicit val longComparer: Comparer[Long] = Ordering[Long]
       implicit val bigIntComparer: Comparer[BigInt] = Ordering[BigInt]
@@ -391,9 +392,12 @@ Currently defined are:
  
 * comparerSeq: Comparer[Seq[T]] and
 * comparerOpt: Comparer[Option[T]]
+* comparerTry: Comparer[Try[T]]
+* comparerEither: Comparer[Either[_,T]]
 
-So, if your case class happens to include sequences or optional types, you can still use
+So, if your case class happens to include sequences, optional, try or either types, you can still use
 one of the _comparerN_ methods and the types will be handled.
+The _comparerN_ methods are implemented up through _N_ = 10.
 
 ### Colophon
 
@@ -407,3 +411,5 @@ This is a more functional approach and gives us the invaluable option of easily 
 
 Version 1.0.2 introduces a _Comparers_ trait which allows a programmer easily to get a comparer
 for a case class, assuming that the fields are in order from most to least significant.
+
+Version 1.0.3 adds compareTry, compareEither and compare7 thru compare10. Also Comparer[Boolean].

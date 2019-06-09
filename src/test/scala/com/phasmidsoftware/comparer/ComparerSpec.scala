@@ -56,6 +56,13 @@ class ComparerSpec extends FlatSpec with Matchers with Futures with ScalaFutures
     comparer.tupled(2, 1) shouldBe Comparison.More
   }
 
+  it should "compare Booleans" in {
+    val comparer: Comparer[Boolean] = Ordering[Boolean]
+    comparer(true)(false) shouldBe Comparison.Less
+    comparer(true)(true) shouldBe Same
+    comparer(false)(true) shouldBe Comparison.More
+  }
+
   it should "evaluate operators on Int" in {
     val comparer: Comparer[Int] = Ordering[Int]
     comparer.>(1)(2) shouldBe true

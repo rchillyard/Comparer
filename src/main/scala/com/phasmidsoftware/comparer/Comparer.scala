@@ -287,7 +287,8 @@ object Comparer {
     * Following are the Comparer definitions for the common scalar types.
     */
   implicit val intComparer: Comparer[Int] = Ordering[Int]
-  implicit val strComparer: Comparer[String] = Ordering[String]
+  implicit val booleanComparer: Comparer[Boolean] = Ordering[Boolean]
+  implicit val stringComparer: Comparer[String] = Ordering[String]
   implicit val doubleComparer: Comparer[Double] = Ordering[Double]
   implicit val longComparer: Comparer[Long] = Ordering[Long]
   implicit val bigIntComparer: Comparer[BigInt] = Ordering[BigInt]
