@@ -45,7 +45,7 @@ trait Comparers {
     *
     * @param f a function P => T, usually the apply method of a case class.
     * @tparam P the type of the (single) field of the Product type T.
-    * @tparam T  the underlying type of the result, a Product.
+    * @tparam T the underlying type of the result, a Product.
     * @return a Comparer[T] which can compare two instances of T and return a Comparison.
     */
   def comparer1[P: Comparer, T <: Product](f: P => T): Comparer[T] = comparer[T, P](0)
@@ -90,10 +90,10 @@ trait Comparers {
     * @return a Comparer[T] which can compare two instances of T and return a Comparison.
     */
   def comparer4[P0: Comparer, P1: Comparer, P2: Comparer, P3: Comparer, T <: Product](f: (P0, P1, P2, P3) => T): Comparer[T] =
-    Comparer.comparer[T, P0](t => t.productElement(0).asInstanceOf[P0]) orElse
-      Comparer.comparer(t => t.productElement(1).asInstanceOf[P1]) orElse
-      Comparer.comparer(t => t.productElement(2).asInstanceOf[P2]) orElse
-      Comparer.comparer(t => t.productElement(3).asInstanceOf[P3])
+    comparer[T, P0](0) orElse
+      comparer[T, P1](1) orElse
+      comparer[T, P2](2) orElse
+      comparer[T, P3](3)
 
   /**
     * Method to return a Comparer[T] where T is a 5-ary Product and which is based on a function to convert a P0,P1,P2,P3,P4 into a T.
@@ -108,11 +108,11 @@ trait Comparers {
     * @return a Comparer[T] which can compare two instances of T and return a Comparison.
     */
   def comparer5[P0: Comparer, P1: Comparer, P2: Comparer, P3: Comparer, P4: Comparer, T <: Product](f: (P0, P1, P2, P3, P4) => T): Comparer[T] =
-    Comparer.comparer[T, P0](t => t.productElement(0).asInstanceOf[P0]) orElse
-      Comparer.comparer(t => t.productElement(1).asInstanceOf[P1]) orElse
-      Comparer.comparer(t => t.productElement(2).asInstanceOf[P2]) orElse
-      Comparer.comparer(t => t.productElement(3).asInstanceOf[P3]) orElse
-      Comparer.comparer(t => t.productElement(4).asInstanceOf[P4])
+    comparer[T, P0](0) orElse
+      comparer[T, P1](1) orElse
+      comparer[T, P2](2) orElse
+      comparer[T, P3](3) orElse
+      comparer[T, P4](4)
 
   /**
     * Method to return a Comparer[T] where T is a 6-ary Product and which is based on a function to convert a P0,P1,P2,P3,P4,P5 into a T.
@@ -128,12 +128,12 @@ trait Comparers {
     * @return a Comparer[T] which can compare two instances of T and return a Comparison.
     */
   def comparer6[P0: Comparer, P1: Comparer, P2: Comparer, P3: Comparer, P4: Comparer, P5: Comparer, T <: Product](f: (P0, P1, P2, P3, P4, P5) => T): Comparer[T] =
-    Comparer.comparer[T, P0](t => t.productElement(0).asInstanceOf[P0]) orElse
-      Comparer.comparer(t => t.productElement(1).asInstanceOf[P1]) orElse
-      Comparer.comparer(t => t.productElement(2).asInstanceOf[P2]) orElse
-      Comparer.comparer(t => t.productElement(3).asInstanceOf[P3]) orElse
-      Comparer.comparer(t => t.productElement(4).asInstanceOf[P4]) orElse
-      Comparer.comparer(t => t.productElement(5).asInstanceOf[P5])
+    comparer[T, P0](0) orElse
+      comparer[T, P1](1) orElse
+      comparer[T, P2](2) orElse
+      comparer[T, P3](3) orElse
+      comparer[T, P4](4) orElse
+      comparer[T, P5](5)
 
   // CONSIDER add more comparer methods, including one for Try, etc.
 

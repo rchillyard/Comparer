@@ -75,7 +75,7 @@ sealed trait Comparison extends (() => Option[Boolean]) {
     * @param c the other Comparison (lazily evaluated).
     * @return the composition of this and c.
     */
-  def orElse(c: => Comparison): Comparison = Comparison(apply().orElse(c()))
+  def orElse(c: => Comparison): Comparison
 
   /**
     * Method to yield the complementary Comparison to this Comparison, that's to say the result is flipped (i.e. negated).
@@ -115,6 +115,14 @@ case class Different(less: Boolean) extends Comparison {
   def ||(c: => Comparison): Comparison = if (less) c else this
 
   /**
+    * Method to compose this with another Comparison.
+    *
+    * @param c the other Comparison (never evaluated).
+    * @return this.
+    */
+  def orElse(c: => Comparison): Comparison = this
+
+  /**
     * Flip the sense of this Different Comparison.
     *
     * @return Different(!less).
@@ -148,20 +156,34 @@ case object Same extends Comparison {
   def apply(): Option[Boolean] = None
 
   /**
-    * Short-circuited AND.
+    * Short-circuited AND -- but in this case there is no short circuit.
     *
-    * @param c the other Comparison (lazily evaluated).
+    * @param c the other Comparison (always evaluated).
     * @return c & this.
     */
-  def &&(c: => Comparison): Comparison = c & this
+  def &&(c: => Comparison): Comparison = c match {
+    case Same => Same
+    case Different(b) => if (b) c else Same
+  }
 
   /**
-    * Short-circuited OR.
+    * Short-circuited OR -- but in this case there is no short circuit.
     *
-    * @param c the other Comparison (lazily evaluated).
+    * @param c the other Comparison (always evaluated).
     * @return c | this.
     */
-  def ||(c: => Comparison): Comparison = c | this
+  def ||(c: => Comparison): Comparison = c match {
+    case Same => Same
+    case Different(b) => if (b) Same else c
+  }
+
+  /**
+    * Method to compose this with another Comparison.
+    *
+    * @param c the other Comparison (always evaluated).
+    * @return c.
+    */
+  def orElse(c: => Comparison): Comparison = c
 
   /**
     * No-op.
@@ -200,6 +222,7 @@ object Comparison {
 
   /**
     * Method to construct a Comparison from a Boolean.
+    *
     * @param b true or false.
     * @return Different(b)
     */
@@ -207,6 +230,7 @@ object Comparison {
 
   /**
     * Method to construct a Comparison from an Option[Boolean].
+    *
     * @param bo an optional Boolean.
     * @return the homologous Comparison for the input.
     */
@@ -217,6 +241,7 @@ object Comparison {
 
   /**
     * Method to construct a Comparison from a Java-style comparison result.
+    *
     * @param x an integer which is either less than 0, equal to 0, or greater than 0.
     *          Typically, this is the result of a Java-style comparison.
     * @return the homologous Comparison for x, either Same or Different(b) where b is true if x is negative.
