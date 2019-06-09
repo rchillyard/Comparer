@@ -48,7 +48,7 @@ It would look like this:
         implicit object OrderingDate extends OrderingDate
       }
     
-And we wouldn't need the mixin of Ordered[Date] in the case class any more.
+And we wouldn't need the mixin of _Ordered[Date]_ in the case class any more.
 
 A typical usage of this in a specification might be:
 
@@ -60,7 +60,7 @@ A typical usage of this in a specification might be:
     ordering.compare(tomorrow, today) shouldBe 1
 
 This looks a little more like the functional version below.
-But the compare method itself is still very inelegant with all of those temporary variables.
+But the _compare_ method itself is still very inelegant with all of those temporary variables.
 
 Note that the 0, 1 and -1 values almost rise to the level of magic numbers.
 They have a significance that is far above their actual values.
@@ -94,10 +94,13 @@ The _:|_ method composes (using _orElse_) two _Comparers_ where the one on the r
 constructed from an implicitly discovered _Comparer_ of the type yielded by the "lens" function lambda
 and which is then snapped by the given lens.
 
-Actually, since in this case the lens functions are all of type _Date=>Int_, we can do even better:
+There's also a _:|!_ method which works the same except that it invokes the _orElseNot_ method which flips
+the sense of the _Comparer_ formed from the lens function.
+
+Actually, since in this case the lens functions are all of type _Date=>Int_ and all of the same sense, we can do even better:
 
     object Date {
-      implicit val dateComparer: Comparer[DateF] = Comparer(_.year, _.month, _.day)
+      implicit val dateComparer: Comparer[Date] = Comparer(_.year, _.month, _.day)
     }
 
 Now, isn't that a lot more elegant?
@@ -113,6 +116,22 @@ A typical usage of this in a specification might be:
     Comparison(today, today) shouldBe Same
     Comparison(today, tomorrow) shouldBe Less
     Comparison(tomorrow, today) shouldBe Moreglp
+
+Well, of course, that's not quite it. We can do even better:
+
+    object MyComparers extends Comparers {
+      val comparer: Comparer[Date] = comparer3(Date)
+    }
+    import MyComparers._
+    comparer(today)(tomorrow) shouldBe More
+
+This time, we didn't have to spell out how to compare the various elements of the _Data_ case class.
+The compiler figured it out for us using the magic of type inference.
+Notice that we simply pass in the _Date.apply_ method to the _comparer3_ method.
+But, inside _comparer3_, we never actually have to invoke that _apply_ method.
+The work is all done by the compiler.
+
+Now, we've really got the compiler doing some serious work for us!
 
 ## API
 
@@ -181,6 +200,8 @@ whereas when tupled parameters are used, it is conventional to compare the first
       /**
         * Compose this Comparer with another Comparer of the same underlying type.
         *
+        * There is also a similar method orElseNot which flips the sense of tc.
+        *
         * @param tc the other Comparer (lazily evaluated).
         * @return the result of applying this Comparer unless it yields Same, in which case we invoke the other Comparer.
         */
@@ -204,7 +225,7 @@ whereas when tupled parameters are used, it is conventional to compare the first
     
       /**
         * Method to compose this Comparer[T] with a "lens" function that operates on a T.
-        * See, for example, the definition of the Comparer in object DateF (in CompareSpec).
+        * See, for example, the definition of the Comparer in object Date (in CompareSpec).
         *
         * The resulting Comparer[T] is formed by using orElse to compose this Comparer[T] with a Comparer[T] that:
         * is formed by using the "lens" function lens to snap (the implicit) comparer (which is a Comparer[U]) into a Comparer[T].
@@ -212,6 +233,8 @@ whereas when tupled parameters are used, it is conventional to compare the first
         * This method is used primarily when chaining together several Comparers, each of which is derived from the given function
         * by invoking snap on an implicitly-defined Comparer, with the a specified function.
         * The initial value is typically provided by the "same" method of Comparer's companion object.
+        * 
+        * There is a similar method :|! which invokes orElseNot instead of orElse.
         *
         * @param lens a function which takes a T (the underlying type of this and the result) and returns a U.
         * @tparam U the underlying type of the implicit comparer.
