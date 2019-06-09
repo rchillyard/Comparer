@@ -29,9 +29,9 @@ class ComparersSpec extends FlatSpec with Matchers with Futures with ScalaFuture
     comparer(Some(2))(Some(3)) shouldBe More
   }
 
-  it should "compare sequence" in {
+  it should "compare iterable" in {
     object MyComparers extends Comparers {
-      val comparer: Comparer[Seq[Int]] = comparerSeq
+      val comparer: Comparer[Iterable[Int]] = comparerIterable
     }
     import MyComparers._
     comparer(Seq(3))(Seq(2)) shouldBe Less
@@ -40,15 +40,48 @@ class ComparersSpec extends FlatSpec with Matchers with Futures with ScalaFuture
     comparer(Seq(2))(Seq(3)) shouldBe More
   }
 
-  it should "compare sequence 2" in {
+  it should "compare iterable 2" in {
     object MyComparers extends Comparers {
-      val comparer: Comparer[Seq[Int]] = comparerSeq
+      val comparer: Comparer[Iterable[Int]] = comparerIterable
     }
     import MyComparers._
     comparer(Seq(3))(Seq(2, 3)) shouldBe Less
     comparer(Seq(1, 2))(Nil) shouldBe Same
     comparer(Seq(1, 2))(Seq(1)) shouldBe Same
     comparer(Seq(2, 1))(Seq(3)) shouldBe More
+  }
+
+  it should "compare sequence" in {
+    object MyComparers extends Comparers {
+      val comparer: Comparer[Seq[Int]] = comparerSeq
+    }
+    import MyComparers._
+    comparer(List(3))(Seq(2, 3)) shouldBe Less
+    comparer(Seq(1, 2))(Nil) shouldBe Same
+    comparer(Seq(1, 2))(List(1)) shouldBe Same
+    comparer(Seq(2, 1))(Seq(3)) shouldBe More
+  }
+
+  it should "compare list" in {
+    object MyComparers extends Comparers {
+      val comparer: Comparer[List[Int]] = comparerList
+    }
+    import MyComparers._
+    comparer(List(3))(List(2, 3)) shouldBe Less
+    comparer(List(1, 2))(Nil) shouldBe Same
+    comparer(List(1, 2))(List(1)) shouldBe Same
+    comparer(List(2, 1))(List(3)) shouldBe More
+  }
+
+  it should "compare array" in {
+    object MyComparers extends Comparers {
+      val comparer: Comparer[Array[Int]] = comparerArray
+    }
+    import MyComparers._
+    comparer(Array(3))(Array(2, 3)) shouldBe Less
+    comparer(Array(1, 2))(Array()) shouldBe Same
+    comparer(Array(1, 2))(Array(1)) shouldBe Same
+    comparer(Array(2, 1))(Array(3)) shouldBe More
   }
 
   it should "compare try" in {
@@ -163,23 +196,23 @@ class ComparersSpec extends FlatSpec with Matchers with Futures with ScalaFuture
   }
 
   it should "compare 9" in {
-    case class Case9(x1: Int, x2: Double, x3: String, x4: Option[Int], x5: Int, x6: Long, x7: Either[String, Int], x8: Seq[Int], x9: Boolean)
+    case class Case9(x1: Int, x2: Double, x3: String, x4: Option[Int], x5: Int, x6: Long, x7: Either[String, Int], x8: List[Int], x9: Boolean)
     object MyComparers extends Comparers {
       val comparer: Comparer[Case9] = comparer9(Case9)
     }
     import MyComparers._
-    comparer(Case9(1, 2, "3", Some(4), 0, 99L, Right(3), Seq(1), true))(Case9(1, 2, "3", Some(4), 0, 99L, Right(3), Seq(2, 1), true)) shouldBe More
-    comparer(Case9(1, 2, "3", None, 0, 99L, Left(""), Nil, false))(Case9(1, 2, "3", Some(4), 1, 99L, Left(""), Seq(1), false)) shouldBe More
+    comparer(Case9(1, 2, "3", Some(4), 0, 99L, Right(3), List(1), true))(Case9(1, 2, "3", Some(4), 0, 99L, Right(3), List(2, 1), true)) shouldBe More
+    comparer(Case9(1, 2, "3", None, 0, 99L, Left(""), Nil, false))(Case9(1, 2, "3", Some(4), 1, 99L, Left(""), List(1), false)) shouldBe More
   }
 
   it should "compare 10" in {
-    case class Case10(x1: Int, x2: Double, x3: String, x4: Option[Int], x5: Int, x6: Long, x7: Either[String, Int], x8: Seq[Int], x9: Seq[Int], x10: Boolean)
+    case class Case10(x1: Int, x2: Double, x3: String, x4: Option[Int], x5: Int, x6: Long, x7: Either[String, Int], x8: Iterable[Int], x9: Iterable[Int], x10: Boolean)
     object MyComparers extends Comparers {
       val comparer: Comparer[Case10] = comparer10(Case10)
     }
     import MyComparers._
     comparer(Case10(1, 2, "3", Some(4), 0, 1010L, Right(3), Seq(1), Seq(1), true))(Case10(1, 2, "3", Some(4), 0, 1010L, Right(3), Seq(2, 1), Seq(1), true)) shouldBe More
-    comparer(Case10(1, 2, "3", None, 0, 1010L, Left(""), Nil, Seq(1), false))(Case10(1, 2, "3", Some(4), 1, 1010L, Left(""), Seq(1), Seq(1), false)) shouldBe More
+    comparer(Case10(1, 2, "3", None, 0, 1010L, Left(""), Nil, Array(1), false))(Case10(1, 2, "3", Some(4), 1, 1010L, Left(""), Seq(1), Array(1), false)) shouldBe More
   }
 }
 

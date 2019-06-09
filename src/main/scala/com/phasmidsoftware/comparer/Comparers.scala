@@ -14,14 +14,53 @@ import scala.util.Try
 trait Comparers {
 
   /**
-    * Method to return a Comparer[Seq[T] where T is any type that has an implicit Comparer.
-    * Elements at the head of a sequence are considered more significant than those appearing later;
-    * the comparisons are made only through the shortest sequence.
+    * Method to return a Comparer[Iterable[T] where T is any type that has an implicit Comparer.
+    * Elements at the head of a iterable are considered more significant than those appearing later;
+    * Comparisons are made only through the shortest iterable.
     *
     * @tparam T the underlying type of the inputs.
-    * @return a Comparer of Seq[T] which can compare two instances of Seq[T] and return a Comparison.
+    * @return a Comparer of Iterable[T] which can compare two instances of Iterable[T] and return a Comparison.
     */
-  implicit def comparerSeq[T: Comparer]: Comparer[Seq[T]] = to2 => to1 =>
+  implicit def comparerIterable[T: Comparer]: Comparer[Iterable[T]] = to2 => to1 =>
+    (to1 zip to2).foldLeft[Comparison](Same)((a, x) => a orElse Comparison.compare(x._1, x._2))
+
+  /**
+    * Method to return a Comparer[Iterable[T] where T is any type that has an implicit Comparer.
+    * Elements at the head of a iterable are considered more significant than those appearing later;
+    * Comparisons are made only through the shortest iterable.
+    *
+    * @tparam T the underlying type of the inputs.
+    * @return a Comparer of Iterable[T] which can compare two instances of Iterable[T] and return a Comparison.
+    */
+  implicit def comparerSeq[T: Comparer]: Comparer[Seq[T]] = {
+    // NOTE: this construction is necessary to avoid diverging implicit expansion compiler error: don't inline.
+    val comparer: Comparer[Iterable[T]] = comparerIterable
+    comparer.snap(identity)
+  }
+
+  /**
+    * Method to return a Comparer[List[T] where T is any type that has an implicit Comparer.
+    * Elements at the head of a list are considered more significant than those appearing later;
+    * Comparisons are made only through the shortest list.
+    *
+    * @tparam T the underlying type of the inputs.
+    * @return a Comparer of List[T] which can compare two instances of List[T] and return a Comparison.
+    */
+  implicit def comparerList[T: Comparer]: Comparer[List[T]] = {
+    // NOTE: this construction is necessary to avoid diverging implicit expansion compiler error: don't inline.
+    val comparer: Comparer[Iterable[T]] = comparerIterable
+    comparer.snap(identity)
+  }
+
+  /**
+    * Method to return a Comparer[Array[T] where T is any type that has an implicit Comparer.
+    * Elements at the head of a array are considered more significant than those appearing later;
+    * Comparisons are made only through the shortest array.
+    *
+    * @tparam T the underlying type of the inputs.
+    * @return a Comparer of Array[T] which can compare two instances of Array[T] and return a Comparison.
+    */
+  implicit def comparerArray[T: Comparer]: Comparer[Array[T]] = to2 => to1 =>
     (to1 zip to2).foldLeft[Comparison](Same)((a, x) => a orElse Comparison.compare(x._1, x._2))
 
   /**

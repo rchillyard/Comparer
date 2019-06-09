@@ -390,12 +390,15 @@ there is a companion object).
 There are additionally, implicit methods which will create a _Comparer_ for a wrapper of a type.
 Currently defined are:
  
-* comparerSeq: Comparer[Seq[T]] and
+* comparerIterable: Comparer[Iterable[T]]
+* comparerSeq: Comparer[Seq[T]]
+* comparerList: Comparer[List[T]]
+* comparerArray: Comparer[Array[T]]
 * comparerOpt: Comparer[Option[T]]
 * comparerTry: Comparer[Try[T]]
 * comparerEither: Comparer[Either[_,T]]
 
-So, if your case class happens to include sequences, optional, try or either types, you can still use
+So, if your case class happens to include iterables (sequences or lists), optional, try or either types, you can still use
 one of the _comparerN_ methods and the types will be handled.
 The _comparerN_ methods are implemented up through _N_ = 10.
 
@@ -412,4 +415,4 @@ This is a more functional approach and gives us the invaluable option of easily 
 Version 1.0.2 introduces a _Comparers_ trait which allows a programmer easily to get a comparer
 for a case class, assuming that the fields are in order from most to least significant.
 
-Version 1.0.3 adds compareTry, compareEither and compare7 thru compare10. Also Comparer[Boolean].
+Version 1.0.3 adds compareIterable, compareList, compareArray, compareTry, compareEither and compare7 thru compare10. Also Comparer[Boolean].
