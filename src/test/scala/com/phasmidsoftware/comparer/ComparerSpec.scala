@@ -49,6 +49,20 @@ class ComparerSpec extends FlatSpec with Matchers with Futures with ScalaFutures
     comparer(2)(1) shouldBe Comparison.Less
   }
 
+  it should "compare tupled" in {
+    val comparer: Comparer[Int] = Ordering[Int]
+    comparer.tupled(1, 2) shouldBe Comparison.Less
+    comparer.tupled(1, 1) shouldBe Same
+    comparer.tupled(2, 1) shouldBe Comparison.More
+  }
+
+  it should "compare Booleans" in {
+    val comparer: Comparer[Boolean] = Ordering[Boolean]
+    comparer(true)(false) shouldBe Comparison.Less
+    comparer(true)(true) shouldBe Same
+    comparer(false)(true) shouldBe Comparison.More
+  }
+
   it should "evaluate operators on Int" in {
     val comparer: Comparer[Int] = Ordering[Int]
     comparer.>(1)(2) shouldBe true
@@ -127,8 +141,7 @@ class ComparerSpec extends FlatSpec with Matchers with Futures with ScalaFutures
     val comparer3: Comparer[(Int, String)] = comparer1 compose comparer2
     val x: (Int, String) = Composite.unapply(c1a).get
     val y: (Int, String) = Composite.unapply(c1z).get
-    // TODO double-check this one.
-    comparer3(x)(y) shouldBe Less
+    comparer3.tupled(x, y) shouldBe Less
   }
 
   it should "compose using orElse" in {
@@ -231,13 +244,36 @@ class ComparerSpec extends FlatSpec with Matchers with Futures with ScalaFutures
     comparerAlt(c1a)(c1z) shouldBe More
   }
 
+  it should "snap on Date object" in {
+    val ic = implicitly[Comparer[Int]]
+    val comparerY: Comparer[DateJ] = ic.snap(_.year)
+    val comparerM: Comparer[DateJ] = ic.snap(_.month)
+    val comparerD: Comparer[DateJ] = ic.snap(_.day)
+    val comparer: Comparer[DateJ] = comparerY orElse comparerM orElse comparerD
+    val today = DateJ(2019, 6, 5)
+    val tomorrow = DateJ(2019, 6, 6)
+    val yesterday = DateJ(2019, 6, 4)
+    val nextMonth = DateJ(2019, 7, 5)
+    val lastMonth = DateJ(2019, 5, 5)
+    val nextYear = DateJ(2020, 6, 5)
+    val lastYear = DateJ(2018, 6, 5)
+    comparer.tupled(today, today) shouldBe Same
+    comparer.tupled(tomorrow, today) shouldBe More
+    comparer.tupled(today, tomorrow) shouldBe Less
+    comparer.tupled(today, yesterday) shouldBe More
+    comparer.tupled(today, nextMonth) shouldBe Less
+    comparer.tupled(today, lastMonth) shouldBe More
+    comparer.tupled(today, nextYear) shouldBe Less
+    comparer.tupled(today, lastYear) shouldBe More
+  }
+
   it should "compose" in {
     val comparer1: Comparer[Int] = implicitly[Comparer[Int]]
     val comparer2: Comparer[String] = implicitly[Comparer[String]]
     val comparer3: Comparer[(Int, String)] = comparer1 compose comparer2
     val x: (Int, String) = Composite.unapply(c1a).get
     val y: (Int, String) = Composite.unapply(c1z).get
-    comparer3(x)(y) shouldBe Less
+    comparer3(x)(y) shouldBe More
   }
 
   it should "compose using orElse" in {

@@ -159,7 +159,7 @@ trait Comparer[T] extends (T => T => Comparison) {
     * @tparam U the underlying type of uc.
     * @return a Comparer of tuples each comprising a T and a U.
     */
-  def compose[U](uc: => Comparer[U]): Comparer[(T, U)] = tu1 => tu2 => self(tu2._1)(tu1._1) orElse uc(tu2._2)(tu1._2)
+  def compose[U](uc: => Comparer[U]): Comparer[(T, U)] = tu1 => tu2 => self(tu1._1)(tu2._1) orElse uc(tu1._2)(tu2._2)
 
   /**
     * Compose this Comparer with another Comparer of the same underlying type.
@@ -229,6 +229,15 @@ trait Comparer[T] extends (T => T => Comparison) {
     * @return a Comparer[T] which is composed from this and the unmapped form of comparer.
     */
   def :|![U: Comparer](lens: T => U): Comparer[T] = orElseNot(implicitly[Comparer[U]].snap(lens))
+
+  /**
+    * Method to apply this Comparer using two (tupled) parameters rather than the curried form.
+    *
+    * @param t1 the first T.
+    * @param t2 the second T.
+    * @return the resulting Comparison.
+    */
+  def tupled(t1: T, t2: T): Comparison = self(t2)(t1)
 }
 
 /**
@@ -256,6 +265,7 @@ object Comparer {
 
   /**
     * Method to construct a Comparer from a variable-length list of Comparers.
+    *
     * @param comparers the Comparers.
     * @tparam T the underlying type of all Comparers and the result.
     * @return a Comparer[T] which applies each Comparer in turn.
@@ -271,13 +281,14 @@ object Comparer {
     * @tparam U the type by which the actual comparisons will be made.
     * @return a Comparer[T] which applies each Comparer in turn.
     */
-  def apply[T,U: Comparer](lenses: (T=>U)*): Comparer[T] = lenses.foldLeft[Comparer[T]](same)(_ :| _)
+  def apply[T, U: Comparer](lenses: (T => U)*): Comparer[T] = lenses.foldLeft[Comparer[T]](same)(_ :| _)
 
   /**
     * Following are the Comparer definitions for the common scalar types.
     */
   implicit val intComparer: Comparer[Int] = Ordering[Int]
-  implicit val strComparer: Comparer[String] = Ordering[String]
+  implicit val booleanComparer: Comparer[Boolean] = Ordering[Boolean]
+  implicit val stringComparer: Comparer[String] = Ordering[String]
   implicit val doubleComparer: Comparer[Double] = Ordering[Double]
   implicit val longComparer: Comparer[Long] = Ordering[Long]
   implicit val bigIntComparer: Comparer[BigInt] = Ordering[BigInt]
@@ -291,6 +302,15 @@ object Comparer {
     */
   implicit def convert[T](to: Ordering[T]): Comparer[T] = t1 => t2 => Comparison.convert(to.compare(t2, t1))
 
-  // TODO test and check (or dump)
-  def comparer[T, U: Comparer](lens: T => U): Comparer[T] = t1 => t2 => implicitly[Comparer[U]].apply(lens(t1))(lens(t2))
+  /**
+    * This method creates a Comparer[T] based on an implicitly defined Comparer[P] and a lens function--
+    * by invoking snap on the Comparer[P] and passing in lens.
+    * It is used by the private comparer method in Comparers.
+    *
+    * @param lens a function which takes a T and returns a P.
+    * @tparam T the underlying type of the returned Comparer.
+    * @tparam P the result type of the lens function.
+    * @return a Comparer[T].
+    */
+  def comparer[T, P: Comparer](lens: T => P): Comparer[T] = implicitly[Comparer[P]].snap(lens)
 }
