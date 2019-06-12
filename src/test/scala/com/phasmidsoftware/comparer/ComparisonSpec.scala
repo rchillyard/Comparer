@@ -27,6 +27,11 @@ class ComparisonSpec extends FlatSpec with Matchers with Futures with ScalaFutur
     Comparison.convert(0).toInt shouldBe 0
     Comparison.convert(1).toInt shouldBe 1
   }
+  it should "apply(Kleenean)" in {
+    Comparison(Maybe) shouldBe Same
+    Comparison(Truth(false)) shouldBe More
+    Comparison(Truth(true)) shouldBe Less
+  }
   it should "apply(Option[Boolean])" in {
     Comparison(None) shouldBe Same
     Comparison(Some(false)) shouldBe More

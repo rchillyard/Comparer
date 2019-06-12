@@ -106,6 +106,17 @@ class ComparersSpec extends FlatSpec with Matchers with Futures with ScalaFuture
     comparer(Right(2))(Right(3)) shouldBe More
   }
 
+  it should "compare 1" in {
+    case class Case1(x1: Int)
+    object MyComparers extends Comparers {
+      val comparer: Comparer[Case1] = comparer1(Case1)
+    }
+    import MyComparers._
+    comparer(Case1(1))(Case1(0)) shouldBe Less
+    comparer(Case1(0))(Case1(0)) shouldBe Same
+    comparer(Case1(0))(Case1(1)) shouldBe More
+  }
+
   it should "compare 2" in {
     val c1a = Composite(1, "a")
     val c2a = Composite(2, "a")

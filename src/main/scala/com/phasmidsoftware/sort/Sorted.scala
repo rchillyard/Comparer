@@ -2,12 +2,20 @@
  * Copyright (c) 2019. Phasmid Software. Comparer: functional comparison library.
  */
 
-package com.phasmidsoftware.comparer
+package com.phasmidsoftware.sort
+
+import com.phasmidsoftware.comparer.Comparer
 
 import scala.annotation.tailrec
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.{implicitConversions, postfixOps}
 
+/**
+  * This is not really part of the Comparer/Comparison code and should probably not be here.
+  *
+  * @param ts a sequence of T.
+  * @tparam T the underlying type to be sorted.
+  */
 case class Sorted[T: Comparer](ts: Seq[T]) extends (() => Seq[T]) {
 
   private val ct = implicitly[Comparer[T]]
