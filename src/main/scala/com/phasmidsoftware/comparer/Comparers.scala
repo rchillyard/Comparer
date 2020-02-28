@@ -128,8 +128,21 @@ trait Comparers {
     * @return a Comparer[T] which can compare two instances of T and return a Comparison.
     */
   def comparer2[P0: Comparer, P1: Comparer, T <: Product](f: (P0, P1) => T): Comparer[T] =
-    comparer[T, P0](0) orElse
-      comparer[T, P1](1)
+//    {
+      comparer[T, P0](0) orElse
+        comparer[T, P1](1)
+//        {
+//            val g: P0 => P1 => T = f.curried
+//        val h: P0 => P1 => T = g
+//
+//        comparer1[P1,T](g)
+//      }
+//    }
+//  {
+//    val g: P0 => P1 => T = f.curried
+//    comparer1[P0,T](g _) orElse
+//      comparer[T, P1](1)
+//  }
 
   /**
     * Method to return a Comparer[T] where T is a 3-ary Product and which is based on a function to convert a P0,P1,P2 into a T.
@@ -307,5 +320,5 @@ trait Comparers {
       comparer[T, P8](8) orElse
       comparer[T, P9](9)
 
-  private def comparer[T <: Product, P: Comparer](x: Int): Comparer[T] = Comparer.comparer[T, P](t => t.productElement(x).asInstanceOf[P])
+  private def comparer[T <: Product, P: Comparer](x: Int): Comparer[T] = Comparer.comparer[T, P](t => t.productElement(x) match {case p: P => p; case _ => throw ComparerException(s"logic error: element $x of $t is not of type P")})
 }

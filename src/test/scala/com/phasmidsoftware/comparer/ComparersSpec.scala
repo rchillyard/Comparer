@@ -14,6 +14,7 @@ import scala.util.{Failure, Success, Try}
 /**
   * @author scalaprof
   */
+//noinspection NameBooleanParameters
 class ComparersSpec extends FlatSpec with Matchers with Futures with ScalaFutures {
 
   behavior of "comparers"
@@ -225,5 +226,16 @@ class ComparersSpec extends FlatSpec with Matchers with Futures with ScalaFuture
     comparer(Case10(1, 2, "3", Some(4), 0, 1010L, Right(3), Seq(1), Seq(1), true))(Case10(1, 2, "3", Some(4), 0, 1010L, Right(3), Seq(2, 1), Seq(1), true)) shouldBe More
     comparer(Case10(1, 2, "3", None, 0, 1010L, Left(""), Nil, Array(1), false))(Case10(1, 2, "3", Some(4), 1, 1010L, Left(""), Seq(1), Array(1), false)) shouldBe More
   }
+
+  it should "throw exception for compare 10" in {
+    case class Case10(x1: Int, x2: Double, x3: String, x4: Option[Int], x5: Int, x6: Long, x7: Either[String, Int], x8: Iterable[Int], x9: Iterable[Int], x10: Boolean)
+    object MyComparers extends Comparers {
+      val comparer: Comparer[Case10] = comparer10(Case10)
+    }
+    import MyComparers._
+    comparer(Case10(1, 2, "3", Some(4), 0, 1010, Right(3), Seq(1), Seq(1), true))(Case10(1, 2, "3", Some(4), 0, 1010L, Right(3), Seq(2, 1), Seq(1), true)) shouldBe More
+    comparer(Case10(1, 2, "3", None, 0, 1010L, Left(""), Nil, Array(1), false))(Case10(1, 2, "3", Some(4), 1, 1010L, Left(""), Seq(1), Array(1), false)) shouldBe More
+  }
+
 }
 

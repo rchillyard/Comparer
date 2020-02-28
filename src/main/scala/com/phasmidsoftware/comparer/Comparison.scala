@@ -20,7 +20,6 @@ import scala.language.{implicitConversions, postfixOps}
   * In many situations we use pattern-matching rather than evaluation of the Comparison value.
   *
   * NOTE: also that Comparison is a form of three-valued logic.
-  * It is not three-valued logic in the classic sense (Łukasiewicz, Priest and Kleene) because we have a value which represents sameness (Same)
   * which does not correspond exactly to the the indeterminate state.
   * We can generate a Kleenean object by invoking the Comparison's apply method.
   *
@@ -34,6 +33,8 @@ sealed trait Comparison extends (() => Kleenean) {
     * @return a Kleenean.
     */
   def apply(): Kleenean
+
+  val f: ()=>String
 
   /**
     * Method to yield logical AND.
@@ -104,6 +105,8 @@ case class Different(less: Boolean) extends Comparison {
     */
   def apply(): Kleenean = Truth(less)
 
+  val f: ()=>String = () => toString()
+
   /**
     * Short-circuited AND.
     *
@@ -160,6 +163,8 @@ case object Same extends Comparison {
     * @return Maybe.
     */
   def apply(): Kleenean = Maybe
+
+  val f: ()=>String = () => toString()
 
   /**
     * Short-circuited AND -- but in this case there is no short circuit.
@@ -263,7 +268,7 @@ object Comparison {
     *          Typically, this is the result of a Java-style comparison.
     * @return the homologous Comparison for x, either Same or Different(b) where b is true if x is negative.
     */
-  def convert(x: Int): Comparison = x match {
+  implicit def convert(x: Int): Comparison = x match {
     case 0 => Same;
     case _ => Comparison(Some(x < 0))
   }

@@ -4,7 +4,7 @@
 
 package com.phasmidsoftware.sort
 
-import com.phasmidsoftware.comparer.Comparer
+import com.phasmidsoftware.comparer.{Comparer, ComparerException}
 
 import scala.annotation.tailrec
 import scala.concurrent.{ExecutionContext, Future}
@@ -49,7 +49,7 @@ object Sorted {
       case (x :: xs1, y :: ys1) =>
         if (ordering.lt(x, y)) inner(r :+ x, xs1, ys)
         else inner(r :+ y, xs, ys1)
-      case (_, _) => throw new Exception(s"Unmatched: ($xs, $ys)")
+      case (_, _) => throw ComparerException(s"Unmatched: ($xs, $ys)")
     }
 
     inner(Nil, ts1, ts2)
