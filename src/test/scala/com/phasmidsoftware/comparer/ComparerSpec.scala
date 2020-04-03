@@ -19,27 +19,6 @@ class ComparerSpec extends FlatSpec with Matchers with Futures with ScalaFutures
   private val c2a = Composite(2, "a")
   private val c1z = Composite(1, "z")
 
-  case class DateJ(year: Int, month: Int, day: Int)
-
-  object DateJ {
-
-    trait OrderingDate extends Ordering[DateJ] {
-
-      def compare(d1: DateJ, d2: DateJ): Int = {
-        val cfy = d1.year.compareTo(d2.year)
-        if (cfy != 0) cfy
-        else {
-          val cfm = d1.month.compareTo(d2.month)
-          if (cfm != 0) cfm
-          else d1.day.compareTo(d2.day)
-        }
-      }
-    }
-
-    implicit object OrderingDate extends OrderingDate
-
-  }
-
   behavior of "Comparer"
 
   it should "compare Ints (1)" in {
@@ -47,6 +26,13 @@ class ComparerSpec extends FlatSpec with Matchers with Futures with ScalaFutures
     comparer(1)(2) shouldBe Comparison.More
     comparer(1)(1) shouldBe Same
     comparer(2)(1) shouldBe Comparison.Less
+  }
+
+  it should "compare" in {
+    val comparer: Comparer[Int] = Ordering[Int]
+    comparer.compare(1, 2) shouldBe Comparison.Less
+    comparer.compare(1, 1) shouldBe Same
+    comparer.compare(2, 1) shouldBe Comparison.More
   }
 
   it should "compare tupled" in {
@@ -347,6 +333,7 @@ class ComparerSpec extends FlatSpec with Matchers with Futures with ScalaFutures
     val orderingMonth: Comparer[DateJ] = t1 => t2 => Comparison(t1.month)(t2.month)
     val orderingDay: Comparer[DateJ] = t1 => t2 => Comparison(t1.day)(t2.day)
     implicit val orderingDate: Comparer[DateJ] = orderingYear orElse orderingMonth orElse orderingDay
+
     Comparison.compare(today, today) shouldBe Same
     Comparison.compare(tomorrow, today) shouldBe More
     Comparison.compare(today, tomorrow) shouldBe Less
@@ -440,3 +427,15 @@ object DateF {
   //  implicit val dateComparer: Comparer[DateF] = Comparer(_.year, _.month, _.day)
 
 }
+
+case class DateJ(year: Int, month: Int, day: Int)
+
+object DateJ {
+  val comparerYear: Comparer[DateJ] = t1 => t2 => Comparison(t1.year)(t2.year)
+  val comparerMonth: Comparer[DateJ] = t1 => t2 => Comparison(t1.month)(t2.month)
+  val comparerDay: Comparer[DateJ] = t1 => t2 => Comparison(t1.day)(t2.day)
+  implicit val comparerDateJ: Comparer[DateJ] = comparerYear orElse comparerMonth orElse comparerDay
+  implicit val orderingDateJ: Ordering[DateJ] = comparerDateJ.toOrdering
+}
+
+

@@ -181,8 +181,8 @@ class ComparersSpec extends FlatSpec with Matchers with Futures with ScalaFuture
       val comparer: Comparer[Case7] = comparer7(Case7)
     }
     import MyComparers._
-    comparer(Case7(1, 2, "3", Some(4), 0, 99L, true))(Case7(1, 2, "3", Some(5), 0, 99L, true)) shouldBe More
-    comparer(Case7(1, 2, "3", None, 0, 99L, false))(Case7(1, 2, "3", Some(4), 1, 100L, false)) shouldBe More
+    comparer(Case7(1, 2, "3", Some(4), 0, 99L, x7 = true))(Case7(1, 2, "3", Some(5), 0, 99L, x7 = true)) shouldBe More
+    comparer(Case7(1, 2, "3", None, 0, 99L, x7 = false))(Case7(1, 2, "3", Some(4), 1, 100L, x7 = false)) shouldBe More
   }
 
   it should "compare 8" in {
@@ -191,8 +191,8 @@ class ComparersSpec extends FlatSpec with Matchers with Futures with ScalaFuture
       val comparer: Comparer[Case8] = comparer8(Case8)
     }
     import MyComparers._
-    comparer(Case8(1, 2, "3", Some(4), 0, 99L, Right(3), true))(Case8(1, 2, "3", Some(4), 0, 99L, Right(4), true)) shouldBe More
-    comparer(Case8(1, 2, "3", None, 0, 99L, Left(""), false))(Case8(1, 2, "3", Some(4), 1, 100L, Left(""), false)) shouldBe More
+    comparer(Case8(1, 2, "3", Some(4), 0, 99L, Right(3), x8 = true))(Case8(1, 2, "3", Some(4), 0, 99L, Right(4), x8 = true)) shouldBe More
+    comparer(Case8(1, 2, "3", None, 0, 99L, Left(""), x8 = false))(Case8(1, 2, "3", Some(4), 1, 100L, Left(""), x8 = false)) shouldBe More
   }
 
   it should "compare 9" in {
@@ -201,8 +201,8 @@ class ComparersSpec extends FlatSpec with Matchers with Futures with ScalaFuture
       val comparer: Comparer[Case9] = comparer9(Case9)
     }
     import MyComparers._
-    comparer(Case9(1, 2, "3", Some(4), 0, 99L, Right(3), List(1), true))(Case9(1, 2, "3", Some(4), 0, 99L, Right(3), List(2, 1), true)) shouldBe More
-    comparer(Case9(1, 2, "3", None, 0, 99L, Left(""), Nil, false))(Case9(1, 2, "3", Some(4), 1, 99L, Left(""), List(1), false)) shouldBe More
+    comparer(Case9(1, 2, "3", Some(4), 0, 99L, Right(3), List(1), x9 = true))(Case9(1, 2, "3", Some(4), 0, 99L, Right(3), List(2, 1), x9 = true)) shouldBe More
+    comparer(Case9(1, 2, "3", None, 0, 99L, Left(""), Nil, x9 = false))(Case9(1, 2, "3", Some(4), 1, 99L, Left(""), List(1), x9 = false)) shouldBe More
   }
 
   it should "compare 10" in {
@@ -211,8 +211,8 @@ class ComparersSpec extends FlatSpec with Matchers with Futures with ScalaFuture
       val comparer: Comparer[Case10] = comparer10(Case10)
     }
     import MyComparers._
-    comparer(Case10(1, 2, "3", Some(4), 0, 1010L, Right(3), Seq(1), Seq(1), true))(Case10(1, 2, "3", Some(4), 0, 1010L, Right(3), Seq(2, 1), Seq(1), true)) shouldBe More
-    comparer(Case10(1, 2, "3", None, 0, 1010L, Left(""), Nil, Array(1), false))(Case10(1, 2, "3", Some(4), 1, 1010L, Left(""), Seq(1), Array(1), false)) shouldBe More
+    comparer(Case10(1, 2, "3", Some(4), 0, 1010L, Right(3), Seq(1), Seq(1), x10 = true))(Case10(1, 2, "3", Some(4), 0, 1010L, Right(3), Seq(2, 1), Seq(1), x10 = true)) shouldBe More
+    comparer(Case10(1, 2, "3", None, 0, 1010L, Left(""), Nil, Array(1), x10 = false))(Case10(1, 2, "3", Some(4), 1, 1010L, Left(""), Seq(1), Array(1), x10 = false)) shouldBe More
   }
 }
 

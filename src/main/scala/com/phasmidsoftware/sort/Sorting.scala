@@ -176,7 +176,7 @@ object QuickSort {
   * insertionSort(), which is slow except for small arrays.
   */
 object Sorting {
-  final def sort[A: Ordering : ClassTag](data: Array[A]): Unit = QuickSort.sort(data)
+  final def sort[A: Ordering : ClassTag](data: Array[A]): Unit = quickSort(data)
 
   final def insertionSort[A: Ordering : ClassTag](data: Array[A]): Unit = InsertionSort.sort(data)
 

@@ -26,6 +26,16 @@ trait Comparer[T] extends (T => T => Comparison) {
   self =>
 
   /**
+    * Method to yield a Comparison from a tuple of Ts.
+    * This, then, invokes the tupled version of apply.
+    * This is essentially the same as the tupled method where the two input parameters are both Ts.
+    *
+    * @param tt a tuple (T,T).
+    * @return a Comparison
+    */
+  def compare(tt: (T, T)): Comparison = self(tt._2)(tt._1)
+
+  /**
     * Method to convert this Comparer[T] into an Ordering[T] which can then be used for more typical Java/Scala-style comparisons.
     *
     * @return a new Ordering[T].
@@ -231,7 +241,8 @@ trait Comparer[T] extends (T => T => Comparison) {
   def :|![U: Comparer](lens: T => U): Comparer[T] = orElseNot(implicitly[Comparer[U]].snap(lens))
 
   /**
-    * Method to apply this Comparer using two (tupled) parameters rather than the curried form.
+    * Method to apply this Comparer to two (tupled) parameters rather than the curried form.
+    * This is essentially the same as the compare method where the parameter is, explicitly, a (T,T).
     *
     * @param t1 the first T.
     * @param t2 the second T.
