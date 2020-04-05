@@ -235,7 +235,7 @@ object Comparison {
     * @return the homologous Comparison for the input.
     */
   def apply(bo: Option[Boolean]): Comparison = bo match {
-    case Some(b) => apply(b);
+    case Some(b) => Comparison(b);
     case _ => Same
   }
 

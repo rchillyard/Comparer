@@ -107,14 +107,14 @@ class ComparersSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers w
     comparer(Right(2))(Right(3)) shouldBe More
   }
 
-  it should "compare 2" in {
-    val c1a = Composite(1, "a")
-    val c2a = Composite(2, "a")
-    val c1z = Composite(1, "z")
+  it should "implement comparer 2" in {
     object MyComparers extends Comparers {
       val comparer: Comparer[Composite] = comparer2(Composite.apply)
     }
     import MyComparers._
+    val c1a = Composite(1, "a")
+    val c2a = Composite(2, "a")
+    val c1z = Composite(1, "z")
     comparer(c1z)(c1a) shouldBe Less
     comparer(c2a)(c1a) shouldBe Less
     comparer(c2a)(c1z) shouldBe Less
@@ -123,14 +123,30 @@ class ComparersSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers w
     comparer(c1a)(c1z) shouldBe More
   }
 
+  it should "implement comparer 2 (alt)" in {
+    object MyComparers extends Comparers {
+      val comparer: Comparer[Composite] = comparer2(Composite.apply)
+    }
+    import MyComparers._
+    val c1a = Composite(1, "a")
+    val c2a = Composite(2, "a")
+    val c1z = Composite(1, "z")
+    comparer.compare(c1a, c1z) shouldBe Less
+    comparer.compare(c1a, c2a) shouldBe Less
+    comparer.compare(c1z, c2a) shouldBe Less
+    comparer.compare(c1a, c1a) shouldBe Same
+    comparer.compare(c2a, c1a) shouldBe More
+    comparer.compare(c1z, c1a) shouldBe More
+  }
+
   it should "compare 1" in {
-    val o0 = Option(0)
-    val o1 = Option(1)
-    val o2 = Option(2)
     object MyComparers extends Comparers {
       val comparer: Comparer[Option[Int]] = comparer1 { x: Int => Option(x) }
     }
     import MyComparers._
+    val o0 = Option(0)
+    val o1 = Option(1)
+    val o2 = Option(2)
     comparer(o0)(o1) shouldBe More
     comparer(o2)(o1) shouldBe Less
     comparer(o2)(o0) shouldBe Less
@@ -141,6 +157,10 @@ class ComparersSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers w
 
   it should "compare 3" in {
     case class DateJ(year: Int, month: Int, day: Int)
+    object MyComparers extends Comparers {
+      val comparer: Comparer[DateJ] = comparer3(DateJ)
+    }
+    import MyComparers._
     val today = DateJ(2019, 6, 5)
     val tomorrow = DateJ(2019, 6, 6)
     val yesterday = DateJ(2019, 6, 4)
@@ -148,10 +168,6 @@ class ComparersSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers w
     val lastMonth = DateJ(2019, 5, 5)
     val nextYear = DateJ(2020, 6, 5)
     val lastYear = DateJ(2018, 6, 5)
-    object MyComparers extends Comparers {
-      val comparer: Comparer[DateJ] = comparer3(DateJ)
-    }
-    import MyComparers._
     comparer(today)(today) shouldBe Same
     comparer(today)(tomorrow) shouldBe More
     comparer(tomorrow)(today) shouldBe Less
@@ -165,9 +181,7 @@ class ComparersSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers w
   it should "compare 3 in reverse order" in {
     case class DateJ(day: Int, month: Int, year: Int)
     object MyComparers extends Comparers {
-
       import Functional._
-
       val comparer: Comparer[DateJ] = comparer3(invert3(DateJ))
     }
     import MyComparers._
@@ -190,13 +204,6 @@ class ComparersSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers w
 
   it should "compare 3 in reverse order using more general approach" in {
     case class DateJ(day: Int, month: Int, year: Int)
-    val today = DateJ(5, 6, 2019)
-    val tomorrow = DateJ(6, 6, 2019)
-    val yesterday = DateJ(4, 6, 2019)
-    val nextMonth = DateJ(5, 7, 2019)
-    val lastMonth = DateJ(5, 5, 2019)
-    val nextYear = DateJ(5, 6, 2020)
-    val lastYear = DateJ(5, 6, 2018)
     object MyComparers extends Comparers {
 
       import Functional._
@@ -204,6 +211,13 @@ class ComparersSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers w
       val comparer: Comparer[DateJ] = comparer3(tuple3(invert3(DateJ.curried)))
     }
     import MyComparers._
+    val today = DateJ(5, 6, 2019)
+    val tomorrow = DateJ(6, 6, 2019)
+    val yesterday = DateJ(4, 6, 2019)
+    val nextMonth = DateJ(5, 7, 2019)
+    val lastMonth = DateJ(5, 5, 2019)
+    val nextYear = DateJ(5, 6, 2020)
+    val lastYear = DateJ(5, 6, 2018)
     comparer(today)(today) shouldBe Same
     comparer(today)(tomorrow) shouldBe More
     comparer(tomorrow)(today) shouldBe Less
@@ -216,13 +230,6 @@ class ComparersSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers w
 
   it should "compare 3 in mixed up order" in {
     case class DateJ(month: Int, day: Int, year: Int)
-    val today = DateJ(6, 5, 2019)
-    val tomorrow = DateJ(6, 6, 2019)
-    val yesterday = DateJ(6, 4, 2019)
-    val nextMonth = DateJ(7, 5, 2019)
-    val lastMonth = DateJ(5, 5, 2019)
-    val nextYear = DateJ(6, 5, 2020)
-    val lastYear = DateJ(6, 5, 2018)
     object MyComparers extends Comparers {
 
       import Functional._
@@ -230,6 +237,13 @@ class ComparersSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers w
       val comparer: Comparer[DateJ] = comparer3(tuple3(invert2(DateJ.curried)))
     }
     import MyComparers._
+    val today = DateJ(6, 5, 2019)
+    val tomorrow = DateJ(6, 6, 2019)
+    val yesterday = DateJ(6, 4, 2019)
+    val nextMonth = DateJ(7, 5, 2019)
+    val lastMonth = DateJ(5, 5, 2019)
+    val nextYear = DateJ(6, 5, 2020)
+    val lastYear = DateJ(6, 5, 2018)
     comparer(today)(today) shouldBe Same
     comparer(today)(tomorrow) shouldBe More
     comparer(tomorrow)(today) shouldBe Less
@@ -246,11 +260,22 @@ class ComparersSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers w
       val comparer: Comparer[Case4] = comparer4(Case4)
     }
     import MyComparers._
+    comparer(Case4(1, 2, 3, 4))(Case4(1, 2, 3, 0)) shouldBe Less
     comparer(Case4(1, 2, 3, 4))(Case4(2, 1, 3, 4)) shouldBe More
     comparer(Case4(1, 2, 3, 4))(Case4(1, 2, 3, 5)) shouldBe More
   }
 
   it should "compare 5" in {
+    case class Case5(x1: Int, x2: Double, x3: String, x4: Option[Int], x5: Long)
+    object MyComparers extends Comparers {
+      val comparer: Comparer[Case5] = comparer5(Case5)
+    }
+    import MyComparers._
+    comparer(Case5(1, 2, "3", Some(4), 99L))(Case5(1, 2, "3", Some(4), 98L)) shouldBe Less
+    comparer(Case5(1, 2, "3", None, 99L))(Case5(1, 2, "3", None, 100L)) shouldBe More
+  }
+
+  it should "compare 5 Ints" in {
     case class Case5(x1: Int, x2: Int, x3: Int, x4: Int, x5: Int)
     object MyComparers extends Comparers {
       val comparer: Comparer[Case5] = comparer5(Case5)
@@ -266,6 +291,7 @@ class ComparersSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers w
       val comparer: Comparer[Case6] = comparer6(Case6)
     }
     import MyComparers._
+    comparer(Case6(1, 2, "3", Some(4), 0, 99L))(Case6(1, 2, "3", Some(4), 0, 98L)) shouldBe Less
     comparer(Case6(1, 2, "3", Some(4), 0, 99L))(Case6(2, 1, "3", Some(4), 0, 99L)) shouldBe More
     comparer(Case6(1, 2, "3", None, 0, 99L))(Case6(1, 2, "3", Some(4), 1, 100L)) shouldBe More
   }

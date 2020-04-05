@@ -25,5 +25,5 @@ case class RandomStateJava[A](x: Long)(f: Long => A) extends RandomState[A] {
 object RandomState {
   def apply(x: Long): RandomState[Long] = RandomStateJava[Long](x)(identity[Long])
 
-  def apply: RandomState[Long] = apply(System.currentTimeMillis())
+  def apply: RandomState[Long] = RandomState(System.currentTimeMillis())
 }

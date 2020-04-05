@@ -27,10 +27,20 @@ class ComparisonSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers 
     Comparison.convert(0).toInt shouldBe 0
     Comparison.convert(1).toInt shouldBe 1
   }
-  it should "apply(Option[Boolean])" in {
+  it should "Comparison.apply(Option[Boolean])" in {
     Comparison(None) shouldBe Same
     Comparison(Some(false)) shouldBe More
     Comparison(Some(true)) shouldBe Less
+  }
+  it should "apply() 1" in {
+    Comparison(None)() should matchPattern { case None => }
+    Comparison(Some(false))() should matchPattern { case Some(false) => }
+    Comparison(Some(true))() should matchPattern { case Some(true) => }
+  }
+  it should "apply() 2" in {
+    Same() should matchPattern { case None => }
+    Different(false)() should matchPattern { case Some(false) => }
+    Different(true)() should matchPattern { case Some(true) => }
   }
   it should "flip" in {
     More.flip shouldBe Less

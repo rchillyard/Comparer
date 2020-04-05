@@ -85,7 +85,7 @@ class SortedSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers with
     val d4 = DateF(1984, 6, 6)
     val d5 = DateF(2000, 3, 2)
     val list = List(d3, d5, d1, d2, d4)
-    val sorted: Sorted[DateF] = Sorted(list)(Comparer.apply[DateF, Int](_.year, _.month, _.day))
+    val sorted: Sorted[DateF] = Sorted(list)(Comparer[DateF, Int](_.year, _.month, _.day))
     sorted() shouldBe List(d1, d2, d3, d4, d5)
   }
   it should "sort List[Composite] by Int then String" in {
@@ -121,5 +121,13 @@ class SortedSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers with
     val l2 = List(3, 4, 9, 12, 14, 16)
     Sorted.merge(l1, l2) shouldBe List(1, 3, 4, 5, 8, 9, 10, 11, 12, 14, 15, 16)
   }
+  it should "sort in parallel" in {
+    import scala.concurrent.ExecutionContext.Implicits.global
+    val list = List(3, 1, 2, 4, 6, 5)
+    val sorted = Sorted.create(list)
+    val xsf = sorted.parallel
+    whenReady(xsf) { xs => xs shouldBe List(1, 2, 3, 4, 5, 6) }
+  }
+
 }
 
