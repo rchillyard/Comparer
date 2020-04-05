@@ -4,7 +4,7 @@
 
 package com.phasmidsoftware.sort
 
-import com.phasmidsoftware.comparer.{DateJ, Sorted}
+import com.phasmidsoftware.comparer.DateJ
 import com.phasmidsoftware.generic.Unpack
 import com.phasmidsoftware.util.RandomState
 import org.scalatest.concurrent.{Futures, ScalaFutures}

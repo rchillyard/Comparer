@@ -7,7 +7,7 @@ package com.phasmidsoftware.comparer
 import scala.language.{implicitConversions, postfixOps}
 
 /**
-  * Function trait which embodies the behavior of a lazy (three-way) comparison.
+  * Function trait which embodies the behavior of a lazy, three-way comparison.
   *
   * The problem with the Java style of comparing, which Scala also uses, is that you cannot easily compose
   * comparisons. A typical comparison of two quantities compares the two most significant quantities, then,
@@ -17,17 +17,29 @@ import scala.language.{implicitConversions, postfixOps}
   *
   * Although it would be possible to write this eagerly, or simply replace it with an Option[Boolean],
   * there is some slight advantage in defining it lazily.
+  * In many situations we use pattern-matching rather than evaluation of the Comparison value.
+  *
+  * NOTE: also that Comparison is a form of three-valued logic.
+  * which does not correspond exactly to the the indeterminate state.
+  * We can generate a Kleenean object by invoking the Comparison's apply method.
   *
   * This trait is sealed because there can only be two concrete sub-types.
   */
-sealed trait Comparison extends (() => Option[Boolean]) {
+sealed trait Comparison extends (() => Kleenean) {
 
   /**
     * Method to eagerly evaluate this Comparison.
     *
-    * @return an Option[Boolean].
+    * @return a Kleenean.
     */
-  def apply(): Option[Boolean]
+  def apply(): Kleenean
+
+  /**
+    * Definition of a function which takes Unit and returns String.
+    *
+    * NOTE: I'm not entirely clear why this is even here.
+    */
+  val f: () => String
 
   /**
     * Method to yield logical AND.
@@ -94,9 +106,11 @@ case class Different(less: Boolean) extends Comparison {
   /**
     * Eagerly evaluate this Different.
     *
-    * @return Some(less).
+    * @return Truth(less).
     */
-  def apply(): Option[Boolean] = Some(less)
+  def apply(): Kleenean = Truth(less)
+
+  val f: () => String = () => toString()
 
   /**
     * Short-circuited AND.
@@ -149,11 +163,13 @@ case class Different(less: Boolean) extends Comparison {
   */
 case object Same extends Comparison {
   /**
-    * Eagerly evaluate this Same.
+    * Eagerly evaluate this Same as a Kleenean (Maybe).
     *
-    * @return None.
+    * @return Maybe.
     */
-  def apply(): Option[Boolean] = None
+  def apply(): Kleenean = Maybe
+
+  val f: () => String = () => toString()
 
   /**
     * Short-circuited AND -- but in this case there is no short circuit.
@@ -229,6 +245,17 @@ object Comparison {
   def apply(b: Boolean): Comparison = Different(b)
 
   /**
+    * Method to construct a Comparison from a Kleenean.
+    *
+    * @param k a Kleenean.
+    * @return the homologous Comparison for the input.
+    */
+  def apply(k: Kleenean): Comparison = k match {
+    case Truth(b) => apply(b);
+    case _ => Same
+  }
+
+  /**
     * Method to construct a Comparison from an Option[Boolean].
     *
     * @param bo an optional Boolean.
@@ -246,7 +273,7 @@ object Comparison {
     *          Typically, this is the result of a Java-style comparison.
     * @return the homologous Comparison for x, either Same or Different(b) where b is true if x is negative.
     */
-  def convert(x: Int): Comparison = x match {
+  implicit def convert(x: Int): Comparison = x match {
     case 0 => Same;
     case _ => Comparison(Some(x < 0))
   }

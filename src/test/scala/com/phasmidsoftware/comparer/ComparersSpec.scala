@@ -181,7 +181,9 @@ class ComparersSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers w
   it should "compare 3 in reverse order" in {
     case class DateJ(day: Int, month: Int, year: Int)
     object MyComparers extends Comparers {
+
       import Functional._
+
       val comparer: Comparer[DateJ] = comparer3(invert3(DateJ))
     }
     import MyComparers._
