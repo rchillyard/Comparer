@@ -327,10 +327,3 @@ object Comparer {
     */
   def comparer[T, P: Comparer](lens: T => P): Comparer[T] = implicitly[Comparer[P]].snap(lens)
 }
-
-/**
-  * ComparerException.
-  * @param w the message.
-  * @param e an exception (defaults to null).
-  */
-case class ComparerException(w: String, e: Throwable = null) extends Exception(w, e)

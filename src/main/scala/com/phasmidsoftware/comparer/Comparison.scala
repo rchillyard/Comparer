@@ -34,7 +34,12 @@ sealed trait Comparison extends (() => Kleenean) {
     */
   def apply(): Kleenean
 
-  val f: ()=>String
+  /**
+    * Definition of a function which takes Unit and returns String.
+    *
+    * NOTE: I'm not entirely clear why this is even here.
+    */
+  val f: () => String
 
   /**
     * Method to yield logical AND.
@@ -105,7 +110,7 @@ case class Different(less: Boolean) extends Comparison {
     */
   def apply(): Kleenean = Truth(less)
 
-  val f: ()=>String = () => toString()
+  val f: () => String = () => toString()
 
   /**
     * Short-circuited AND.
@@ -164,7 +169,7 @@ case object Same extends Comparison {
     */
   def apply(): Kleenean = Maybe
 
-  val f: ()=>String = () => toString()
+  val f: () => String = () => toString()
 
   /**
     * Short-circuited AND -- but in this case there is no short circuit.

@@ -374,8 +374,11 @@ From the application programmer's perspective, the following methods of _Compari
       def compare[T](t1: T, t2: T)(implicit comparer: Comparer[T]): Comparison = comparer(t1)(t2)
     }
     
-### Comparers
+### Kleenean
+The result of evaluating a Comparison is a Kleenean: a three-valued logic type.
+Kleenean is essentially an _Option[Boolean]_.
 
+### Comparers
 This trait provides methods to create a _Comparer_ for a case class (or other _Product_).
 It assumes that the parameters of the case class are in order of significance: most to least.
 All the programmer needs to do is to create an object which extends _Comparers_, and
@@ -432,7 +435,9 @@ for a case class, assuming that the fields are in order from most to least signi
 
 Version 1.0.3 adds compareIterable, compareList, compareArray, compareTry, compareEither and compare7 thru compare10. Also Comparer[Boolean].
 
-Version 1.0.5 introduces the Kleenean trait and has Comparison return it with apply().
+Version 1.0.4 adds Functional module and provides support for Scala 2.13
+
+Version 1.0.5 introduced the Kleenean trait and has Comparison return it with apply().
 Otherwise, no logic changes.
 
-Version 1.0.4 adds Functional module and provides support for Scala 2.13
+Version 1.0.6 merged 1.0.5 with master branch.

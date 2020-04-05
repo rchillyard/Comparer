@@ -4,9 +4,11 @@
 
 package com.phasmidsoftware.comparer
 
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class KleeneanSpec extends FlatSpec with Matchers {
+
+class KleeneanSpec extends AnyFlatSpec with Matchers {
 
   behavior of "Kleenean"
 
@@ -59,7 +61,13 @@ class KleeneanSpec extends FlatSpec with Matchers {
     Truth(false) | Maybe shouldBe Maybe
     Maybe | Truth(false) shouldBe Maybe
     Truth(false) | Truth(false) shouldBe Truth(false)
+  }
 
+  behavior of "toString"
+  it should "work" in {
+    Maybe.toString shouldBe "?"
+    Truth(true).toString shouldBe "T"
+    Truth(false).toString shouldBe "F"
   }
 
 }

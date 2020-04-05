@@ -33,14 +33,14 @@ class ComparisonSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers 
     Comparison(Some(true)) shouldBe Less
   }
   it should "apply() 1" in {
-    Comparison(None)() should matchPattern { case None => }
-    Comparison(Some(false))() should matchPattern { case Some(false) => }
-    Comparison(Some(true))() should matchPattern { case Some(true) => }
+    Comparison(None)() should matchPattern { case Maybe => }
+    Comparison(Some(false))() should matchPattern { case Truth(false) => }
+    Comparison(Some(true))() should matchPattern { case Truth(true) => }
   }
   it should "apply() 2" in {
-    Same() should matchPattern { case None => }
-    Different(false)() should matchPattern { case Some(false) => }
-    Different(true)() should matchPattern { case Some(true) => }
+    Same() should matchPattern { case Maybe => }
+    Different(false)() should matchPattern { case Truth(false) => }
+    Different(true)() should matchPattern { case Truth(true) => }
   }
   it should "flip" in {
     More.flip shouldBe Less

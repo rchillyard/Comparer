@@ -4,20 +4,16 @@
 
 package com.phasmidsoftware.sort
 
-import com.phasmidsoftware.comparer.{Comparer, ComparerException}
+import com.phasmidsoftware.comparer.Comparer
 
 import scala.annotation.tailrec
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.{implicitConversions, postfixOps}
 
 /**
-  * This is not really part of the Comparer/Comparison code and should probably not be here.
-  *
-  * @param ts a sequence of T.
-  * @tparam T the underlying type to be sorted.
-  */
-/**
   * Case class Sorted to enable different types of sort on a sequence.
+  *
+  * This is not really part of the Comparer/Comparison code and should probably not be here.
   *
   * @param ts a sequence of T values/
   * @tparam T the underlying type of the sequence (implicitly provides Comparer[T])
