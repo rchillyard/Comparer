@@ -32,6 +32,11 @@ class ComparisonSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers 
     Comparison(Some(false)) shouldBe More
     Comparison(Some(true)) shouldBe Less
   }
+  it should "Comparison.apply(Kleenean)" in {
+    Comparison(Maybe) shouldBe Same
+    Comparison(Truth(false)) shouldBe More
+    Comparison(Truth(true)) shouldBe Less
+  }
   it should "apply() 1" in {
     Comparison(None)() should matchPattern { case Maybe => }
     Comparison(Some(false))() should matchPattern { case Truth(false) => }

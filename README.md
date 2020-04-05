@@ -115,9 +115,9 @@ A typical usage of this in a specification might be:
 
     val today = Date(2019, 6, 5)
     val tomorrow = Date(2019, 6, 6)
-    Comparison(today, today) shouldBe Same
-    Comparison(today, tomorrow) shouldBe Less
-    Comparison(tomorrow, today) shouldBe Moreglp
+    Compare(today, today) shouldBe Same
+    Compare(today, tomorrow) shouldBe Less
+    Compare(tomorrow, today) shouldBe Moreglp
 
 Well, of course, that's not quite it. We can do even better:
 
@@ -274,6 +274,20 @@ whereas when tupled parameters are used, it is conventional to compare the first
         * @return a Comparer[T] which has the same intrinsic behavior as "to".
         */
       implicit def convert[T](to: Ordering[T]): Comparer[T]
+      
+    object Compare {
+      /**
+        * Method to construct a Comparison from two objects of type T (tupled form).
+        * The sense of the result of this comparison is the same as,
+        * for example, Double.compare(t1, t2).
+        *
+        * @param t1 the first T.
+        * @param t2 the second T.
+        * @tparam T the type of both t1 and t2, such type providing implicit evidence of a Comparer[T].
+        * @return a Comparison, resulting from applying the comparer to the tuple of t1 and t2.
+        */
+      def apply[T: Comparer](t1: T, t2: T): Comparison = Comparison(t2)(t1)
+    }
 
 
 ### Comparison
@@ -359,19 +373,15 @@ From the application programmer's perspective, the following methods of _Compari
       val Less: Comparison
     
       /**
-        * Method to construct a Comparison from two objects of type T (curried).
-        * @param t1 the inner T.
-        * @param t2 the outer T.
+        * Method to construct a Comparison from two objects of type T (curried form).
+        * NOTE: the sense of the result will be similar to invoking, for example, Double.compare(t1, t2).
+        * @param t2 the inner T.
+        * @param t1 the outer T.
         * @param comparer an implicit Comparer[T].
-        * @tparam T the type of both t1 and t2, and also the underlying type of the Comparer[T].
+        * @tparam T the type of both t1 and t2, which type must also provide implicit evidence of type Comparer[T].
         * @return a Comparison, resulting from applying the comparer to the tuple of t1 and t2.
         */
-      def apply[T](t1: T)(t2: T)(implicit comparer: Comparer[T]): Comparison
-      
-      /**
-        * And, similarly a tupled version using the method name compare...
-       */
-      def compare[T](t1: T, t2: T)(implicit comparer: Comparer[T]): Comparison = comparer(t1)(t2)
+      def apply[T](t2: T)(t1: T)(implicit comparer: Comparer[T]): Comparison
     }
     
 ### Kleenean
@@ -441,3 +451,5 @@ Version 1.0.5 introduced the Kleenean trait and has Comparison return it with ap
 Otherwise, no logic changes.
 
 Version 1.0.6 merged 1.0.5 with master branch.
+
+Version 1.0.7 improved usability slightly by moving compare method of Comparison into apply method of (new) Compare object.

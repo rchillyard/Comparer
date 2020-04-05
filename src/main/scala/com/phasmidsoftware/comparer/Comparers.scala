@@ -22,7 +22,7 @@ trait Comparers {
     * @return a Comparer of Iterable[T] which can compare two instances of Iterable[T] and return a Comparison.
     */
   implicit def comparerIterable[T: Comparer]: Comparer[Iterable[T]] = to2 => to1 =>
-    (to1 zip to2).foldLeft[Comparison](Same)((a, x) => a orElse Comparison.compare(x._1, x._2))
+    (to1 zip to2).foldLeft[Comparison](Same)((a, x) => a orElse Compare(x._1, x._2))
 
   /**
     * Method to return a Comparer[Iterable[T] where T is any type that has an implicit Comparer.
@@ -61,7 +61,7 @@ trait Comparers {
     * @return a Comparer of Array[T] which can compare two instances of Array[T] and return a Comparison.
     */
   implicit def comparerArray[T: Comparer]: Comparer[Array[T]] = to2 => to1 =>
-    (to1 zip to2).foldLeft[Comparison](Same)((a, x) => a orElse Comparison.compare(x._1, x._2))
+    (to1 zip to2).foldLeft[Comparison](Same)((a, x) => a orElse Compare(x._1, x._2))
 
   /**
     * Method to return a Comparer[Option[T] where T is any type that has an implicit Comparer.

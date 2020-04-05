@@ -327,3 +327,17 @@ object Comparer {
     */
   def comparer[T, P: Comparer](lens: T => P): Comparer[T] = implicitly[Comparer[P]].snap(lens)
 }
+
+object Compare {
+  /**
+    * Method to construct a Comparison from two objects of type T (tupled form).
+    * The sense of the result of this comparison is the same as,
+    * for example, Double.compare(t1, t2).
+    *
+    * @param t1 the first T.
+    * @param t2 the second T.
+    * @tparam T the type of both t1 and t2, such type providing implicit evidence of a Comparer[T].
+    * @return a Comparison, resulting from applying the comparer to the tuple of t1 and t2.
+    */
+  def apply[T: Comparer](t1: T, t2: T): Comparison = Comparison(t2)(t1)
+}
