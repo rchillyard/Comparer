@@ -6,14 +6,14 @@ package com.phasmidsoftware.comparer
 
 import com.phasmidsoftware.comparer.Comparison.{Less, More}
 import org.scalatest.concurrent.{Futures, ScalaFutures}
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.{flatspec, matchers}
 
 import scala.language.postfixOps
 
 /**
   * @author scalaprof
   */
-class ComparerSpec extends FlatSpec with Matchers with Futures with ScalaFutures {
+class ComparerSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers with Futures with ScalaFutures {
 
   private val c1a = Composite(1, "a")
   private val c2a = Composite(2, "a")
@@ -93,7 +93,7 @@ class ComparerSpec extends FlatSpec with Matchers with Futures with ScalaFutures
     comparer.!=(2, 1) shouldBe true
   }
   it should "map with function" in {
-    val comparer: Comparer[Int] = Comparer.intComparer.map(_ flip)
+    val comparer: Comparer[Int] = Comparer.intComparer.transform(_ flip)
     comparer(1)(2) shouldBe Comparison.Less
   }
 
@@ -200,7 +200,7 @@ class ComparerSpec extends FlatSpec with Matchers with Futures with ScalaFutures
   }
 
   it should "map with function" in {
-    val comparer: Comparer[Int] = Comparer.intComparer.map(_ flip)
+    val comparer: Comparer[Int] = Comparer.intComparer.transform(_ flip)
     val inverseCompareWithOne: Int => Comparison = comparer(1)
     inverseCompareWithOne(2) shouldBe Comparison.Less
   }

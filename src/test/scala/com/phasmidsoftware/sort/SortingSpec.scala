@@ -8,13 +8,13 @@ import com.phasmidsoftware.comparer.DateJ
 import com.phasmidsoftware.generic.Unpack
 import com.phasmidsoftware.util.RandomState
 import org.scalatest.concurrent.{Futures, ScalaFutures}
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.{flatspec, matchers}
 
 
 /**
   * @author scalaprof
   */
-class SortingSpec extends FlatSpec with Matchers with Futures with ScalaFutures {
+class SortingSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers with Futures with ScalaFutures {
 
   behavior of "Insertion Sort"
 
@@ -43,7 +43,7 @@ class SortingSpec extends FlatSpec with Matchers with Futures with ScalaFutures 
   }
 
   it should "sort List[DateJ]" in {
-    def getRandomIntStream(n: Int): Stream[Int] = {
+    def getRandomIntStream(n: Int): LazyList[Int] = {
       def modulo(n: Int): Long => Int = { l: Long => math.abs(l.toInt) % n }
 
       RandomState(0L).stream.take(100).map(modulo(n))

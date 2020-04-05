@@ -190,20 +190,22 @@ trait Comparer[T] extends (T => T => Comparison) {
   def orElseNot(tc: => Comparer[T]): Comparer[T] = t1 => t2 => self(t1)(t2).orElse(tc.invert(t1)(t2))
 
   /**
-    * A non-monadic map method which maps this Comparer into a different Comparer,
-    * but of the same underlying type.
+    * A method which maps this Comparer into a different Comparer,
+    * but of the same underlying type, according to the function f.
+    *
+    * NOTE: formerly called map.
     *
     * @param f the function which takes a Comparison and yields a different Comparison.
     * @return a new Comparer[T].
     */
-  def map(f: Comparison => Comparison): Comparer[T] = t1 => t2 => f(self(t1)(t2))
+  def transform(f: Comparison => Comparison): Comparer[T] = t1 => t2 => f(self(t1)(t2))
 
   /**
     * Method to invert the sense of a Comparer.
     *
     * @return a Compare[T] which, given the same tuple of Ts, yields the complementary Comparison to this Comparer.
     */
-  def invert: Comparer[T] = map(_ flip)
+  def invert: Comparer[T] = transform(_ flip)
 
   /**
     * Method to compose this Comparer[T] with a Comparer[U] that is formed from the given "lens" function.

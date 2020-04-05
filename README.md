@@ -2,9 +2,9 @@
 A functional (three-way) comparer.
 
 ## Introduction
-
 Why do I say that this is a functional comparer? Because _Comparers_ can be composed!
 
+### The old object-oriented way
 Let's take a look at a typical date comparison using the built-in comparisons provided by Scala
 (and, ultimately, Java):
 
@@ -64,10 +64,11 @@ But the _compare_ method itself is still very inelegant with all of those tempor
 
 Note that the 0, 1 and -1 values almost rise to the level of magic numbers.
 They have a significance that is far above their actual values.
-Indeed, if you performed the same comparison on an object with Strings, the negative and positive
+Indeed, if you performed the same comparison on an object with _String_s, the negative and positive
 values could be anything at all.
 
-Now, lets look at the functional way of doing comparisons, using the _Comparer_ library:
+### The new functional way
+Now, let's look at the functional way of doing comparisons, using the _Comparer_ library:
 
     case class Date(year: Int, month: Int, day: Int)
     
@@ -81,7 +82,7 @@ Note that this (the case class) is just the same as the previous _Date_.
     }
 
 We find an implicit value of a type class for the integer comparer, and we make this a variable called _cf_.
-The _snap_ method takes a lens function as its parameter and transforms the _Comparer[Int]_ into a _Comparer[Date]_.
+The _snap_ method takes a "lens" function as its parameter and transforms the _Comparer[Int]_ into a _Comparer[Date]_.
 
 Actually, we can come up with something rather more elegant than this:
 
@@ -91,7 +92,7 @@ Actually, we can come up with something rather more elegant than this:
 
 The _Compare.same_ method simply provides a _Comparer_ of the given type which always evaluates to _Same_.
 The _:|_ method composes (using _orElse_) two _Comparers_ where the one on the right is
-constructed from an implicitly discovered _Comparer_ of the type yielded by the "lens" function lambda
+constructed from an implicitly discovered _Comparer_ of the type yielded by the lens function lambda
 and which is then snapped by the given lens.
 
 There's also a _:|!_ method which works the same except that it invokes the _orElseNot_ method which flips
@@ -208,13 +209,13 @@ whereas when tupled parameters are used, it is conventional to compare the first
       def orElse(tc: => Comparer[T]): Comparer[T]
     
       /**
-        * A non-monadic map method which maps this Comparer into a different Comparer,
-        * but of the same underlying type.
+        * A non-monadic transform method which transforms this Comparer into a different Comparer,
+        * but of the same underlying type. NOTE: this was formerly called map.
         *
         * @param f the function which takes a Comparison and yields a different Comparison.
         * @return a new Comparer[T].
         */
-      def map(f: Comparison => Comparison): Comparer[T]
+      def transform(f: Comparison => Comparison): Comparer[T]
     
       /**
         * Method to invert the sense of a Comparer.
@@ -400,8 +401,21 @@ Currently defined are:
 
 So, if your case class happens to include iterables (sequences or lists), optional, try or either types, you can still use
 one of the _comparerN_ methods and the types will be handled.
-The _comparerN_ methods are implemented up through _N_ = 10.
+You don't have to do anything in your code (other than importing the implicits) to get the benefit of this feature.
+The _comparerN_ methods are implemented up through _N_ = 11.
 
+What if the case class you want to compare doesn't have its fields in descending order of significance?
+For example, you might be using a _Date_ class where the fields are laid out: day, month, year.
+There is a set of function manipulation methods in _generic.Functional_.
+For instance, for the situation mentioned, you can simply write something like the following:
+
+        case class DateJ(day: Int, month: Int, year: Int)
+        object MyComparers extends Comparers {
+          import Functional._
+          val comparer: Comparer[DateJ] = comparer3(invert3(DateJ))
+        }
+ 
+If you have a more complex situation, such as only needing to invert the first two parameters, please see _ComparersSpec_.
 ### Colophon
 
 This project has 100% coverage so it makes sense to resolve any doubtful points about usage by consulting
@@ -416,3 +430,5 @@ Version 1.0.2 introduces a _Comparers_ trait which allows a programmer easily to
 for a case class, assuming that the fields are in order from most to least significant.
 
 Version 1.0.3 adds compareIterable, compareList, compareArray, compareTry, compareEither and compare7 thru compare10. Also Comparer[Boolean].
+
+Version 1.0.4 adds Functional module and provides support for Scala 2.13

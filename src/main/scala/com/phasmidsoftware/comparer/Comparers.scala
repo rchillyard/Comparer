@@ -119,7 +119,7 @@ trait Comparers {
   def comparer1[P: Comparer, T <: Product](f: P => T): Comparer[T] = comparer[T, P](0)
 
   /**
-    * Method to return a Comparer[T] where T is a 2-ary Product and which is based on a function to convert a P0,P1 into a T.
+    * Method to return a Comparer[T] where T is a 2-ary Product and which is based on a function to convert a (P0,P1) into a T.
     *
     * @param f a function (P0,P1) => T, usually the apply method of a case class.
     * @tparam P0 the type of the first field of the Product type T.
@@ -132,7 +132,7 @@ trait Comparers {
       comparer[T, P1](1)
 
   /**
-    * Method to return a Comparer[T] where T is a 3-ary Product and which is based on a function to convert a P0,P1,P2 into a T.
+    * Method to return a Comparer[T] where T is a 3-ary Product and which is based on a function to convert a (P0,P1,P2) into a T.
     *
     * @param f a function (P0,P1,P2) => T, usually the apply method of a case class.
     * @tparam P0 the type of the first field of the Product type T.
@@ -147,7 +147,7 @@ trait Comparers {
       comparer[T, P2](2)
 
   /**
-    * Method to return a Comparer[T] where T is a 4-ary Product and which is based on a function to convert a P0,P1,P2,P3 into a T.
+    * Method to return a Comparer[T] where T is a 4-ary Product and which is based on a function to convert a (P0,P1,P2,P3) into a T.
     *
     * @param f a function (P0,P1,P2,P3) => T, usually the apply method of a case class.
     * @tparam P0 the type of the first field of the Product type T.
@@ -164,7 +164,7 @@ trait Comparers {
       comparer[T, P3](3)
 
   /**
-    * Method to return a Comparer[T] where T is a 5-ary Product and which is based on a function to convert a P0,P1,P2,P3,P4 into a T.
+    * Method to return a Comparer[T] where T is a 5-ary Product and which is based on a function to convert a (P0,P1,P2,P3,P4) into a T.
     *
     * @param f a function (P0,P1,P2,P3,P4) => T, usually the apply method of a case class.
     * @tparam P0 the type of the first field of the Product type T.
@@ -183,7 +183,7 @@ trait Comparers {
       comparer[T, P4](4)
 
   /**
-    * Method to return a Comparer[T] where T is a 6-ary Product and which is based on a function to convert a P0,P1,P2,P3,P4,P5 into a T.
+    * Method to return a Comparer[T] where T is a 6-ary Product and which is based on a function to convert a (P0,P1,P2,P3,P4,P5) into a T.
     *
     * @param f a function (P0,P1,P2,P3,P4,P5) => T, usually the apply method of a case class.
     * @tparam P0 the type of the first field of the Product type T.
@@ -204,7 +204,7 @@ trait Comparers {
       comparer[T, P5](5)
 
   /**
-    * Method to return a Comparer[T] where T is a 7-ary Product and which is based on a function to convert a P0,P1,P2,P3,P4,P5,P6 into a T.
+    * Method to return a Comparer[T] where T is a 7-ary Product and which is based on a function to convert a (P0,P1,P2,P3,P4,P5,P6) into a T.
     *
     * @param f a function (P0,P1,P2,P3,P4,P5,P6) => T, usually the apply method of a case class.
     * @tparam P0 the type of the first field of the Product type T.
@@ -227,7 +227,7 @@ trait Comparers {
       comparer[T, P6](6)
 
   /**
-    * Method to return a Comparer[T] where T is a 8-ary Product and which is based on a function to convert a P0,P1,P2,P3,P4,P5,P6,P7 into a T.
+    * Method to return a Comparer[T] where T is a 8-ary Product and which is based on a function to convert a (P0,P1,P2,P3,P4,P5,P6,P7) into a T.
     *
     * @param f a function (P0,P1,P2,P3,P4,P5,P6,P7) => T, usually the apply method of a case class.
     * @tparam P0 the type of the first field of the Product type T.
@@ -252,7 +252,7 @@ trait Comparers {
       comparer[T, P7](7)
 
   /**
-    * Method to return a Comparer[T] where T is a 9-ary Product and which is based on a function to convert a P0,P1,P2,P3,P4,P5,P6,P7,P8 into a T.
+    * Method to return a Comparer[T] where T is a 9-ary Product and which is based on a function to convert a (P0,P1,P2,P3,P4,P5,P6,P7,P8) into a T.
     *
     * @param f a function (P0,P1,P2,P3,P4,P5,P6,P7,P8) => T, usually the apply method of a case class.
     * @tparam P0 the type of the first field of the Product type T.
@@ -279,7 +279,7 @@ trait Comparers {
       comparer[T, P8](8)
 
   /**
-    * Method to return a Comparer[T] where T is a 10-ary Product and which is based on a function to convert a P0,P1,P2,P3,P4,P5,P6,P7,P8,P9 into a T.
+    * Method to return a Comparer[T] where T is a 10-ary Product and which is based on a function to convert a (P0,P1,P2,P3,P4,P5,P6,P7,P8,P9) into a T.
     *
     * @param f a function (P0,P1,P2,P3,P4,P5,P6,P7,P8,P9) => T, usually the apply method of a case class.
     * @tparam P0 the type of the first field of the Product type T.
@@ -306,6 +306,37 @@ trait Comparers {
       comparer[T, P7](7) orElse
       comparer[T, P8](8) orElse
       comparer[T, P9](9)
+
+  /**
+    * Method to return a Comparer[T] where T is a 10-ary Product and which is based on a function to convert a (P0,P1,P2,P3,P4,P5,P6,P7,P8,P9,P10) into a T.
+    *
+    * @param f a function (P0,P1,P2,P3,P4,P5,P6,P7,P8,P9) => T, usually the apply method of a case class.
+    * @tparam P0  the type of the first field of the Product type T.
+    * @tparam P1  the type of the second field of the Product type T.
+    * @tparam P2  the type of the third field of the Product type T.
+    * @tparam P3  the type of the fourth field of the Product type T.
+    * @tparam P4  the type of the fifth field of the Product type T.
+    * @tparam P5  the type of the sixth field of the Product type T.
+    * @tparam P6  the type of the seventh field of the Product type T.
+    * @tparam P7  the type of the eighth field of the Product type T.
+    * @tparam P8  the type of the ninth field of the Product type T.
+    * @tparam P9  the type of the tenth field of the Product type T.
+    * @tparam P10 the type of the eleventh field of the Product type T.
+    * @tparam T   the underlying type of the result, a Product.
+    * @return a Comparer[T] which can compare two instances of T and return a Comparison.
+    */
+  def comparer11[P0: Comparer, P1: Comparer, P2: Comparer, P3: Comparer, P4: Comparer, P5: Comparer, P6: Comparer, P7: Comparer, P8: Comparer, P9: Comparer, P10: Comparer, T <: Product](f: (P0, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10) => T): Comparer[T] =
+    comparer[T, P0](0) orElse
+      comparer[T, P1](1) orElse
+      comparer[T, P2](2) orElse
+      comparer[T, P3](3) orElse
+      comparer[T, P4](4) orElse
+      comparer[T, P5](5) orElse
+      comparer[T, P6](6) orElse
+      comparer[T, P7](7) orElse
+      comparer[T, P8](8) orElse
+      comparer[T, P9](9) orElse
+      comparer[T, P10](10)
 
   private def comparer[T <: Product, P: Comparer](x: Int): Comparer[T] = Comparer.comparer[T, P](t => t.productElement(x).asInstanceOf[P])
 }

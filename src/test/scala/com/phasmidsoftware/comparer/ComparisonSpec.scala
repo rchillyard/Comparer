@@ -6,14 +6,14 @@ package com.phasmidsoftware.comparer
 
 import com.phasmidsoftware.comparer.Comparison.{Less, More}
 import org.scalatest.concurrent.{Futures, ScalaFutures}
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.{flatspec, matchers}
 
 import scala.language.postfixOps
 
 /**
   * @author scalaprof
   */
-class ComparisonSpec extends FlatSpec with Matchers with Futures with ScalaFutures {
+class ComparisonSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers with Futures with ScalaFutures {
 
   behavior of "Comparison"
 

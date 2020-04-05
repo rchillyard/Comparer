@@ -5,8 +5,9 @@
 package com.phasmidsoftware.comparer
 
 import com.phasmidsoftware.comparer.Comparison.{Less, More}
+import com.phasmidsoftware.generic.Functional
 import org.scalatest.concurrent.{Futures, ScalaFutures}
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.{flatspec, matchers}
 
 import scala.language.postfixOps
 import scala.util.{Failure, Success, Try}
@@ -14,7 +15,7 @@ import scala.util.{Failure, Success, Try}
 /**
   * @author scalaprof
   */
-class ComparersSpec extends FlatSpec with Matchers with Futures with ScalaFutures {
+class ComparersSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers with Futures with ScalaFutures {
 
   behavior of "comparers"
 
@@ -122,6 +123,22 @@ class ComparersSpec extends FlatSpec with Matchers with Futures with ScalaFuture
     comparer(c1a)(c1z) shouldBe More
   }
 
+  it should "compare 1" in {
+    val o0 = Option(0)
+    val o1 = Option(1)
+    val o2 = Option(2)
+    object MyComparers extends Comparers {
+      val comparer: Comparer[Option[Int]] = comparer1 { x: Int => Option(x) }
+    }
+    import MyComparers._
+    comparer(o0)(o1) shouldBe More
+    comparer(o2)(o1) shouldBe Less
+    comparer(o2)(o0) shouldBe Less
+    comparer(o1)(o1) shouldBe Same
+    comparer(o1)(o2) shouldBe More
+    comparer(o1)(o0) shouldBe Less
+  }
+
   it should "compare 3" in {
     case class DateJ(year: Int, month: Int, day: Int)
     val today = DateJ(2019, 6, 5)
@@ -133,6 +150,84 @@ class ComparersSpec extends FlatSpec with Matchers with Futures with ScalaFuture
     val lastYear = DateJ(2018, 6, 5)
     object MyComparers extends Comparers {
       val comparer: Comparer[DateJ] = comparer3(DateJ)
+    }
+    import MyComparers._
+    comparer(today)(today) shouldBe Same
+    comparer(today)(tomorrow) shouldBe More
+    comparer(tomorrow)(today) shouldBe Less
+    comparer(today)(yesterday) shouldBe Less
+    comparer(today)(nextMonth) shouldBe More
+    comparer(today)(lastMonth) shouldBe Less
+    comparer(today)(nextYear) shouldBe More
+    comparer(today)(lastYear) shouldBe Less
+  }
+
+  it should "compare 3 in reverse order" in {
+    case class DateJ(day: Int, month: Int, year: Int)
+    object MyComparers extends Comparers {
+
+      import Functional._
+
+      val comparer: Comparer[DateJ] = comparer3(invert3(DateJ))
+    }
+    import MyComparers._
+    val today = DateJ(5, 6, 2019)
+    val tomorrow = DateJ(6, 6, 2019)
+    val yesterday = DateJ(4, 6, 2019)
+    val nextMonth = DateJ(5, 7, 2019)
+    val lastMonth = DateJ(5, 5, 2019)
+    val nextYear = DateJ(5, 6, 2020)
+    val lastYear = DateJ(5, 6, 2018)
+    comparer(today)(today) shouldBe Same
+    comparer(today)(tomorrow) shouldBe More
+    comparer(tomorrow)(today) shouldBe Less
+    comparer(today)(yesterday) shouldBe Less
+    comparer(today)(nextMonth) shouldBe More
+    comparer(today)(lastMonth) shouldBe Less
+    comparer(today)(nextYear) shouldBe More
+    comparer(today)(lastYear) shouldBe Less
+  }
+
+  it should "compare 3 in reverse order using more general approach" in {
+    case class DateJ(day: Int, month: Int, year: Int)
+    val today = DateJ(5, 6, 2019)
+    val tomorrow = DateJ(6, 6, 2019)
+    val yesterday = DateJ(4, 6, 2019)
+    val nextMonth = DateJ(5, 7, 2019)
+    val lastMonth = DateJ(5, 5, 2019)
+    val nextYear = DateJ(5, 6, 2020)
+    val lastYear = DateJ(5, 6, 2018)
+    object MyComparers extends Comparers {
+
+      import Functional._
+
+      val comparer: Comparer[DateJ] = comparer3(tuple3(invert3(DateJ.curried)))
+    }
+    import MyComparers._
+    comparer(today)(today) shouldBe Same
+    comparer(today)(tomorrow) shouldBe More
+    comparer(tomorrow)(today) shouldBe Less
+    comparer(today)(yesterday) shouldBe Less
+    comparer(today)(nextMonth) shouldBe More
+    comparer(today)(lastMonth) shouldBe Less
+    comparer(today)(nextYear) shouldBe More
+    comparer(today)(lastYear) shouldBe Less
+  }
+
+  it should "compare 3 in mixed up order" in {
+    case class DateJ(month: Int, day: Int, year: Int)
+    val today = DateJ(6, 5, 2019)
+    val tomorrow = DateJ(6, 6, 2019)
+    val yesterday = DateJ(6, 4, 2019)
+    val nextMonth = DateJ(7, 5, 2019)
+    val lastMonth = DateJ(5, 5, 2019)
+    val nextYear = DateJ(6, 5, 2020)
+    val lastYear = DateJ(6, 5, 2018)
+    object MyComparers extends Comparers {
+
+      import Functional._
+
+      val comparer: Comparer[DateJ] = comparer3(tuple3(invert2(DateJ.curried)))
     }
     import MyComparers._
     comparer(today)(today) shouldBe Same
@@ -213,6 +308,16 @@ class ComparersSpec extends FlatSpec with Matchers with Futures with ScalaFuture
     import MyComparers._
     comparer(Case10(1, 2, "3", Some(4), 0, 1010L, Right(3), Seq(1), Seq(1), x10 = true))(Case10(1, 2, "3", Some(4), 0, 1010L, Right(3), Seq(2, 1), Seq(1), x10 = true)) shouldBe More
     comparer(Case10(1, 2, "3", None, 0, 1010L, Left(""), Nil, Array(1), x10 = false))(Case10(1, 2, "3", Some(4), 1, 1010L, Left(""), Seq(1), Array(1), x10 = false)) shouldBe More
+  }
+
+  it should "compare 11" in {
+    case class Case11(x1: Int, x2: Double, x3: String, x4: Option[Int], x5: Int, x6: Long, x7: Either[String, Int], x8: Iterable[Int], x9: Iterable[Int], x10: Boolean, x11: Try[Int])
+    object MyComparers extends Comparers {
+      val comparer: Comparer[Case11] = comparer11(Case11)
+    }
+    import MyComparers._
+    comparer(Case11(1, 2, "3", Some(4), 0, 1010L, Right(3), Seq(2, 1), Seq(1), x10 = true, Success(1)))(Case11(1, 2, "3", Some(4), 0, 1010L, Right(3), Seq(2, 1), Seq(1), x10 = true, Success(2))) shouldBe More
+    comparer(Case11(1, 2, "3", None, 0, 1010L, Left(""), Nil, Array(1), x10 = false, Success(0)))(Case11(1, 2, "3", None, 0, 1010L, Left(""), Nil, Array(1), x10 = false, Success(1))) shouldBe More
   }
 }
 

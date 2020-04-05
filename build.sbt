@@ -2,11 +2,11 @@ organization := "com.phasmidsoftware"
 
 name := "Comparer"
 
-version := "1.0.3"
+version := "1.0.4"
 
-scalaVersion := "2.12.8"
+scalaVersion := "2.13.1"
 
-val scalaTestVersion = "3.0.5"
+val scalaTestVersion = "3.1.1"
 
 resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/"
 

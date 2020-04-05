@@ -5,14 +5,14 @@
 package com.phasmidsoftware.comparer
 
 import org.scalatest.concurrent.{Futures, ScalaFutures}
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.{flatspec, matchers}
 
 import scala.language.postfixOps
 
 /**
   * @author scalaprof
   */
-class SortedSpec extends FlatSpec with Matchers with Futures with ScalaFutures {
+class SortedSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers with Futures with ScalaFutures {
 
   behavior of "Sorted"
 

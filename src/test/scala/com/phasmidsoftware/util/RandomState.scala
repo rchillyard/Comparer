@@ -9,7 +9,7 @@ trait RandomState[A] {
 
   def value: A
 
-  def stream: Stream[A] = Stream.cons[A](value, next.stream)
+  def stream: LazyList[A] = LazyList.cons[A](value, next.stream)
 
   def map[B](f: A => B): RandomState[B]
 }
