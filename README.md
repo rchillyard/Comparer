@@ -280,14 +280,14 @@ whereas when tupled parameters are used, it is conventional to compare the first
 
 From the application programmer's perspective, the following methods of _Comparison_ are important:
 
-    sealed trait Comparison extends (() => Option[Boolean]) {
+    sealed trait Comparison extends (() => Kleenean) {
     
       /**
         * Method to eagerly evaluate this Comparison.
         *
-        * @return an Option[Boolean].
+        * @return a Kleenean.
         */
-      def apply(): Option[Boolean]
+      def apply(): Kleenean
     
       /**
         * Method to yield logical AND with short-circuit logic.
@@ -400,7 +400,7 @@ Currently defined are:
 * comparerTry: Comparer[Try[T]]
 * comparerEither: Comparer[Either[_,T]]
 
-So, if your case class happens to include iterables (sequences or lists), optional, try or either types, you can still use
+So, if your case class happens to include an iterable (sequence or list), array, optional, try or "either" types, you can still use
 one of the _comparerN_ methods and the types will be handled.
 You don't have to do anything in your code (other than importing the implicits) to get the benefit of this feature.
 The _comparerN_ methods are implemented up through _N_ = 11.
@@ -431,5 +431,8 @@ Version 1.0.2 introduces a _Comparers_ trait which allows a programmer easily to
 for a case class, assuming that the fields are in order from most to least significant.
 
 Version 1.0.3 adds compareIterable, compareList, compareArray, compareTry, compareEither and compare7 thru compare10. Also Comparer[Boolean].
+
+Version 1.0.5 introduces the Kleenean trait and has Comparison return it with apply().
+Otherwise, no logic changes.
 
 Version 1.0.4 adds Functional module and provides support for Scala 2.13

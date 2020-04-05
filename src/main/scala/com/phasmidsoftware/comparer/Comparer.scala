@@ -67,7 +67,7 @@ trait Comparer[T] extends (T => T => Comparison) {
     * @param t2 the second value of T.
     * @return a Boolean which is true if the Ts compare as the same.
     */
-  def ==(t1: T)(t2: T): Boolean = self(t1)(t2)().isEmpty
+  def ==(t1: T)(t2: T): Boolean = self(t1)(t2)() == Maybe
 
   /**
     * Method to yield a Boolean from this Comparer, given two curried Ts.
@@ -327,3 +327,10 @@ object Comparer {
     */
   def comparer[T, P: Comparer](lens: T => P): Comparer[T] = implicitly[Comparer[P]].snap(lens)
 }
+
+/**
+  * ComparerException.
+  * @param w the message.
+  * @param e an exception (defaults to null).
+  */
+case class ComparerException(w: String, e: Throwable = null) extends Exception(w, e)
