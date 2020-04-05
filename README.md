@@ -1,3 +1,4 @@
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/9861f150f6e04200b991de30969ea536)](https://app.codacy.com/manual/scalaprof/Comparer?utm_source=github.com&utm_medium=referral&utm_content=rchillyard/Comparer&utm_campaign=Badge_Grade_Settings)
 # Comparer [![CircleCI](https://circleci.com/gh/rchillyard/Comparer.svg?style=svg)](https://circleci.com/gh/rchillyard/Comparer)
 A functional (three-way) comparer.
 
