@@ -2,8 +2,9 @@
  * This code is borrowed from math.spire with love, if not actual permission.
  *
  * It is not really part of the Comparer project and is only here to help with practical usage.
- *
  * It could easily be removed.
+ *
+ * NOTE: Therefore, we do not include this module in Codacy reviews.
  */
 
 package com.phasmidsoftware.sort
