@@ -5,7 +5,7 @@
 package com.phasmidsoftware.sort
 
 import com.phasmidsoftware.comparer.DateJ
-import com.phasmidsoftware.generic.Unpack
+import com.phasmidsoftware.generic.TupleWrangler
 import com.phasmidsoftware.util.RandomState
 import org.scalatest.concurrent.{Futures, ScalaFutures}
 import org.scalatest.{flatspec, matchers}
@@ -51,7 +51,7 @@ class SortingSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers wit
 
     val tuples = getRandomIntStream(2030) zip getRandomIntStream(12) zip getRandomIntStream(31)
     val toDateJ: ((Int, Int, Int)) => DateJ = (DateJ.apply _).tupled
-    val list = ((tuples.map(Unpack.unpack) map toDateJ) take 5).toArray
+    val list = ((tuples.map(TupleWrangler.inline) map toDateJ) take 5).toArray
     Sorting.sort(list)
     list.take(5) shouldBe Array(DateJ(0, 0, 0), DateJ(59, 3, 20), DateJ(560, 8, 0), DateJ(1675, 11, 25), DateJ(1976, 10, 20))
   }

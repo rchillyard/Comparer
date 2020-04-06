@@ -20,6 +20,21 @@ class ComparerSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers wi
   private val c2a = Composite(2, "a")
   private val c1z = Composite(1, "z")
 
+  behavior of "Compare"
+
+  it should "implement Compare" in {
+    // NOTE: this uses the implicit val Composite.comparer
+    val c1a = Composite(1, "a")
+    val c2a = Composite(2, "a")
+    val c1z = Composite(1, "z")
+    Compare(c1a, c1z) shouldBe Less
+    Compare(c1a, c2a) shouldBe Less
+    Compare(c1z, c2a) shouldBe More
+    Compare(c1a, c1a) shouldBe Same
+    Compare(c2a, c1a) shouldBe More
+    Compare(c1z, c1a) shouldBe More
+  }
+
   behavior of "Comparer"
 
   it should "compare Ints (1)" in {
@@ -415,7 +430,6 @@ object Composite {
   }
 
 }
-
 
 case class DateF(year: Int, month: Int, day: Int)
 

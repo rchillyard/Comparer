@@ -4,6 +4,8 @@
 
 package com.phasmidsoftware.comparer
 
+import com.phasmidsoftware.generic.TupleWrangler._
+
 import scala.util.Try
 
 
@@ -60,8 +62,11 @@ trait Comparers {
     * @tparam T the underlying type of the inputs.
     * @return a Comparer of Array[T] which can compare two instances of Array[T] and return a Comparison.
     */
-  implicit def comparerArray[T: Comparer]: Comparer[Array[T]] = to2 => to1 =>
-    (to1 zip to2).foldLeft[Comparison](Same)((a, x) => a orElse Compare(x._1, x._2))
+  implicit def comparerArray[T: Comparer]: Comparer[Array[T]] = {
+    // NOTE: this construction is necessary to avoid diverging implicit expansion compiler error: don't inline.
+    val comparer: Comparer[Iterable[T]] = comparerIterable
+    comparer.snap(x => x)
+  }
 
   /**
     * Method to return a Comparer[Option[T] where T is any type that has an implicit Comparer.
@@ -128,8 +133,7 @@ trait Comparers {
     * @return a Comparer[T] which can compare two instances of T and return a Comparison.
     */
   def comparer2[P0: Comparer, P1: Comparer, T <: Product](f: (P0, P1) => T): Comparer[T] =
-    comparer[T, P0](0) orElse
-      comparer[T, P1](1)
+    comparer1(strip(f)) orElse comparer[T, P1](1)
 
   /**
     * Method to return a Comparer[T] where T is a 3-ary Product and which is based on a function to convert a (P0,P1,P2) into a T.
@@ -142,9 +146,7 @@ trait Comparers {
     * @return a Comparer[T] which can compare two instances of T and return a Comparison.
     */
   def comparer3[P0: Comparer, P1: Comparer, P2: Comparer, T <: Product](f: (P0, P1, P2) => T): Comparer[T] =
-    comparer[T, P0](0) orElse
-      comparer[T, P1](1) orElse
-      comparer[T, P2](2)
+    comparer2(strip(f)) orElse comparer[T, P2](2)
 
   /**
     * Method to return a Comparer[T] where T is a 4-ary Product and which is based on a function to convert a (P0,P1,P2,P3) into a T.
@@ -158,10 +160,7 @@ trait Comparers {
     * @return a Comparer[T] which can compare two instances of T and return a Comparison.
     */
   def comparer4[P0: Comparer, P1: Comparer, P2: Comparer, P3: Comparer, T <: Product](f: (P0, P1, P2, P3) => T): Comparer[T] =
-    comparer[T, P0](0) orElse
-      comparer[T, P1](1) orElse
-      comparer[T, P2](2) orElse
-      comparer[T, P3](3)
+    comparer3(strip(f)) orElse comparer[T, P3](3)
 
   /**
     * Method to return a Comparer[T] where T is a 5-ary Product and which is based on a function to convert a (P0,P1,P2,P3,P4) into a T.
@@ -176,11 +175,7 @@ trait Comparers {
     * @return a Comparer[T] which can compare two instances of T and return a Comparison.
     */
   def comparer5[P0: Comparer, P1: Comparer, P2: Comparer, P3: Comparer, P4: Comparer, T <: Product](f: (P0, P1, P2, P3, P4) => T): Comparer[T] =
-    comparer[T, P0](0) orElse
-      comparer[T, P1](1) orElse
-      comparer[T, P2](2) orElse
-      comparer[T, P3](3) orElse
-      comparer[T, P4](4)
+    comparer4(strip(f)) orElse comparer[T, P4](4)
 
   /**
     * Method to return a Comparer[T] where T is a 6-ary Product and which is based on a function to convert a (P0,P1,P2,P3,P4,P5) into a T.
@@ -196,12 +191,7 @@ trait Comparers {
     * @return a Comparer[T] which can compare two instances of T and return a Comparison.
     */
   def comparer6[P0: Comparer, P1: Comparer, P2: Comparer, P3: Comparer, P4: Comparer, P5: Comparer, T <: Product](f: (P0, P1, P2, P3, P4, P5) => T): Comparer[T] =
-    comparer[T, P0](0) orElse
-      comparer[T, P1](1) orElse
-      comparer[T, P2](2) orElse
-      comparer[T, P3](3) orElse
-      comparer[T, P4](4) orElse
-      comparer[T, P5](5)
+    comparer5(strip(f)) orElse comparer[T, P5](5)
 
   /**
     * Method to return a Comparer[T] where T is a 7-ary Product and which is based on a function to convert a (P0,P1,P2,P3,P4,P5,P6) into a T.
@@ -218,13 +208,7 @@ trait Comparers {
     * @return a Comparer[T] which can compare two instances of T and return a Comparison.
     */
   def comparer7[P0: Comparer, P1: Comparer, P2: Comparer, P3: Comparer, P4: Comparer, P5: Comparer, P6: Comparer, T <: Product](f: (P0, P1, P2, P3, P4, P5, P6) => T): Comparer[T] =
-    comparer[T, P0](0) orElse
-      comparer[T, P1](1) orElse
-      comparer[T, P2](2) orElse
-      comparer[T, P3](3) orElse
-      comparer[T, P4](4) orElse
-      comparer[T, P5](5) orElse
-      comparer[T, P6](6)
+    comparer6(strip(f)) orElse comparer[T, P6](6)
 
   /**
     * Method to return a Comparer[T] where T is a 8-ary Product and which is based on a function to convert a (P0,P1,P2,P3,P4,P5,P6,P7) into a T.
@@ -242,14 +226,7 @@ trait Comparers {
     * @return a Comparer[T] which can compare two instances of T and return a Comparison.
     */
   def comparer8[P0: Comparer, P1: Comparer, P2: Comparer, P3: Comparer, P4: Comparer, P5: Comparer, P6: Comparer, P7: Comparer, T <: Product](f: (P0, P1, P2, P3, P4, P5, P6, P7) => T): Comparer[T] =
-    comparer[T, P0](0) orElse
-      comparer[T, P1](1) orElse
-      comparer[T, P2](2) orElse
-      comparer[T, P3](3) orElse
-      comparer[T, P4](4) orElse
-      comparer[T, P5](5) orElse
-      comparer[T, P6](6) orElse
-      comparer[T, P7](7)
+    comparer7(strip(f)) orElse comparer[T, P7](7)
 
   /**
     * Method to return a Comparer[T] where T is a 9-ary Product and which is based on a function to convert a (P0,P1,P2,P3,P4,P5,P6,P7,P8) into a T.
@@ -268,15 +245,7 @@ trait Comparers {
     * @return a Comparer[T] which can compare two instances of T and return a Comparison.
     */
   def comparer9[P0: Comparer, P1: Comparer, P2: Comparer, P3: Comparer, P4: Comparer, P5: Comparer, P6: Comparer, P7: Comparer, P8: Comparer, T <: Product](f: (P0, P1, P2, P3, P4, P5, P6, P7, P8) => T): Comparer[T] =
-    comparer[T, P0](0) orElse
-      comparer[T, P1](1) orElse
-      comparer[T, P2](2) orElse
-      comparer[T, P3](3) orElse
-      comparer[T, P4](4) orElse
-      comparer[T, P5](5) orElse
-      comparer[T, P6](6) orElse
-      comparer[T, P7](7) orElse
-      comparer[T, P8](8)
+    comparer8(strip(f)) orElse comparer[T, P8](8)
 
   /**
     * Method to return a Comparer[T] where T is a 10-ary Product and which is based on a function to convert a (P0,P1,P2,P3,P4,P5,P6,P7,P8,P9) into a T.
@@ -296,16 +265,7 @@ trait Comparers {
     * @return a Comparer[T] which can compare two instances of T and return a Comparison.
     */
   def comparer10[P0: Comparer, P1: Comparer, P2: Comparer, P3: Comparer, P4: Comparer, P5: Comparer, P6: Comparer, P7: Comparer, P8: Comparer, P9: Comparer, T <: Product](f: (P0, P1, P2, P3, P4, P5, P6, P7, P8, P9) => T): Comparer[T] =
-    comparer[T, P0](0) orElse
-      comparer[T, P1](1) orElse
-      comparer[T, P2](2) orElse
-      comparer[T, P3](3) orElse
-      comparer[T, P4](4) orElse
-      comparer[T, P5](5) orElse
-      comparer[T, P6](6) orElse
-      comparer[T, P7](7) orElse
-      comparer[T, P8](8) orElse
-      comparer[T, P9](9)
+    comparer9(strip(f)) orElse comparer[T, P9](9)
 
   /**
     * Method to return a Comparer[T] where T is a 10-ary Product and which is based on a function to convert a (P0,P1,P2,P3,P4,P5,P6,P7,P8,P9,P10) into a T.
@@ -326,17 +286,7 @@ trait Comparers {
     * @return a Comparer[T] which can compare two instances of T and return a Comparison.
     */
   def comparer11[P0: Comparer, P1: Comparer, P2: Comparer, P3: Comparer, P4: Comparer, P5: Comparer, P6: Comparer, P7: Comparer, P8: Comparer, P9: Comparer, P10: Comparer, T <: Product](f: (P0, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10) => T): Comparer[T] =
-    comparer[T, P0](0) orElse
-      comparer[T, P1](1) orElse
-      comparer[T, P2](2) orElse
-      comparer[T, P3](3) orElse
-      comparer[T, P4](4) orElse
-      comparer[T, P5](5) orElse
-      comparer[T, P6](6) orElse
-      comparer[T, P7](7) orElse
-      comparer[T, P8](8) orElse
-      comparer[T, P9](9) orElse
-      comparer[T, P10](10)
+    comparer10(strip(f)) orElse comparer[T, P10](10)
 
   private def comparer[T <: Product, P: Comparer](x: Int): Comparer[T] = Comparer.comparer[T, P](t => t.productElement(x).asInstanceOf[P])
 }

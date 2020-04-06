@@ -169,6 +169,9 @@ case object Same extends Comparison {
     */
   def apply(): Kleenean = Maybe
 
+  /**
+    * Not sure why we have this.
+    */
   val f: () => String = () => toString()
 
   /**
