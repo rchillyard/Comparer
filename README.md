@@ -10,7 +10,7 @@ Let's take a look at a typical date comparison using the built-in comparisons pr
 (and, ultimately, Java):
 
     case class Date(year: Int, month: Int, day: Int) extends Ordered[Date] {
-      def compareTo(that: Date): Int = {
+      def compare(that: Date): Int = {
         val cfy = year.compareTo(that.year)
         if (cfy!=0) cfy
         else {
@@ -29,7 +29,7 @@ A typical usage of this in a specification might be:
     today.compareTo(tomorrow) shouldBe -1
     tomorrow.compareTo(today) shouldBe 1
 
-Yes, I know that we could also have used _Ordering_, which would have involved declaring an _Ordering[Date]_
+Yes, I know that we could also have used _Ordering_, which would have involved declaring an _Ordering of Date_
 in the companion object of _Date_.
 
 It would look like this:
@@ -49,7 +49,7 @@ It would look like this:
         implicit object OrderingDate extends OrderingDate
       }
     
-And we wouldn't need the mixin of _Ordered[Date]_ in the case class any more.
+And we wouldn't need the mixin of _Ordered of Date_ in the case class any more.
 
 A typical usage of this in a specification might be:
 
@@ -83,7 +83,7 @@ Note that this (the case class) is just the same as the previous _Date_.
     }
 
 We find an implicit value of a type class for the integer comparer, and we make this a variable called _cf_.
-The _snap_ method takes a "lens" function as its parameter and transforms the _Comparer[Int]_ into a _Comparer[Date]_.
+The _snap_ method takes a "lens" function as its parameter and transforms the _Comparer of Int_ into a _Comparer of Date_.
 
 Actually, we can come up with something rather more elegant than this:
 
@@ -115,9 +115,9 @@ A typical usage of this in a specification might be:
 
     val today = Date(2019, 6, 5)
     val tomorrow = Date(2019, 6, 6)
-    Comparison(today, today) shouldBe Same
-    Comparison(today, tomorrow) shouldBe Less
-    Comparison(tomorrow, today) shouldBe Moreglp
+    Compare(today, today) shouldBe Same
+    Compare(today, tomorrow) shouldBe Less
+    Compare(tomorrow, today) shouldBe More
 
 Well, of course, that's not quite it. We can do even better:
 
@@ -125,9 +125,9 @@ Well, of course, that's not quite it. We can do even better:
       val comparer: Comparer[Date] = comparer3(Date)
     }
     import MyComparers._
-    comparer(today)(tomorrow) shouldBe More
+    Compare(tomorrow, today) shouldBe More
 
-This time, we didn't have to spell out how to compare the various elements of the _Data_ case class.
+This time, we didn't have to spell out how to compare the various elements of the _Date_ case class.
 The compiler figured it out for us using the magic of type inference.
 Notice that we simply pass in the _Date.apply_ method to the _comparer3_ method.
 But, inside _comparer3_, we never actually have to invoke that _apply_ method.
@@ -274,6 +274,20 @@ whereas when tupled parameters are used, it is conventional to compare the first
         * @return a Comparer[T] which has the same intrinsic behavior as "to".
         */
       implicit def convert[T](to: Ordering[T]): Comparer[T]
+      
+    object Compare {
+      /**
+        * Method to construct a Comparison from two objects of type T (tupled form).
+        * The sense of the result of this comparison is the same as,
+        * for example, Double.compare(t1, t2).
+        *
+        * @param t1 the first T.
+        * @param t2 the second T.
+        * @tparam T the type of both t1 and t2, such type providing implicit evidence of a Comparer[T].
+        * @return a Comparison, resulting from applying the comparer to the tuple of t1 and t2.
+        */
+      def apply[T: Comparer](t1: T, t2: T): Comparison = Comparison(t2)(t1)
+    }
 
 
 ### Comparison
@@ -359,24 +373,20 @@ From the application programmer's perspective, the following methods of _Compari
       val Less: Comparison
     
       /**
-        * Method to construct a Comparison from two objects of type T (curried).
-        * @param t1 the inner T.
-        * @param t2 the outer T.
+        * Method to construct a Comparison from two objects of type T (curried form).
+        * NOTE: the sense of the result will be similar to invoking, for example, Double.compare(t1, t2).
+        * @param t2 the inner T.
+        * @param t1 the outer T.
         * @param comparer an implicit Comparer[T].
-        * @tparam T the type of both t1 and t2, and also the underlying type of the Comparer[T].
+        * @tparam T the type of both t1 and t2, which type must also provide implicit evidence of type Comparer[T].
         * @return a Comparison, resulting from applying the comparer to the tuple of t1 and t2.
         */
-      def apply[T](t1: T)(t2: T)(implicit comparer: Comparer[T]): Comparison
-      
-      /**
-        * And, similarly a tupled version using the method name compare...
-       */
-      def compare[T](t1: T, t2: T)(implicit comparer: Comparer[T]): Comparison = comparer(t1)(t2)
+      def apply[T](t2: T)(t1: T)(implicit comparer: Comparer[T]): Comparison
     }
     
 ### Kleenean
-The result of evaluating a Comparison is a Kleenean: a three-valued logic type.
-Kleenean is essentially an _Option[Boolean]_.
+The result of evaluating a _Comparison_ is a _Kleenean_: a three-valued logic type.
+_Kleenean_ evaluates to an _Option of Boolean_.
 
 ### Comparers
 This trait provides methods to create a _Comparer_ for a case class (or other _Product_).
@@ -395,13 +405,13 @@ there is a companion object).
 There are additionally, implicit methods which will create a _Comparer_ for a wrapper of a type.
 Currently defined are:
  
-* comparerIterable: Comparer[Iterable[T]]
-* comparerSeq: Comparer[Seq[T]]
-* comparerList: Comparer[List[T]]
-* comparerArray: Comparer[Array[T]]
-* comparerOpt: Comparer[Option[T]]
-* comparerTry: Comparer[Try[T]]
-* comparerEither: Comparer[Either[_,T]]
+* _comparerIterable_: _Comparer[Iterable[T]]_
+* _comparerSeq_: _Comparer[Seq[T]]_
+* _comparerList_: _Comparer[List[T]]_
+* _comparerArray_: _Comparer[Array[T]]_
+* _comparerOpt_: _Comparer[Option[T]]_
+* _comparerTry_: _Comparer[Try[T]]_
+* _comparerEither: Comparer[Either[_,T]]_
 
 So, if your case class happens to include an iterable (sequence or list), array, optional, try or "either" types, you can still use
 one of the _comparerN_ methods and the types will be handled.
@@ -433,7 +443,7 @@ This is a more functional approach and gives us the invaluable option of easily 
 Version 1.0.2 introduces a _Comparers_ trait which allows a programmer easily to get a comparer
 for a case class, assuming that the fields are in order from most to least significant.
 
-Version 1.0.3 adds compareIterable, compareList, compareArray, compareTry, compareEither and compare7 thru compare10. Also Comparer[Boolean].
+Version 1.0.3 adds compareIterable, compareList, compareArray, compareTry, compareEither and compare7 thru compare10. Also _Comparer of Boolean_.
 
 Version 1.0.4 adds Functional module and provides support for Scala 2.13
 
@@ -441,3 +451,5 @@ Version 1.0.5 introduced the Kleenean trait and has Comparison return it with ap
 Otherwise, no logic changes.
 
 Version 1.0.6 merged 1.0.5 with master branch.
+
+Version 1.0.7 improved usability slightly by moving compare method of Comparison into apply method of (new) Compare object.

@@ -34,6 +34,8 @@ sealed trait Kleenean extends (() => Option[Boolean]) {
     */
   def &(k: => Kleenean): Kleenean
 
+  def ! : Kleenean
+
   /**
     * Convert this Kleenean into a Boolean by providing a default value for the Maybe case.
     *
@@ -86,6 +88,8 @@ case object Maybe extends Kleenean {
     * @return x.
     */
   def getOrElse(x: => Boolean): Boolean = x
+
+  override def ! : Kleenean = Maybe
 }
 
 /**
@@ -134,6 +138,8 @@ case class Truth(b: Boolean) extends Kleenean {
     * @return a Boolean corresponding to this Kleenean.
     */
   def getOrElse(x: => Boolean): Boolean = b
+
+  override def ! : Kleenean = Truth(!b)
 }
 
 object Kleenean {

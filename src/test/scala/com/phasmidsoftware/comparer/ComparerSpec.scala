@@ -20,6 +20,21 @@ class ComparerSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers wi
   private val c2a = Composite(2, "a")
   private val c1z = Composite(1, "z")
 
+  behavior of "Compare"
+
+  it should "implement Compare" in {
+    // NOTE: this uses the implicit val Composite.comparer
+    val c1a = Composite(1, "a")
+    val c2a = Composite(2, "a")
+    val c1z = Composite(1, "z")
+    Compare(c1a, c1z) shouldBe Less
+    Compare(c1a, c2a) shouldBe Less
+    Compare(c1z, c2a) shouldBe More
+    Compare(c1a, c1a) shouldBe Same
+    Compare(c2a, c1a) shouldBe More
+    Compare(c1z, c1a) shouldBe More
+  }
+
   behavior of "Comparer"
 
   it should "compare Ints (1)" in {
@@ -335,16 +350,14 @@ class ComparerSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers wi
     val orderingDay: Comparer[DateJ] = t1 => t2 => Comparison(t1.day)(t2.day)
     implicit val orderingDate: Comparer[DateJ] = orderingYear orElse orderingMonth orElse orderingDay
 
-    Comparison.compare(today, today) shouldBe Same
-    Comparison.compare(tomorrow, today) shouldBe More
-    Comparison.compare(today, tomorrow) shouldBe Less
-    Comparison.compare(today, yesterday) shouldBe More
-    Comparison.compare(today, nextMonth) shouldBe Less
-    Comparison.compare(today, lastMonth) shouldBe More
-    Comparison.compare(today, nextYear) shouldBe Less
-    Comparison.compare(today, lastYear) shouldBe More
-
-
+    Compare(today, today) shouldBe Same
+    Compare(tomorrow, today) shouldBe More
+    Compare(today, tomorrow) shouldBe Less
+    Compare(today, yesterday) shouldBe More
+    Compare(today, nextMonth) shouldBe Less
+    Compare(today, lastMonth) shouldBe More
+    Compare(today, nextYear) shouldBe Less
+    Compare(today, lastYear) shouldBe More
   }
 
   it should "functional-style compare (curried)" in {
@@ -391,15 +404,14 @@ class ComparerSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers wi
     val lastMonth = DateF(2019, 5, 5)
     val nextYear = DateF(2020, 6, 5)
     val lastYear = DateF(2018, 6, 5)
-    import Comparison.compare
-    compare(today, today) shouldBe Same
-    compare(today, tomorrow) shouldBe Less
-    compare(tomorrow, today) shouldBe More
-    compare(today, yesterday) shouldBe More
-    compare(today, nextMonth) shouldBe Less
-    compare(today, lastMonth) shouldBe More
-    compare(today, nextYear) shouldBe Less
-    compare(today, lastYear) shouldBe More
+    Compare(today, today) shouldBe Same
+    Compare(today, tomorrow) shouldBe Less
+    Compare(tomorrow, today) shouldBe More
+    Compare(today, yesterday) shouldBe More
+    Compare(today, nextMonth) shouldBe Less
+    Compare(today, lastMonth) shouldBe More
+    Compare(today, nextYear) shouldBe Less
+    Compare(today, lastYear) shouldBe More
   }
 }
 
@@ -418,7 +430,6 @@ object Composite {
   }
 
 }
-
 
 case class DateF(year: Int, month: Int, day: Int)
 

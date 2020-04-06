@@ -169,6 +169,9 @@ case object Same extends Comparison {
     */
   def apply(): Kleenean = Maybe
 
+  /**
+    * Not sure why we have this.
+    */
   val f: () => String = () => toString()
 
   /**
@@ -281,20 +284,12 @@ object Comparison {
   /**
     * Method to construct a Comparison from two objects of type T (curried form).
     *
-    * @param t1 the inner T.
-    * @param t2 the outer T.
-    * @tparam T the type of both t1 and t2, and also the underlying type of the Comparer[T].
+    * NOTE: the sense of the result will be similar to invoking, for example, Double.compare(t1, t2).
+    *
+    * @param t2 the inner T.
+    * @param t1 the outer T.
+    * @tparam T the type of both t1 and t2, which type must also provide implicit evidence of type Comparer[T].
     * @return a Comparison, resulting from applying the comparer to t1 and its result to t2.
     */
-  def apply[T: Comparer](t1: T)(t2: T): Comparison = implicitly[Comparer[T]].apply(t1)(t2)
-
-  /**
-    * Method to construct a Comparison from two objects of type T (tupled form).
-    *
-    * @param t1 the first T.
-    * @param t2 the second T.
-    * @tparam T the type of both t1 and t2, and also the underlying type of the Comparer[T].
-    * @return a Comparison, resulting from applying the comparer to the tuple of t1 and t2.
-    */
-  def compare[T: Comparer](t1: T, t2: T): Comparison = implicitly[Comparer[T]].apply(t2)(t1)
+  def apply[T: Comparer](t2: T)(t1: T): Comparison = implicitly[Comparer[T]].apply(t2)(t1)
 }

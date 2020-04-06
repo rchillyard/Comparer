@@ -2,7 +2,7 @@ organization := "com.phasmidsoftware"
 
 name := "Comparer"
 
-version := "1.0.4"
+version := "1.0.7"
 
 scalaVersion := "2.13.1"
 
