@@ -277,14 +277,14 @@ whereas when tupled parameters are used, it is conventional to compare the first
         * If you are looking for comparisons of more complex tuples, then use Ordering instead.
         * Alternatively, create a case class and then create a Comparer by extending Comparers and invoking comparerN where N is the number of fields.
         */
-      implicit def tuple2Comparer[T1: Comparer, T2: Comparer]: Comparer[(T1,T2)]
-      implicit def tuple3Comparer[T1: Comparer, T2: Comparer, T3: Comparer]: Comparer[(T1,T2,T3)]
-      implicit def tuple4Comparer[T1: Comparer, T2: Comparer, T3: Comparer, T4: Comparer]: Comparer[(T1,T2,T3,T4)]
-      implicit def tuple5Comparer[T1: Comparer, T2: Comparer, T3: Comparer, T4: Comparer, T5: Comparer]: Comparer[(T1,T2,T3,T4,T5)]
-      implicit def tuple6Comparer[T1: Comparer, T2: Comparer, T3: Comparer, T4: Comparer, T5: Comparer, T6: Comparer]: Comparer[(T1, T2, T3, T4, T5, T6)]
-      implicit def tuple7Comparer[T1: Comparer, T2: Comparer, T3: Comparer, T4: Comparer, T5: Comparer, T6: Comparer, T7: Comparer]: Comparer[(T1, T2, T3, T4, T5, T6, T7)]
-      implicit def tuple8Comparer[T1: Comparer, T2: Comparer, T3: Comparer, T4: Comparer, T5: Comparer, T6: Comparer, T7: Comparer, T8: Comparer]: Comparer[(T1, T2, T3, T4, T5, T6, T7, T8)]  
-      implicit def tuple9Comparer[T1: Comparer, T2: Comparer, T3: Comparer, T4: Comparer, T5: Comparer, T6: Comparer, T7: Comparer, T8: Comparer, T9: Comparer]: Comparer[(T1, T2, T3, T4, T5, T6, T7, T8, T9)]
+      implicit def tuple2[T1: Comparer, T2: Comparer]: Comparer[(T1,T2)]
+      implicit def tuple3[T1: Comparer, T2: Comparer, T3: Comparer]: Comparer[(T1,T2,T3)]
+      implicit def tuple4[T1: Comparer, T2: Comparer, T3: Comparer, T4: Comparer]: Comparer[(T1,T2,T3,T4)]
+      implicit def tuple5[T1: Comparer, T2: Comparer, T3: Comparer, T4: Comparer, T5: Comparer]: Comparer[(T1,T2,T3,T4,T5)]
+      implicit def tuple6[T1: Comparer, T2: Comparer, T3: Comparer, T4: Comparer, T5: Comparer, T6: Comparer]: Comparer[(T1, T2, T3, T4, T5, T6)]
+      implicit def tuple7[T1: Comparer, T2: Comparer, T3: Comparer, T4: Comparer, T5: Comparer, T6: Comparer, T7: Comparer]: Comparer[(T1, T2, T3, T4, T5, T6, T7)]
+      implicit def tuple8[T1: Comparer, T2: Comparer, T3: Comparer, T4: Comparer, T5: Comparer, T6: Comparer, T7: Comparer, T8: Comparer]: Comparer[(T1, T2, T3, T4, T5, T6, T7, T8)]  
+      implicit def tuple9[T1: Comparer, T2: Comparer, T3: Comparer, T4: Comparer, T5: Comparer, T6: Comparer, T7: Comparer, T8: Comparer, T9: Comparer]: Comparer[(T1, T2, T3, T4, T5, T6, T7, T8, T9)]
     
       /**
         * Implicit converter from Ordering[T] to Comparer[T].
