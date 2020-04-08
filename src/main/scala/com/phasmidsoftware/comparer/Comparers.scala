@@ -70,7 +70,8 @@ trait Comparers {
 
   /**
     * Method to return a Comparer[Option[T] where T is any type that has an implicit Comparer.
-    * Note that we arbitrarily evaluate all comparisons involving None to be Same.
+    * NOTE that we arbitrarily evaluate all comparisons involving None to be Same.
+    * NOTE this behavior is NOT the same as when using OptionOrdering[T] defined in Ordering.scala.
     *
     * @tparam T the underlying type of the inputs.
     * @return a Comparer of Option[T] which can compare two instances of Option[T] and return a Comparison.
@@ -86,10 +87,11 @@ trait Comparers {
 
   /**
     * Method to return a Comparer[Try[T] where T is any type that has an implicit Comparer.
-    * Note that we arbitrarily evaluate all comparisons involving Failure to be Same.
+    * NOTE that we arbitrarily evaluate all comparisons involving Failure to be Same.
+    * This is because we actually convert the comparands to Option[T] and use comparerOpt.
     *
     * @tparam T the underlying type of the inputs.
-    * @return a Comparer of Try[T] which can compare two instances of Option[T] and return a Comparison.
+    * @return a Comparer of Try[T] which can compare two instances of Try[T] and return a Comparison.
     */
   implicit def comparerTry[T: Comparer]: Comparer[Try[T]] = {
     // NOTE: this construction is necessary to avoid diverging implicit expansion compiler error: don't inline.
@@ -114,7 +116,7 @@ trait Comparers {
   /**
     * Method to return a Comparer[T] where T is a 1-ary Product and which is based on a function to convert a P into a T.
     *
-    * NOTE: be careful using this method it only applies where T is a 1-tuple (e.g. a case class with one field).
+    * NOTE: be careful using this method: it only applies where T is a 1-tuple (e.g. a case class with one field).
     *
     * @param f a function P => T, usually the apply method of a case class.
     * @tparam P the type of the (single) field of the Product type T.

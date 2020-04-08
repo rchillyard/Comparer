@@ -257,14 +257,34 @@ whereas when tupled parameters are used, it is conventional to compare the first
       def same[T]: Comparer[T]
     
       /**
-        * Following are the Comparer definitions for the common scalar types.
+        * The following Comparers are defined for the common scalar types.
         */
-      implicit val intComparer: Comparer[Int] = Ordering[Int]
-      implicit val booleanComparer: Comparer[Boolean] = Ordering[Boolean]
-      implicit val stringComparer: Comparer[String] = Ordering[String]
-      implicit val doubleComparer: Comparer[Double] = Ordering[Double]
-      implicit val longComparer: Comparer[Long] = Ordering[Long]
-      implicit val bigIntComparer: Comparer[BigInt] = Ordering[BigInt]
+      implicit val unitComparer: Comparer[Unit]
+      implicit val byteComparer: Comparer[Byte]
+      implicit val charComparer: Comparer[Char]
+      implicit val shortComparer: Comparer[Short]
+      implicit val intComparer: Comparer[Int]
+      implicit val booleanComparer: Comparer[Boolean]
+      implicit val stringComparer: Comparer[String]
+      implicit val doubleComparer: Comparer[Double]
+      implicit val floatComparer: Comparer[Float]
+      implicit val longComparer: Comparer[Long]
+      implicit val bigIntComparer: Comparer[BigInt]
+      implicit val bigDecimalComparer: Comparer[BigDecimal]
+    
+      /**
+        * The following Comparers are defined for the first four tuple types.
+        * If you are looking for comparisons of more complex tuples, then use Ordering instead.
+        * Alternatively, create a case class and then create a Comparer by extending Comparers and invoking comparerN where N is the number of fields.
+        */
+      implicit def tuple2Comparer[T1: Comparer, T2: Comparer]: Comparer[(T1,T2)]
+      implicit def tuple3Comparer[T1: Comparer, T2: Comparer, T3: Comparer]: Comparer[(T1,T2,T3)]
+      implicit def tuple4Comparer[T1: Comparer, T2: Comparer, T3: Comparer, T4: Comparer]: Comparer[(T1,T2,T3,T4)]
+      implicit def tuple5Comparer[T1: Comparer, T2: Comparer, T3: Comparer, T4: Comparer, T5: Comparer]: Comparer[(T1,T2,T3,T4,T5)]
+      implicit def tuple6Comparer[T1: Comparer, T2: Comparer, T3: Comparer, T4: Comparer, T5: Comparer, T6: Comparer]: Comparer[(T1, T2, T3, T4, T5, T6)]
+      implicit def tuple7Comparer[T1: Comparer, T2: Comparer, T3: Comparer, T4: Comparer, T5: Comparer, T6: Comparer, T7: Comparer]: Comparer[(T1, T2, T3, T4, T5, T6, T7)]
+      implicit def tuple8Comparer[T1: Comparer, T2: Comparer, T3: Comparer, T4: Comparer, T5: Comparer, T6: Comparer, T7: Comparer, T8: Comparer]: Comparer[(T1, T2, T3, T4, T5, T6, T7, T8)]  
+      implicit def tuple9Comparer[T1: Comparer, T2: Comparer, T3: Comparer, T4: Comparer, T5: Comparer, T6: Comparer, T7: Comparer, T8: Comparer, T9: Comparer]: Comparer[(T1, T2, T3, T4, T5, T6, T7, T8, T9)]
     
       /**
         * Implicit converter from Ordering[T] to Comparer[T].
@@ -431,10 +451,8 @@ For instance, for the situation mentioned, you can simply write something like t
  
 If you have a more complex situation, such as only needing to invert the first two parameters, please see _ComparersSpec_.
 ### Colophon
-
 This project has 100% coverage so it makes sense to resolve any doubtful points about usage by consulting
 the specifications (i.e. unit tests).
-
 ### Versioning
 Version 1.0.1 introduces the notion of curried parameters for the internal workings and for some of the
 application-oriented methods.
@@ -453,3 +471,5 @@ Otherwise, no logic changes.
 Version 1.0.6 merged 1.0.5 with master branch.
 
 Version 1.0.7 improved usability slightly by moving compare method of Comparison into apply method of (new) Compare object.
+
+Version 1.0.8 improved support for comparing tuples.
