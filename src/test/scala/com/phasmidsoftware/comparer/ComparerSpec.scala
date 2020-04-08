@@ -20,10 +20,147 @@ class ComparerSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers wi
   private val c2a = Composite(2, "a")
   private val c1z = Composite(1, "z")
 
+  // NOTE these tests of Compare all use the implicit Comparer defined for their type.
   behavior of "Compare"
 
-  it should "implement Compare" in {
-    // NOTE: this uses the implicit val Composite.comparer
+  it should "compare short" in {
+    val x: Short = 1
+    val y: Short = 2
+    Compare(x, y) shouldBe Less
+    Compare(x, x) shouldBe Same
+    Compare(y, x) shouldBe More
+  }
+
+  it should "compare byte" in {
+    val x: Byte = 1
+    val y: Byte = 2
+    Compare(x, y) shouldBe Less
+    Compare(x, x) shouldBe Same
+    Compare(y, x) shouldBe More
+  }
+
+  it should "compare char" in {
+    val x: Char = 'a'
+    val y: Char = 'b'
+    Compare(x, y) shouldBe Less
+    Compare(x, x) shouldBe Same
+    Compare(y, x) shouldBe More
+  }
+
+  it should "compare int" in {
+    val x = 1
+    val y = 2
+    Compare(x, y) shouldBe Less
+    Compare(x, x) shouldBe Same
+    Compare(y, x) shouldBe More
+  }
+
+  it should "compare long" in {
+    val x = 1L
+    val y = 2L
+    Compare(x, y) shouldBe Less
+    Compare(x, x) shouldBe Same
+    Compare(y, x) shouldBe More
+  }
+
+  it should "compare float" in {
+    val x = 1.0f
+    val y = 2.0f
+    Compare(x, y) shouldBe Less
+    Compare(x, x) shouldBe Same
+    Compare(y, x) shouldBe More
+  }
+
+  it should "compare double" in {
+    val x = 1.0
+    val y = 2.0
+    Compare(x, y) shouldBe Less
+    Compare(x, x) shouldBe Same
+    Compare(y, x) shouldBe More
+  }
+
+  it should "compare BigInt" in {
+    val x = BigInt(1)
+    val y = BigInt(2)
+    Compare(x, y) shouldBe Less
+    Compare(x, x) shouldBe Same
+    Compare(y, x) shouldBe More
+  }
+
+  it should "compare BigDecimal" in {
+    val x = BigDecimal(1.0)
+    val y = BigDecimal(2.0)
+    Compare(x, y) shouldBe Less
+    Compare(x, x) shouldBe Same
+    Compare(y, x) shouldBe More
+  }
+
+  it should "compare String" in {
+    val x = "ab"
+    val y = "ac"
+    Compare(x, y) shouldBe Less
+    Compare(x, x) shouldBe Same
+    Compare(y, x) shouldBe More
+  }
+
+  it should "compare Tuple2" in {
+    val x = 1 -> 2
+    val y = 1 -> 3
+    Compare(x, y) shouldBe Less
+    Compare(x, x) shouldBe Same
+    Compare(y, x) shouldBe More
+  }
+
+  it should "compare more complex Tuple2" in {
+    // NOTE: this mechanism is necessary if the types of the Tuple members themselves are non-simple types,
+    // or if your tuple has 10 or 11 fields in it.
+    // You could also define a case class of course (as, for example, you will see in ComparersSpec).
+    def makeTuple(p1: Int, p2: Option[String]): (Int, Option[String]) = (p1, p2)
+
+    val x = makeTuple(1, Some("a"))
+    val y = makeTuple(1, Some("b"))
+    object MyComparers extends Comparers {
+      val comparer: Comparer[(Int, Option[String])] = comparer2(makeTuple)
+    }
+    import MyComparers._
+    Compare(x, y) shouldBe Less
+    Compare(x, x) shouldBe Same
+    Compare(y, x) shouldBe More
+  }
+
+  it should "compare Tuple3" in {
+    val x = (1, 2, 3)
+    val y = (1, 3, 4)
+    Compare(x, y) shouldBe Less
+    Compare(x, x) shouldBe Same
+    Compare(y, x) shouldBe More
+  }
+
+  it should "compare Tuple4" in {
+    val x = (1, "a", 2, 3)
+    val y = (1, "a", 2, 4)
+    Compare(x, y) shouldBe Less
+    Compare(x, x) shouldBe Same
+    Compare(y, x) shouldBe More
+  }
+
+  it should "compare Tuple5" in {
+    val x = (1, true, "a", 2, 3)
+    val y = (1, true, "a", 2, 4)
+    Compare(x, y) shouldBe Less
+    Compare(x, x) shouldBe Same
+    Compare(y, x) shouldBe More
+  }
+
+  it should "compare Tuple6" in {
+    val x = (1, true, "a", 2, 3, 1)
+    val y = (1, true, "a", 2, 3, 2)
+    Compare(x, y) shouldBe Less
+    Compare(x, x) shouldBe Same
+    Compare(y, x) shouldBe More
+  }
+
+  it should "compare Composite" in {
     val c1a = Composite(1, "a")
     val c2a = Composite(2, "a")
     val c1z = Composite(1, "z")

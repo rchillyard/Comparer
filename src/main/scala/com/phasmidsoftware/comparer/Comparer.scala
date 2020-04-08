@@ -299,12 +299,40 @@ object Comparer {
   /**
     * Following are the Comparer definitions for the common scalar types.
     */
+  implicit val unitComparer: Comparer[Unit] = Ordering[Unit]
+  implicit val byteComparer: Comparer[Byte] = Ordering[Byte]
+  implicit val charComparer: Comparer[Char] = Ordering[Char]
+  implicit val shortComparer: Comparer[Short] = Ordering[Short]
   implicit val intComparer: Comparer[Int] = Ordering[Int]
   implicit val booleanComparer: Comparer[Boolean] = Ordering[Boolean]
   implicit val stringComparer: Comparer[String] = Ordering[String]
   implicit val doubleComparer: Comparer[Double] = Ordering[Double]
+  implicit val floatComparer: Comparer[Float] = Ordering[Float]
   implicit val longComparer: Comparer[Long] = Ordering[Long]
   implicit val bigIntComparer: Comparer[BigInt] = Ordering[BigInt]
+  implicit val bigDecimalComparer: Comparer[BigDecimal] = Ordering[BigDecimal]
+
+  /**
+    * Following are the Comparer definitions for the first eight tuple types (Tuple2 thru Tuple9).
+    * If you are looking for comparisons of more complex tuples (with 10 or 11 parameters),
+    * then define an explicit case class for your tuple (or you could just define a method which constructs your tuple and use that).
+    * Then, you can use the mechanism of extending Comparers and invoking comparerN where N is the number of fields (up to N = 11)
+    */
+  implicit def tuple2[T1: Comparer, T2: Comparer]: Comparer[(T1, T2)] = Ordering.Tuple2[T1, T2](implicitly[Comparer[T1]].toOrdering, implicitly[Comparer[T2]].toOrdering)
+
+  implicit def tuple3[T1: Comparer, T2: Comparer, T3: Comparer]: Comparer[(T1, T2, T3)] = Ordering.Tuple3[T1, T2, T3](implicitly[Comparer[T1]].toOrdering, implicitly[Comparer[T2]].toOrdering, implicitly[Comparer[T3]].toOrdering)
+
+  implicit def tuple4[T1: Comparer, T2: Comparer, T3: Comparer, T4: Comparer]: Comparer[(T1, T2, T3, T4)] = Ordering.Tuple4[T1, T2, T3, T4](implicitly[Comparer[T1]].toOrdering, implicitly[Comparer[T2]].toOrdering, implicitly[Comparer[T3]].toOrdering, implicitly[Comparer[T4]].toOrdering)
+
+  implicit def tuple5[T1: Comparer, T2: Comparer, T3: Comparer, T4: Comparer, T5: Comparer]: Comparer[(T1, T2, T3, T4, T5)] = Ordering.Tuple5[T1, T2, T3, T4, T5](implicitly[Comparer[T1]].toOrdering, implicitly[Comparer[T2]].toOrdering, implicitly[Comparer[T3]].toOrdering, implicitly[Comparer[T4]].toOrdering, implicitly[Comparer[T5]].toOrdering)
+
+  implicit def tuple6[T1: Comparer, T2: Comparer, T3: Comparer, T4: Comparer, T5: Comparer, T6: Comparer]: Comparer[(T1, T2, T3, T4, T5, T6)] = Ordering.Tuple6[T1, T2, T3, T4, T5, T6](implicitly[Comparer[T1]].toOrdering, implicitly[Comparer[T2]].toOrdering, implicitly[Comparer[T3]].toOrdering, implicitly[Comparer[T4]].toOrdering, implicitly[Comparer[T5]].toOrdering, implicitly[Comparer[T6]].toOrdering)
+
+  implicit def tuple7[T1: Comparer, T2: Comparer, T3: Comparer, T4: Comparer, T5: Comparer, T6: Comparer, T7: Comparer]: Comparer[(T1, T2, T3, T4, T5, T6, T7)] = Ordering.Tuple7[T1, T2, T3, T4, T5, T6, T7](implicitly[Comparer[T1]].toOrdering, implicitly[Comparer[T2]].toOrdering, implicitly[Comparer[T3]].toOrdering, implicitly[Comparer[T4]].toOrdering, implicitly[Comparer[T5]].toOrdering, implicitly[Comparer[T6]].toOrdering, implicitly[Comparer[T7]].toOrdering)
+
+  implicit def tuple8[T1: Comparer, T2: Comparer, T3: Comparer, T4: Comparer, T5: Comparer, T6: Comparer, T7: Comparer, T8: Comparer]: Comparer[(T1, T2, T3, T4, T5, T6, T7, T8)] = Ordering.Tuple8[T1, T2, T3, T4, T5, T6, T7, T8](implicitly[Comparer[T1]].toOrdering, implicitly[Comparer[T2]].toOrdering, implicitly[Comparer[T3]].toOrdering, implicitly[Comparer[T4]].toOrdering, implicitly[Comparer[T5]].toOrdering, implicitly[Comparer[T6]].toOrdering, implicitly[Comparer[T7]].toOrdering, implicitly[Comparer[T8]].toOrdering)
+
+  implicit def tuple9[T1: Comparer, T2: Comparer, T3: Comparer, T4: Comparer, T5: Comparer, T6: Comparer, T7: Comparer, T8: Comparer, T9: Comparer]: Comparer[(T1, T2, T3, T4, T5, T6, T7, T8, T9)] = Ordering.Tuple9[T1, T2, T3, T4, T5, T6, T7, T8, T9](implicitly[Comparer[T1]].toOrdering, implicitly[Comparer[T2]].toOrdering, implicitly[Comparer[T3]].toOrdering, implicitly[Comparer[T4]].toOrdering, implicitly[Comparer[T5]].toOrdering, implicitly[Comparer[T6]].toOrdering, implicitly[Comparer[T7]].toOrdering, implicitly[Comparer[T8]].toOrdering, implicitly[Comparer[T9]].toOrdering)
 
   /**
     * Implicit converter from Ordering[T] to Comparer[T].
