@@ -30,6 +30,7 @@ class SortingSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers wit
   }
   it should "sort List[Double] using create" in {
     val list = Array(3.0, 1.5, 2.4)
+    import Ordering.Double.TotalOrdering
     Sorting.insertionSort(list)
     list shouldBe Array(1.5, 2.4, 3.0)
   }
@@ -59,9 +60,9 @@ class SortingSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers wit
   behavior of "Merge Sort"
 
   it should "sort List[Long]" in {
-    val list = RandomState(0L).stream.take(100).toArray
-    Sorting.mergeSort(list)
-    Sorted.verify(list) shouldBe true
-    list.reverse.take(5) shouldBe Array(9054633673849498218L, 8937230293740383692L, 8613213585075034408L, 8543763135442756639L, 8358116205139703580L)
+    val array = RandomState(0L).stream.take(100).toArray
+    Sorting.mergeSort(array)
+    Sorted.verify(array.toList) shouldBe true
+    array.reverse.take(5) shouldBe Array(9054633673849498218L, 8937230293740383692L, 8613213585075034408L, 8543763135442756639L, 8358116205139703580L)
   }
 }

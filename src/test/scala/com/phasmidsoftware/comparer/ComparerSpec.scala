@@ -160,6 +160,30 @@ class ComparerSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers wi
     Compare(y, x) shouldBe More
   }
 
+  it should "compare Tuple7" in {
+    val x = (1.0, 1, true, "a", 2, 3, 1)
+    val y = (1.0, 1, true, "a", 2, 3, 2)
+    Compare(x, y) shouldBe Less
+    Compare(x, x) shouldBe Same
+    Compare(y, x) shouldBe More
+  }
+
+  it should "compare Tuple8" in {
+    val x = (1.0, 1, true, "a", 2, 3, 1, 1.0f)
+    val y = (1.0, 1, true, "a", 2, 3, 1, 2.0f)
+    Compare(x, y) shouldBe Less
+    Compare(x, x) shouldBe Same
+    Compare(y, x) shouldBe More
+  }
+
+  it should "compare Tuple9" in {
+    val x = (1.0, 1, true, "a", 2, 3, 1, 1.0f, ())
+    val y = (1.0, 1, true, "a", 2, 3, 1, 2.0f, ())
+    Compare(x, y) shouldBe Less
+    Compare(x, x) shouldBe Same
+    Compare(y, x) shouldBe More
+  }
+
   it should "compare Composite" in {
     val c1a = Composite(1, "a")
     val c2a = Composite(2, "a")
