@@ -6,9 +6,11 @@ version := "1.0.8"
 
 scalaVersion := "2.13.1"
 
+useGpg := true
+
 val scalaTestVersion = "3.1.1"
 
-resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/"
+resolvers += "Typesafe Repository" at "https://repo.typesafe.com/typesafe/releases/"
 
 libraryDependencies ++= Seq(
 	"org.scalatest" %% "scalatest" % scalaTestVersion % "test"

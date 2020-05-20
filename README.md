@@ -1,11 +1,20 @@
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/9861f150f6e04200b991de30969ea536)](https://app.codacy.com/manual/scalaprof/Comparer?utm_source=github.com&utm_medium=referral&utm_content=rchillyard/Comparer&utm_campaign=Badge_Grade_Settings)
-# Comparer [![CircleCI](https://circleci.com/gh/rchillyard/Comparer.svg?style=svg)](https://circleci.com/gh/rchillyard/Comparer)
-A functional (three-way) comparer.
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.phasmidsoftware/comparer_2.13/badge.svg?color=blue)](https://maven-badges.herokuapp.com/maven-central/com.phasmidsoftware_2.13/comparer/)
+[![CircleCI](https://circleci.com/gh/rchillyard/Comparer.svg?style=svg)](https://circleci.com/gh/rchillyard/Comparer)
+# Comparer A functional three-way comparer.
+
+## Making _Comparer_ a dependency
+If you're using sbt, then include the following line (see the badge above for the current version):
+
+    libraryDependencies += "com.phasmidsoftware" %% "comparer" % "1.0.8"
+    
+Please note that Comparer is currently built for Scala 2.13 only.
 
 ## Introduction
 Why do I say that this is a functional comparer? Because _Comparers_ can be composed!
+And it's three-way, like the rather primitive Java mechanism, because _Comparer_ distinguishes between less than, equals, and greater than.
 
-### The old object-oriented way
+### The "old" object-oriented way
 Let's take a look at a typical date comparison using the built-in comparisons provided by Scala
 (and, ultimately, Java):
 
@@ -68,7 +77,7 @@ They have a significance that is far above their actual values.
 Indeed, if you performed the same comparison on an object with _String_s, the negative and positive
 values could be anything at all.
 
-### The new functional way
+### The "new" functional way
 Now, let's look at the functional way of doing comparisons, using the _Comparer_ library:
 
     case class Date(year: Int, month: Int, day: Int)
@@ -131,7 +140,10 @@ This time, we didn't have to spell out how to compare the various elements of th
 The compiler figured it out for us using the magic of type inference.
 Notice that we simply pass in the _Date.apply_ method to the _comparer3_ method.
 But, inside _comparer3_, we never actually have to invoke that _apply_ method.
-The work is all done by the compiler.
+In this form of comparison, the precedence order is fixed by the order of the fields of the case class.
+And, furthermore, the sense is always fixed to be the natural ordering.
+If you need to reverse the ordering for a field, or change the precedence, then you will have to use one of the previous
+methods (see, for example, the :| operator).
 
 Now, we've really got the compiler doing some serious work for us!
 
@@ -454,6 +466,8 @@ If you have a more complex situation, such as only needing to invert the first t
 This project has 100% coverage so it makes sense to resolve any doubtful points about usage by consulting
 the specifications (i.e. unit tests).
 ### Versioning
+For the current version, see the badge at the top of the README page.
+
 Version 1.0.1 introduces the notion of curried parameters for the internal workings and for some of the
 application-oriented methods.
 This is a more functional approach and gives us the invaluable option of easily creating partially applied functions.
