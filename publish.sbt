@@ -1,6 +1,8 @@
 ThisBuild / organization := "com.phasmidsoftware"
-ThisBuild / organizationName := "Comparer"
+ThisBuild / organizationName := "Phasmid Software"
 ThisBuild / organizationHomepage := Some(url("https://phasmidsoftware.com/"))
+
+// (deprecated):  ThisBuild / useGpg := true
 
 ThisBuild / scmInfo := Some(
   ScmInfo(
