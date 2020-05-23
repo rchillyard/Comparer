@@ -9,6 +9,7 @@ import com.phasmidsoftware.comparer.Comparer
 import scala.annotation.tailrec
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.{implicitConversions, postfixOps}
+import scala.reflect.ClassTag
 
 /**
   * Case class Sorted to enable different types of sort on a sequence.
@@ -18,13 +19,13 @@ import scala.language.{implicitConversions, postfixOps}
   * @param ts a sequence of T values/
   * @tparam T the underlying type of the sequence (implicitly provides Comparer[T])
   */
-case class Sorted[T: Comparer](ts: Seq[T]) extends (() => Seq[T]) {
+case class Sorted[T: Comparer : ClassTag](ts: Seq[T]) extends (() => Seq[T]) {
 
   private val ct = implicitly[Comparer[T]]
 
   implicit val ordering: Ordering[T] = ct.toOrdering
 
-  def sort(o: Comparer[T]): Sorted[T] = Sorted(ts)(ct orElse o)
+  def sort(o: Comparer[T]): Sorted[T] = Sorted(ts)(ct orElse o, implicitly[ClassTag[T]])
 
   /**
     * Use the system sort, based on the ordering specified by the implicit Comparer.
@@ -47,7 +48,7 @@ case class Sorted[T: Comparer](ts: Seq[T]) extends (() => Seq[T]) {
     * @param ec an ExecutionContext.
     * @return a sorted sequence of T, wrapped in Future.
     */
-  def parallel(implicit ec: ExecutionContext): Future[Seq[T]] = Sorted.mergeSort(ts)
+  def parallel(implicit ec: ExecutionContext): Future[Seq[T]] = Sorted.mergeSort(ts)(ordering, implicitly[ClassTag[T]], ec, Sorted.TotalThreads)
 }
 
 object Sorted {
@@ -59,7 +60,7 @@ object Sorted {
     * @tparam T the type of the elements of ts (provides implicit Ordering[T]).
     * @return an instance of Sorted.
     */
-  def create[T: Ordering](ts: Seq[T]): Sorted[T] = Sorted(ts)(implicitly[Ordering[T]])
+  def create[T: Ordering : ClassTag](ts: Seq[T]): Sorted[T] = Sorted(ts)(implicitly[Ordering[T]], implicitly[ClassTag[T]])
 
   /**
     * Verify that the sequence ts is in face in ascending order.
@@ -85,12 +86,51 @@ object Sorted {
     * Invoke parSort on two equal partitions of ts.
     * TODO: implement parallel merge sort properly.
     *
-    * @param ts the sequence of T values to be sorted.
-    * @param ec an ExecutionContext
+    * @param ts      the sequence of T values to be sorted.
+    * @param ec      an ExecutionContext (implicit)
+    * @param threads the number of threads (implicit)
     * @tparam T the underlying type to be sorted on, providing an implicit Ordering[T].
     * @return a sorted sequence of T, wrapped in Future.
     */
-  def mergeSort[T: Ordering](ts: Seq[T])(implicit ec: ExecutionContext): Future[Seq[T]] = parSort(ts splitAt (ts.length / 2))
+  def mergeSort[T: Ordering : ClassTag](ts: Seq[T])(implicit ec: ExecutionContext, threads: Threads): Future[Seq[T]] =
+    if (threads > 1) {
+      val f: Seq[T] => Future[Seq[T]] = mergeSort(_)(implicitly[Ordering[T]], implicitly[ClassTag[T]], ec, threads - 1)
+      val (l, r) = ts splitAt (ts.length / 2)
+      map2(f(l), f(r))(merge)
+    }
+    else
+      Future(mergeSortThread(ts))
+
+  type Threads = Int
+
+  implicit val TotalThreads: Threads = 2
+
+  val Cutoff = 8
+
+  def insertionSort[T: Ordering : ClassTag](ts: Seq[T]): Seq[T] = {
+    val to = implicitly[Ordering[T]]
+    val a = ts.toArray
+    for (i <- a.indices) {
+      for (j <- Range.inclusive(i - 1, 0, -1)) {
+        var k = i
+        while (to.compare(a(j), a(k)) > 0) {
+          val tmp = a(j)
+          a(j) = a(k)
+          a(k) = tmp
+          k = k - 1
+        }
+      }
+    }
+    a.toList
+  }
+
+  private def mergeSortThread[T: Ordering : ClassTag](ts: Seq[T]): Seq[T] =
+    if (ts.size > Cutoff) {
+      val (l, r) = ts splitAt (ts.length / 2)
+      merge(mergeSortThread(l), mergeSortThread(r))
+    }
+    else
+      insertionSort(ts)
 
   /**
     * Method to merge the sorted sequences ts1 and ts2.
@@ -111,7 +151,7 @@ object Sorted {
       case (_, y :: ys1) => inner(r :+ y, xs, ys1)
     }
 
-    inner(Nil, ts1, ts2)
+    inner(Nil, ts1.toList, ts2.toList)
   }
 
   private def map2[T: Ordering](t1f: Future[Seq[T]], t2f: Future[Seq[T]])(f: (Seq[T], Seq[T]) => Seq[T])(implicit ec: ExecutionContext): Future[Seq[T]] = for {t1 <- t1f; t2 <- t2f} yield f(t1, t2)
