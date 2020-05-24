@@ -44,12 +44,14 @@ class SortedSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers with
 
   it should "sort List[Double] using create" in {
     val list = List(3.0, 1.5, 2.4)
+    import Ordering.Double.TotalOrdering
     val sorted = Sorted.create(list)
     sorted() shouldBe List(1.5, 2.4, 3.0)
   }
 
   it should "sort List[Float] using create because there isn't an implicitly defined Comparer for float" in {
     val list = List(3.0F, 1.5F, 2.4F)
+    import Ordering.Float.TotalOrdering
     val sorted = Sorted.create(list)
     sorted() shouldBe List(1.5F, 2.4F, 3.0F)
   }

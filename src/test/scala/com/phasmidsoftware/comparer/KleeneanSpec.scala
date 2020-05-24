@@ -63,6 +63,12 @@ class KleeneanSpec extends AnyFlatSpec with Matchers {
     Truth(false) | Truth(false) shouldBe Truth(false)
   }
 
+  it should "!" in {
+    Maybe.! shouldBe Maybe
+    Truth(false).! shouldBe Truth(true)
+    Truth(true).! shouldBe Truth(false)
+  }
+
   behavior of "toString"
   it should "work" in {
     Maybe.toString shouldBe "?"

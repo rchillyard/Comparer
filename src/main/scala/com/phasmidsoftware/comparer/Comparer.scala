@@ -306,8 +306,8 @@ object Comparer {
   implicit val intComparer: Comparer[Int] = Ordering[Int]
   implicit val booleanComparer: Comparer[Boolean] = Ordering[Boolean]
   implicit val stringComparer: Comparer[String] = Ordering[String]
-  implicit val doubleComparer: Comparer[Double] = Ordering[Double]
-  implicit val floatComparer: Comparer[Float] = Ordering[Float]
+  implicit val doubleComparer: Comparer[Double] = Ordering.Double.TotalOrdering
+  implicit val floatComparer: Comparer[Float] = Ordering.Float.TotalOrdering
   implicit val longComparer: Comparer[Long] = Ordering[Long]
   implicit val bigIntComparer: Comparer[BigInt] = Ordering[BigInt]
   implicit val bigDecimalComparer: Comparer[BigDecimal] = Ordering[BigDecimal]
