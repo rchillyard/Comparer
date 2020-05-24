@@ -107,30 +107,16 @@ object Sorted {
 
   val Cutoff = 8
 
-  def insertionSort[T: Ordering : ClassTag](ts: Seq[T]): Seq[T] = {
-    val to = implicitly[Ordering[T]]
-    val a = ts.toArray
-    for (i <- a.indices) {
-      for (j <- Range.inclusive(i - 1, 0, -1)) {
-        var k = i
-        while (to.compare(a(j), a(k)) > 0) {
-          val tmp = a(j)
-          a(j) = a(k)
-          a(k) = tmp
-          k = k - 1
-        }
-      }
-    }
-    a.toList
-  }
-
   private def mergeSortThread[T: Ordering : ClassTag](ts: Seq[T]): Seq[T] =
     if (ts.size > Cutoff) {
       val (l, r) = ts splitAt (ts.length / 2)
       merge(mergeSortThread(l), mergeSortThread(r))
     }
-    else
-      insertionSort(ts)
+    else {
+      val a = ts.toArray
+      InsertionSort.sort(a)
+      a.toList
+    }
 
   /**
     * Method to merge the sorted sequences ts1 and ts2.
@@ -155,4 +141,24 @@ object Sorted {
   }
 
   private def map2[T: Ordering](t1f: Future[Seq[T]], t2f: Future[Seq[T]])(f: (Seq[T], Seq[T]) => Seq[T])(implicit ec: ExecutionContext): Future[Seq[T]] = for {t1 <- t1f; t2 <- t2f} yield f(t1, t2)
+
+  // NOTE: This is a second, superfluous version of insertionSort. However, I actually like this version more.
+  //
+  //  private def insertionSort[T: Ordering : ClassTag](ts: Seq[T]): Seq[T] = {
+  //    val to = implicitly[Ordering[T]]
+  //    val a = ts.toArray
+  //    for (i <- a.indices) {
+  //      for (j <- Range.inclusive(i - 1, 0, -1)) {
+  //        var k = i
+  //        while (to.compare(a(j), a(k)) > 0) {
+  //          val tmp = a(j)
+  //          a(j) = a(k)
+  //          a(k) = tmp
+  //          k = k - 1
+  //        }
+  //      }
+  //    }
+  //    a.toList
+  //  }
+
 }

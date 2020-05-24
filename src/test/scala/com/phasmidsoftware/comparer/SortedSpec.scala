@@ -123,10 +123,6 @@ class SortedSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers with
     whenReady(xsf) { xs => xs shouldBe List(1, 2, 3) }
   }
 
-  behavior of "insertion sort"
-  it should "work" in {
-    Sorted.insertionSort(List(3, 1, 2, 4, 6, 5)) shouldBe Seq(1, 2, 3, 4, 5, 6)
-  }
   behavior of "merge"
   it should "work" in {
     val l1 = List(1, 5, 8, 10, 11, 15)
