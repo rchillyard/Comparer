@@ -27,7 +27,7 @@ object InsertionSort extends Sort {
   final def sort[A: Ordering : ClassTag](data: Array[A]): Unit =
     sort(data, 0, data.length)
 
-  final def sort[A: Ordering : ClassTag](data: Array[A], start: Int, end: Int): Unit = {
+  final def sort[A: Ordering](data: Array[A], start: Int, end: Int): Unit = {
     val o = implicitly[Ordering[A]]
     var i = start + 1
     while (i < end) {

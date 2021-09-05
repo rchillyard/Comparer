@@ -114,6 +114,7 @@ class ComparisonSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers 
 
   it should "support f for Different" in {
     Different(true).f() shouldBe "Less"
+    Different(false).f() shouldBe "More"
   }
 
   it should "support f for Same" in {

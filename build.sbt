@@ -2,9 +2,11 @@ organization := "com.phasmidsoftware"
 
 name := "Comparer"
 
-version := "1.0.8"
+version := "1.0.9"
 
-scalaVersion := "2.13.1"
+scalaVersion := "2.13.6"
+
+scalacOptions += "-deprecation"
 
 val scalaTestVersion = "3.1.1"
 
