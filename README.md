@@ -1,7 +1,7 @@
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/9861f150f6e04200b991de30969ea536)](https://app.codacy.com/manual/scalaprof/Comparer?utm_source=github.com&utm_medium=referral&utm_content=rchillyard/Comparer&utm_campaign=Badge_Grade_Settings)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.phasmidsoftware/comparer_2.13/badge.svg?color=blue)](https://maven-badges.herokuapp.com/maven-central/com.phasmidsoftware_2.13/comparer/)
 [![CircleCI](https://circleci.com/gh/rchillyard/Comparer.svg?style=svg)](https://circleci.com/gh/rchillyard/Comparer)
-# Comparer A functional three-way comparer.
+# Comparer: a functional three-way comparer.
 
 ## Making _Comparer_ a dependency
 If you're using sbt, then include the following line (see the badge above for the current version):
