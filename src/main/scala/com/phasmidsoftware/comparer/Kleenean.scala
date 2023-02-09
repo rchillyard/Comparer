@@ -34,6 +34,11 @@ sealed trait Kleenean extends (() => Option[Boolean]) {
     */
   def &(k: => Kleenean): Kleenean
 
+  /**
+    * Negate this Kleenean.
+    *
+    * @return the complement of this Kleenean.
+    */
   def ! : Kleenean
 
   /**
@@ -53,7 +58,7 @@ case object Maybe extends Kleenean {
   /**
     * @return None
     */
-  override def apply(): Option[Boolean] = None
+  def apply(): Option[Boolean] = None
 
   /**
     * @return 0.
@@ -61,22 +66,38 @@ case object Maybe extends Kleenean {
   def toInt: Int = 0
 
   /**
+    * The logical OR of this and k.
+    *
+    * Equivalent to
+    * <code>
+    * val int = k.toInt
+    * if (int == 0) this else Kleenean(math.max(toInt, int))
+    * </code>
+    *
     * @param k the other Kleenean (always evaluated).
     * @return the logical OR.
     */
-  def |(k: => Kleenean): Kleenean = k match {
-    case Maybe => this
-    case Truth(b) => if (b) k else this
-  }
+  def |(k: => Kleenean): Kleenean =
+    k match {
+      case Truth(true) => k
+      case _ => this
+    }
 
   /**
+    * The logical AND of this and k.
+    *
+    * Equivalent to
+    * <code>
+    * val int = k.toInt
+    * if (int == 0) this else Kleenean(math.min(toInt, int))
+    * </code>
     *
     * @param k the other Kleenean (always evaluated).
     * @return the logical AND.
     */
   def &(k: => Kleenean): Kleenean = k match {
-    case Maybe => this
-    case Truth(b) => if (b) this else k
+    case Truth(false) => k
+    case _ => this
   }
 
   override def toString(): String = "?"
@@ -84,12 +105,17 @@ case object Maybe extends Kleenean {
   /**
     * Convert this Kleenean into a Boolean by providing a default value for the Maybe case.
     *
-    * @param x the result if this is Maybe.
+    * @param x the result.
     * @return x.
     */
   def getOrElse(x: => Boolean): Boolean = x
 
-  override def ! : Kleenean = Maybe
+  /**
+    * Negate this Maybe: return Maybe.
+    *
+    * @return Maybe.
+    */
+  def ! : Kleenean = Maybe
 }
 
 /**
@@ -102,7 +128,7 @@ case class Truth(b: Boolean) extends Kleenean {
   /**
     * @return Some(b)
     */
-  override def apply(): Option[Boolean] = Some(b)
+  def apply(): Option[Boolean] = Some(b)
 
   /**
     * @return an Int which is -1 if b is false, otherwise 1.
@@ -113,33 +139,30 @@ case class Truth(b: Boolean) extends Kleenean {
     * @param k the other Kleenean (call-by-name, only evaluated if b is false).
     * @return the logical OR.
     */
-  def |(k: => Kleenean): Kleenean = if (b) this else
-    k match {
-      case Maybe => Maybe
-      case Truth(_) => k
-    }
+  def |(k: => Kleenean): Kleenean = if (b) this else k
 
   /**
     * @param k the other Kleenean (call-by-name, only evaluated if b is true).
     * @return the logical AND.
     */
-  def &(k: => Kleenean): Kleenean = if (b) k match {
-    case Maybe => Maybe
-    case Truth(_) => k
-  }
-  else this
-
-  override def toString(): String = if (b) "T" else "F"
+  def &(k: => Kleenean): Kleenean = if (b) k else this
 
   /**
     * Convert this Kleenean into a Boolean by providing a default value for the Maybe case.
     *
-    * @param x the result if this is Maybe.
-    * @return a Boolean corresponding to this Kleenean.
+    * @param x ignored.
+    * @return a Boolean corresponding to this Truth value.
     */
   def getOrElse(x: => Boolean): Boolean = b
 
-  override def ! : Kleenean = Truth(!b)
+  /**
+    * Negate this Truth value.
+    *
+    * @return the complement of this Kleenean.
+    */
+  def ! : Kleenean = Truth(!b)
+
+  override def toString(): String = if (b) "T" else "F"
 }
 
 object Kleenean {

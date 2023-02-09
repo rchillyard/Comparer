@@ -77,13 +77,7 @@ trait Comparers {
     * @return a Comparer of Option[T] which can compare two instances of Option[T] and return a Comparison.
     */
   implicit def comparerOpt[T: Comparer]: Comparer[Option[T]] = to1 => to2 =>
-    to1 match {
-      case Some(t1) => to2 match {
-        case Some(t2) => implicitly[Comparer[T]].apply(t1)(t2)
-        case None => Same
-      }
-      case None => Same
-    }
+    (for (t1 <- to1; t2 <- to2) yield implicitly[Comparer[T]].apply(t1)(t2)).getOrElse(Same)
 
   /**
     * Method to return a Comparer[Try[T] where T is any type that has an implicit Comparer.

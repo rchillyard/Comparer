@@ -32,7 +32,7 @@ case class Sorted[T: Comparer : ClassTag](ts: Seq[T]) extends (() => Seq[T]) {
     *
     * @return a sorted sequence of T.
     */
-  def apply: Seq[T] = ts.sorted
+  def apply(): Seq[T] = ts.sorted
 
   /**
     * Use the system sort (see apply) but the sort will be performed asynchronously.
@@ -40,7 +40,7 @@ case class Sorted[T: Comparer : ClassTag](ts: Seq[T]) extends (() => Seq[T]) {
     * @param ec an ExecutionContext.
     * @return a sorted sequence of T, wrapped in Future.
     */
-  def async(implicit ec: ExecutionContext): Future[Seq[T]] = Future(apply)
+  def async(implicit ec: ExecutionContext): Future[Seq[T]] = Future(apply())
 
   /**
     * Use the parallel merge sort.
@@ -105,7 +105,7 @@ object Sorted {
 
   implicit val TotalThreads: Threads = 2
 
-  val Cutoff = 8
+  private val Cutoff = 8
 
   private def mergeSortThread[T: Ordering : ClassTag](ts: Seq[T]): Seq[T] =
     if (ts.size > Cutoff) {
@@ -140,6 +140,16 @@ object Sorted {
     inner(Nil, ts1.toList, ts2.toList)
   }
 
+  /**
+    * NOTE that ec is indeed used.
+    *
+    * @param t1f a Future of Seq[T}.
+    * @param t2f a Future of Seq[T}.
+    * @param f function to combine two Seq[T] lists.
+    * @param ec the execution context (required).
+    * @tparam T the underlying type.
+    * @return a Future of Seq[T].
+    */
   private def map2[T: Ordering](t1f: Future[Seq[T]], t2f: Future[Seq[T]])(f: (Seq[T], Seq[T]) => Seq[T])(implicit ec: ExecutionContext): Future[Seq[T]] = for {t1 <- t1f; t2 <- t2f} yield f(t1, t2)
 
   // NOTE: This is a second, superfluous version of insertionSort. However, I actually like this version more.
