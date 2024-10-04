@@ -23,8 +23,7 @@ trait Comparers {
     * @tparam T the underlying type of the inputs.
     * @return a Comparer of Iterable[T] which can compare two instances of Iterable[T] and return a Comparison.
     */
-  implicit def comparerIterable[T: Comparer]: Comparer[Iterable[T]] = to2 => to1 =>
-    (to1 zip to2).foldLeft[Comparison](Same)((a, x) => a orElse Compare(x._1, x._2))
+  implicit def comparerIterable[T: Comparer]: Comparer[Iterable[T]] = ts2 => ts1 => comparePrefixes(ts1, ts2)
 
   /**
     * Method to return a Comparer[Iterable[T] where T is any type that has an implicit Comparer.
@@ -36,8 +35,8 @@ trait Comparers {
     */
   implicit def comparerSeq[T: Comparer]: Comparer[Seq[T]] = {
     // NOTE: this construction is necessary to avoid diverging implicit expansion compiler error: don't inline.
-    val comparer: Comparer[Iterable[T]] = comparerIterable
-    comparer.snap(identity)
+    val tsc: Comparer[Iterable[T]] = comparerIterable
+    tsc.snap(identity)
   }
 
   /**
@@ -50,8 +49,8 @@ trait Comparers {
     */
   implicit def comparerList[T: Comparer]: Comparer[List[T]] = {
     // NOTE: this construction is necessary to avoid diverging implicit expansion compiler error: don't inline.
-    val comparer: Comparer[Iterable[T]] = comparerIterable
-    comparer.snap(identity)
+    val tsc: Comparer[Iterable[T]] = comparerIterable
+    tsc.snap(identity)
   }
 
   /**
@@ -64,8 +63,8 @@ trait Comparers {
     */
   implicit def comparerArray[T: Comparer]: Comparer[Array[T]] = {
     // NOTE: this construction is necessary to avoid diverging implicit expansion compiler error: don't inline.
-    val comparer: Comparer[Iterable[T]] = comparerIterable
-    comparer.snap(x => x)
+    val tsc: Comparer[Iterable[T]] = comparerIterable
+    tsc.snap(x => x)
   }
 
   /**
@@ -283,6 +282,31 @@ trait Comparers {
     */
   def comparer11[P0: Comparer, P1: Comparer, P2: Comparer, P3: Comparer, P4: Comparer, P5: Comparer, P6: Comparer, P7: Comparer, P8: Comparer, P9: Comparer, P10: Comparer, T <: Product](f: (P0, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10) => T): Comparer[T] =
     comparer10(strip(f)) orElse comparer[T, P10](10)
+
+  /**
+    * Method to compare two Iterables such that only the common prefixes are compared.
+    *
+    * @param ts1 an Iterable[T].
+    * @param ts2 an Iterable[T].
+    * @tparam T the underlying type.
+    * @return a Comparison.
+    */
+  def comparePrefixes[T: Comparer](ts1: Iterable[T], ts2: Iterable[T]): Comparison =
+    (ts1 zip ts2).foldLeft[Comparison](Same) {
+      case (c, (t1, t2)) => c orElse Compare(t1, t2)
+    }
+
+  /**
+    * Method to compare two Iterables such that, if the common prefixes are the same,
+    * the "larger" Iterable is considered to be the longer one.
+    *
+    * @param ts1 an Iterable[T].
+    * @param ts2 an Iterable[T].
+    * @tparam T the underlying type.
+    * @return a Comparison.
+    */
+  def compareAll[T: Comparer](ts1: Iterable[T], ts2: Iterable[T]): Comparison =
+    comparePrefixes(ts1, ts2) orElse implicitly[Comparer[Int]].compare((ts1.size, ts2.size))
 
   private def comparer[T <: Product, P: Comparer](x: Int): Comparer[T] = Comparer.comparer[T, P](t => t.productElement(x).asInstanceOf[P])
 }

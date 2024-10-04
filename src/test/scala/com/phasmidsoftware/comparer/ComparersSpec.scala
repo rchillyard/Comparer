@@ -52,6 +52,24 @@ class ComparersSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers w
     comparer(Seq(2, 1))(Seq(3)) shouldBe More
   }
 
+  it should "comparePrefixes" in {
+    object MyComparers extends Comparers
+    import MyComparers._
+    comparePrefixes(Seq(3), Seq(2, 3)) shouldBe More
+    comparePrefixes(Seq(1, 2), Nil) shouldBe Same
+    comparePrefixes(Seq(1, 2), Seq(1)) shouldBe Same
+    comparePrefixes(Seq(2, 1), Seq(3)) shouldBe Less
+  }
+
+  it should "compareAll" in {
+    object MyComparers extends Comparers
+    import MyComparers._
+    compareAll(Seq(3), Seq(2, 3)) shouldBe More
+    compareAll(Seq(1, 2), Nil) shouldBe More
+    compareAll(Seq(1, 2), Seq(1)) shouldBe More
+    compareAll(Seq(2, 1), Seq(3)) shouldBe Less
+  }
+
   it should "compare sequence" in {
     object MyComparers extends Comparers {
       val comparer: Comparer[Seq[Int]] = comparerSeq
