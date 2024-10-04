@@ -1,10 +1,10 @@
 /*
- * Copyright (c) 2019. Phasmid Software. Comparer: functional comparison library.
+ * Copyright (c) 2024. Phasmid Software. Comparer: functional comparison library.
  */
 
-package com.phasmidsoftware.comparer
+package com.phasmidsoftware.sort
 
-import com.phasmidsoftware.sort.Sorted
+import com.phasmidsoftware.comparer.{Comparer, Composite, DateF}
 import org.scalatest.concurrent.{Futures, ScalaFutures}
 import org.scalatest.{flatspec, matchers}
 

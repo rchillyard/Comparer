@@ -8,7 +8,6 @@ import com.phasmidsoftware.generic.TupleWrangler._
 
 import scala.util.Try
 
-
 /**
   * Definitions of the various comparers for different underlying types.
   *

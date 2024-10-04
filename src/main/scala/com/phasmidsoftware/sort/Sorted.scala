@@ -63,7 +63,7 @@ object Sorted {
   def create[T: Ordering : ClassTag](ts: Seq[T]): Sorted[T] = Sorted(ts)(implicitly[Ordering[T]], implicitly[ClassTag[T]])
 
   /**
-    * Verify that the sequence ts is in face in ascending order.
+    * Verify that the sequence ts is in fact in ascending order.
     *
     * @param ts the sequence of T values.
     * @tparam T the type of the elements of ts.

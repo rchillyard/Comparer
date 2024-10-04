@@ -171,7 +171,7 @@ object QuickSort {
       * @param i one index.
       * @param j the other index.
       */
-    def swap(i: Int, j: Int) = {
+    def swap(i: Int, j: Int): Unit = {
       val tmp = data(i)
       data(i) = data(j)
       data(j) = tmp

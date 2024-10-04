@@ -8,6 +8,7 @@ package com.phasmidsoftware.comparer
   * Trait which models a three-valued logic based on the algebra of Stephen C. Kleene.
   * See https://en.wikipedia.org/wiki/Three-valued_logic
   *
+  * A Kleenean can be lazily converted to an Option[Boolean] when required.
   */
 sealed trait Kleenean extends (() => Option[Boolean]) {
 
@@ -56,6 +57,9 @@ sealed trait Kleenean extends (() => Option[Boolean]) {
 case object Maybe extends Kleenean {
 
   /**
+    * Apply method to convert this Kleenean to an Option[Boolean].
+    * NOTE do not define as a lazy val.
+    *
     * @return None
     */
   def apply(): Option[Boolean] = None
@@ -63,7 +67,7 @@ case object Maybe extends Kleenean {
   /**
     * @return 0.
     */
-  def toInt: Int = 0
+  lazy val toInt: Int = 0
 
   /**
     * The logical OR of this and k.
@@ -115,7 +119,7 @@ case object Maybe extends Kleenean {
     *
     * @return Maybe.
     */
-  def ! : Kleenean = Maybe
+  lazy val ! : Kleenean = Maybe
 }
 
 /**
@@ -126,6 +130,9 @@ case object Maybe extends Kleenean {
 case class Truth(b: Boolean) extends Kleenean {
 
   /**
+    * Apply method to convert this Truth value to an Option[Boolean].
+    * NOTE do not define as a lazy val.
+    *
     * @return Some(b)
     */
   def apply(): Option[Boolean] = Some(b)
@@ -133,7 +140,7 @@ case class Truth(b: Boolean) extends Kleenean {
   /**
     * @return an Int which is -1 if b is false, otherwise 1.
     */
-  def toInt: Int = if (b) 1 else -1
+  lazy val toInt: Int = if (b) 1 else -1
 
   /**
     * @param k the other Kleenean (call-by-name, only evaluated if b is false).
@@ -160,11 +167,25 @@ case class Truth(b: Boolean) extends Kleenean {
     *
     * @return the complement of this Kleenean.
     */
-  def ! : Kleenean = Truth(!b)
+  lazy val ! : Kleenean = Truth(!b)
 
   override def toString(): String = if (b) "T" else "F"
 }
 
 object Kleenean {
-  def apply(x: Int): Kleenean = if (x == 0) Maybe else Truth(x > 0)
+  /**
+    * Construct a Truth value given the input b.
+    *
+    * @param b a Boolean.
+    * @return a Kleenean.
+    */
+  def apply(b: Boolean): Kleenean = Truth(b)
+
+  /**
+    * Construct a Kleenean according to the given value x.
+    *
+    * @param x an Int.
+    * @return if x==0 then Maybe else apply(x>0)
+    */
+  def apply(x: Int): Kleenean = if (x == 0) Maybe else apply(x > 0)
 }
