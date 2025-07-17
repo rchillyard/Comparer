@@ -8,7 +8,7 @@ scalaVersion := "2.13.16"
 
 scalacOptions += "-deprecation"
 
-val scalaTestVersion = "3.1.1"
+val scalaTestVersion = "3.2.19"
 
 resolvers += "Typesafe Repository" at "https://repo.typesafe.com/typesafe/releases/"
 
