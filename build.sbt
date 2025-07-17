@@ -4,7 +4,7 @@ name := "Comparer"
 
 version := "1.0.10"
 
-scalaVersion := "2.13.6"
+scalaVersion := "2.13.16"
 
 scalacOptions += "-deprecation"
 
