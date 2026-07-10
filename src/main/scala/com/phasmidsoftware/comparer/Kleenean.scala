@@ -8,6 +8,7 @@ package com.phasmidsoftware.comparer
   * Trait which models a three-valued logic based on the algebra of Stephen C. Kleene.
   * See https://en.wikipedia.org/wiki/Three-valued_logic
   *
+  * A Kleenean can be lazily converted to an Option[Boolean] when required.
   */
 sealed trait Kleenean extends (() => Option[Boolean]) {
 
@@ -34,6 +35,11 @@ sealed trait Kleenean extends (() => Option[Boolean]) {
     */
   def &(k: => Kleenean): Kleenean
 
+  /**
+    * Negate this Kleenean.
+    *
+    * @return the complement of this Kleenean.
+    */
   def ! : Kleenean
 
   /**
@@ -51,32 +57,51 @@ sealed trait Kleenean extends (() => Option[Boolean]) {
 case object Maybe extends Kleenean {
 
   /**
+    * Apply method to convert this Kleenean to an Option[Boolean].
+    * NOTE do not define as a lazy val.
+    *
     * @return None
     */
-  override def apply(): Option[Boolean] = None
+  def apply(): Option[Boolean] = None
 
   /**
     * @return 0.
     */
-  def toInt: Int = 0
+  lazy val toInt: Int = 0
 
   /**
+    * The logical OR of this and k.
+    *
+    * Equivalent to
+    * <code>
+    * val int = k.toInt
+    * if (int == 0) this else Kleenean(math.max(toInt, int))
+    * </code>
+    *
     * @param k the other Kleenean (always evaluated).
     * @return the logical OR.
     */
-  def |(k: => Kleenean): Kleenean = k match {
-    case Maybe => this
-    case Truth(b) => if (b) k else this
-  }
+  def |(k: => Kleenean): Kleenean =
+    k match {
+      case Truth(true) => k
+      case _ => this
+    }
 
   /**
+    * The logical AND of this and k.
+    *
+    * Equivalent to
+    * <code>
+    * val int = k.toInt
+    * if (int == 0) this else Kleenean(math.min(toInt, int))
+    * </code>
     *
     * @param k the other Kleenean (always evaluated).
     * @return the logical AND.
     */
   def &(k: => Kleenean): Kleenean = k match {
-    case Maybe => this
-    case Truth(b) => if (b) this else k
+    case Truth(false) => k
+    case _ => this
   }
 
   override def toString(): String = "?"
@@ -84,12 +109,17 @@ case object Maybe extends Kleenean {
   /**
     * Convert this Kleenean into a Boolean by providing a default value for the Maybe case.
     *
-    * @param x the result if this is Maybe.
+    * @param x the result.
     * @return x.
     */
   def getOrElse(x: => Boolean): Boolean = x
 
-  override def ! : Kleenean = Maybe
+  /**
+    * Negate this Maybe: return Maybe.
+    *
+    * @return Maybe.
+    */
+  lazy val ! : Kleenean = Maybe
 }
 
 /**
@@ -100,48 +130,62 @@ case object Maybe extends Kleenean {
 case class Truth(b: Boolean) extends Kleenean {
 
   /**
+    * Apply method to convert this Truth value to an Option[Boolean].
+    * NOTE do not define as a lazy val.
+    *
     * @return Some(b)
     */
-  override def apply(): Option[Boolean] = Some(b)
+  def apply(): Option[Boolean] = Some(b)
 
   /**
     * @return an Int which is -1 if b is false, otherwise 1.
     */
-  def toInt: Int = if (b) 1 else -1
+  lazy val toInt: Int = if (b) 1 else -1
 
   /**
     * @param k the other Kleenean (call-by-name, only evaluated if b is false).
     * @return the logical OR.
     */
-  def |(k: => Kleenean): Kleenean = if (b) this else
-    k match {
-      case Maybe => Maybe
-      case Truth(_) => k
-    }
+  def |(k: => Kleenean): Kleenean = if (b) this else k
 
   /**
     * @param k the other Kleenean (call-by-name, only evaluated if b is true).
     * @return the logical AND.
     */
-  def &(k: => Kleenean): Kleenean = if (b) k match {
-    case Maybe => Maybe
-    case Truth(_) => k
-  }
-  else this
-
-  override def toString(): String = if (b) "T" else "F"
+  def &(k: => Kleenean): Kleenean = if (b) k else this
 
   /**
     * Convert this Kleenean into a Boolean by providing a default value for the Maybe case.
     *
-    * @param x the result if this is Maybe.
-    * @return a Boolean corresponding to this Kleenean.
+    * @param x ignored.
+    * @return a Boolean corresponding to this Truth value.
     */
   def getOrElse(x: => Boolean): Boolean = b
 
-  override def ! : Kleenean = Truth(!b)
+  /**
+    * Negate this Truth value.
+    *
+    * @return the complement of this Kleenean.
+    */
+  lazy val ! : Kleenean = Truth(!b)
+
+  override def toString(): String = if (b) "T" else "F"
 }
 
 object Kleenean {
-  def apply(x: Int): Kleenean = if (x == 0) Maybe else Truth(x > 0)
+  /**
+    * Construct a Truth value given the input b.
+    *
+    * @param b a Boolean.
+    * @return a Kleenean.
+    */
+  def apply(b: Boolean): Kleenean = Truth(b)
+
+  /**
+    * Construct a Kleenean according to the given value x.
+    *
+    * @param x an Int.
+    * @return if x==0 then Maybe else apply(x>0)
+    */
+  def apply(x: Int): Kleenean = if (x == 0) Maybe else apply(x > 0)
 }

@@ -35,13 +35,6 @@ sealed trait Comparison extends (() => Kleenean) {
   def apply(): Kleenean
 
   /**
-    * Definition of a function which takes Unit and returns String.
-    *
-    * NOTE: I'm not entirely clear why this is even here.
-    */
-  val f: () => String
-
-  /**
     * Method to yield logical AND.
     *
     * @param c the other Comparison (eagerly evaluated).
@@ -110,8 +103,6 @@ case class Different(less: Boolean) extends Comparison {
     */
   def apply(): Kleenean = Truth(less)
 
-  val f: () => String = () => toString()
-
   /**
     * Short-circuited AND.
     *
@@ -170,30 +161,25 @@ case object Same extends Comparison {
   def apply(): Kleenean = Maybe
 
   /**
-    * Not sure why we have this.
-    */
-  val f: () => String = () => toString()
-
-  /**
-    * Short-circuited AND -- but in this case there is no short circuit.
+    * Short-circuited AND -- but in this case (Same) there is no short circuit.
     *
     * @param c the other Comparison (always evaluated).
     * @return c & this.
     */
   def &&(c: => Comparison): Comparison = c match {
-    case Same => Same
-    case Different(b) => if (b) c else Same
+    case Different(true) => c
+    case _ => Same
   }
 
   /**
-    * Short-circuited OR -- but in this case there is no short circuit.
+    * Short-circuited OR -- but in this case (Same) there is no short circuit.
     *
     * @param c the other Comparison (always evaluated).
     * @return c | this.
     */
   def ||(c: => Comparison): Comparison = c match {
-    case Same => Same
-    case Different(b) => if (b) Same else c
+    case Different(false) => c
+    case _ => Same
   }
 
   /**
@@ -264,10 +250,7 @@ object Comparison {
     * @param bo an optional Boolean.
     * @return the homologous Comparison for the input.
     */
-  def apply(bo: Option[Boolean]): Comparison = bo match {
-    case Some(b) => Comparison(b);
-    case _ => Same
-  }
+  def apply(bo: Option[Boolean]): Comparison = (bo map Comparison.apply).getOrElse(Same)
 
   /**
     * Method to construct a Comparison from a Java-style comparison result.

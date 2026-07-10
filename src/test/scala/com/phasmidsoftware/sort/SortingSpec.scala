@@ -40,6 +40,7 @@ class SortingSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers wit
   it should "sort List[Long]" in {
     val list = RandomState(0L).stream.take(100).toArray
     Sorting.sort(list)
+    list.take(5) shouldBe Array(-9181452172432867415L, -9095715445349070663L, -8929183248358367000L, -8912674914493871025L, -8847680883679894734L)
     list.reverse.take(5) shouldBe Array(9054633673849498218L, 8937230293740383692L, 8613213585075034408L, 8543763135442756639L, 8358116205139703580L)
   }
 
