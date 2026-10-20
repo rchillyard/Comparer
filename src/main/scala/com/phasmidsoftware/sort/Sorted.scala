@@ -129,13 +129,14 @@ object Sorted:
   def merge[T: Ordering](ts1: Seq[T], ts2: Seq[T]): Seq[T] =
     val ordering = summon[Ordering[T]]
 
-    @tailrec def inner(r: Seq[T], xs: List[T], ys: List[T]): Seq[T] = (xs, ys) match
+    // NOTE: r is a Vector because appending to a List copies it, which would make merging quadratic.
+    @tailrec def inner(r: Vector[T], xs: List[T], ys: List[T]): Seq[T] = (xs, ys) match
       case (_, Nil) => r ++ xs
       case (Nil, _) => r ++ ys
       case (x :: xs1, y :: _) if ordering.lt(x, y) => inner(r :+ x, xs1, ys)
       case (_, y :: ys1) => inner(r :+ y, xs, ys1)
 
-    inner(Nil, ts1.toList, ts2.toList)
+    inner(Vector.empty, ts1.toList, ts2.toList)
 
   /**
     * @param t1f a Future of Seq[T}.

@@ -6,6 +6,7 @@ package com.phasmidsoftware.sort
 
 import com.phasmidsoftware.comparer.{Comparer, Composite, DateF}
 import org.scalatest.concurrent.{Futures, ScalaFutures}
+import org.scalatest.time.{Seconds, Span}
 import org.scalatest.{flatspec, matchers}
 
 import scala.util.Random
@@ -14,6 +15,9 @@ import scala.util.Random
   * @author scalaprof
   */
 class SortedSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers with Futures with ScalaFutures:
+
+  // The default patience (150 milliseconds) is too short for the larger sorts on a busy CI machine.
+  override implicit val patienceConfig: PatienceConfig = PatienceConfig(timeout = Span(5, Seconds))
 
   behavior of "Sorted"
 
