@@ -236,9 +236,8 @@ object Functional {
     * @tparam R  the result type
     * @return a function which takes the parameters separately (as part of a parameter set)
     */
-  def untupled[T1, T2, R](f: ((T1, T2)) => R): (T1, T2) => R = {
+  def untupled[T1, T2, R](f: ((T1, T2)) => R): (T1, T2) => R =
     (x1, x2) => f(Tuple2(x1, x2))
-  }
 
   /**
     * This method (and the following similar methods) are missing from Function (or at least, the method in Function is flaky)
@@ -250,9 +249,8 @@ object Functional {
     * @tparam R  the result type
     * @return a function which takes the parameters separately (as part of a parameter set)
     */
-  def untupled[T1, T2, T3, R](f: ((T1, T2, T3)) => R): (T1, T2, T3) => R = {
+  def untupled[T1, T2, T3, R](f: ((T1, T2, T3)) => R): (T1, T2, T3) => R =
     (x1, x2, x3) => f(Tuple3(x1, x2, x3))
-  }
 
   /**
     * This method (and the following similar methods) are missing from Function (or at least, the method in Function is flaky)
@@ -265,9 +263,8 @@ object Functional {
     * @tparam R  the result type
     * @return a function which takes the parameters separately (as part of a parameter set)
     */
-  def untupled[T1, T2, T3, T4, R](f: ((T1, T2, T3, T4)) => R): (T1, T2, T3, T4) => R = {
+  def untupled[T1, T2, T3, T4, R](f: ((T1, T2, T3, T4)) => R): (T1, T2, T3, T4) => R =
     (x1, x2, x3, x4) => f(Tuple4(x1, x2, x3, x4))
-  }
 
   /**
     * This method (and the following similar methods) are missing from Function.
@@ -281,9 +278,8 @@ object Functional {
     * @tparam R  the result type
     * @return a function which takes the parameters separately (as part of a parameter set)
     */
-  def untupled[T1, T2, T3, T4, T5, R](f: ((T1, T2, T3, T4, T5)) => R): (T1, T2, T3, T4, T5) => R = {
+  def untupled[T1, T2, T3, T4, T5, R](f: ((T1, T2, T3, T4, T5)) => R): (T1, T2, T3, T4, T5) => R =
     (x1, x2, x3, x4, x5) => f(Tuple5(x1, x2, x3, x4, x5))
-  }
 
   /**
     * This method (and the following similar methods) are missing from Function.
@@ -298,9 +294,8 @@ object Functional {
     * @tparam R  the result type
     * @return a function which takes the parameters separately (as part of a parameter set)
     */
-  def untupled[T1, T2, T3, T4, T5, T6, R](f: ((T1, T2, T3, T4, T5, T6)) => R): (T1, T2, T3, T4, T5, T6) => R = {
+  def untupled[T1, T2, T3, T4, T5, T6, R](f: ((T1, T2, T3, T4, T5, T6)) => R): (T1, T2, T3, T4, T5, T6) => R =
     (x1, x2, x3, x4, x5, x6) => f(Tuple6(x1, x2, x3, x4, x5, x6))
-  }
 
   /**
     * This method (and the following similar methods) are missing from Function.
@@ -316,7 +311,6 @@ object Functional {
     * @tparam R  the result type
     * @return a function which takes the parameters separately (as part of a parameter set)
     */
-  def untupled[T1, T2, T3, T4, T5, T6, T7, R](f: ((T1, T2, T3, T4, T5, T6, T7)) => R): (T1, T2, T3, T4, T5, T6, T7) => R = {
+  def untupled[T1, T2, T3, T4, T5, T6, T7, R](f: ((T1, T2, T3, T4, T5, T6, T7)) => R): (T1, T2, T3, T4, T5, T6, T7) => R =
     (x1, x2, x3, x4, x5, x6, x7) => f(Tuple7(x1, x2, x3, x4, x5, x6, x7))
-  }
 }

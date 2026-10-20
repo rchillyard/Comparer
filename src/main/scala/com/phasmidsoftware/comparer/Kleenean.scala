@@ -12,7 +12,7 @@ package com.phasmidsoftware.comparer
   *
   * NOTE: the cases are exported at the package level, so that they can be referred to simply as Maybe and Truth.
   */
-enum Kleenean extends Thunk[Option[Boolean]] {
+enum Kleenean extends Thunk[Option[Boolean]]:
 
   /**
     * The indeterminate state of a Kleenean, neither true nor false.
@@ -31,20 +31,18 @@ enum Kleenean extends Thunk[Option[Boolean]] {
     *
     * @return None if this is Maybe, otherwise Some(b).
     */
-  def apply(): Option[Boolean] = this match {
+  def apply(): Option[Boolean] = this match
     case Maybe => None
     case Truth(b) => Some(b)
-  }
 
   /**
     * Yield an Int corresponding to a Java-style comparison for this Kleenean.
     *
     * @return an Int which is either -1, 0 or 1.
     */
-  def toInt: Int = this match {
+  def toInt: Int = this match
     case Maybe => 0
-    case Truth(b) => if (b) 1 else -1
-  }
+    case Truth(b) => if b then 1 else -1
 
   /**
     * Return the logical OR of this and k.
@@ -52,14 +50,12 @@ enum Kleenean extends Thunk[Option[Boolean]] {
     * @param k the other Kleenean (call-by-name, evaluated unless this is Truth(true)).
     * @return the logical OR.
     */
-  def |(k: => Kleenean): Kleenean = this match {
+  def |(k: => Kleenean): Kleenean = this match
     case Truth(true) => this
     case Truth(false) => k
-    case Maybe => k match {
+    case Maybe => k match
       case t@Truth(true) => t
       case _ => Maybe
-    }
-  }
 
   /**
     * Return the logical AND of this and k.
@@ -67,24 +63,21 @@ enum Kleenean extends Thunk[Option[Boolean]] {
     * @param k the other Kleenean (call-by-name, evaluated unless this is Truth(false)).
     * @return the logical AND.
     */
-  def &(k: => Kleenean): Kleenean = this match {
+  def &(k: => Kleenean): Kleenean = this match
     case Truth(false) => this
     case Truth(true) => k
-    case Maybe => k match {
+    case Maybe => k match
       case f@Truth(false) => f
       case _ => Maybe
-    }
-  }
 
   /**
     * Negate this Kleenean.
     *
     * @return the complement of this Kleenean.
     */
-  def ! : Kleenean = this match {
+  def ! : Kleenean = this match
     case Maybe => Maybe
     case Truth(b) => Truth(!b)
-  }
 
   /**
     * Convert this Kleenean into a Boolean by providing a default value for the Maybe case.
@@ -92,21 +85,18 @@ enum Kleenean extends Thunk[Option[Boolean]] {
     * @param x the result if this is Maybe.
     * @return a Boolean corresponding to this Kleenean.
     */
-  def getOrElse(x: => Boolean): Boolean = this match {
+  def getOrElse(x: => Boolean): Boolean = this match
     case Maybe => x
     case Truth(b) => b
-  }
 
   /**
     * @return "?" for Maybe, otherwise "T" or "F".
     */
-  override def toString(): String = this match {
+  override def toString(): String = this match
     case Maybe => "?"
-    case Truth(b) => if (b) "T" else "F"
-  }
-}
+    case Truth(b) => if b then "T" else "F"
 
-object Kleenean {
+object Kleenean:
   /**
     * Construct a Truth value given the input b.
     *
@@ -121,5 +111,4 @@ object Kleenean {
     * @param x an Int.
     * @return if x==0 then Maybe else apply(x>0)
     */
-  def apply(x: Int): Kleenean = if (x == 0) Maybe else apply(x > 0)
-}
+  def apply(x: Int): Kleenean = if x == 0 then Maybe else apply(x > 0)

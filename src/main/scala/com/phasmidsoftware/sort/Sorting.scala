@@ -14,34 +14,29 @@ import scala.reflect.ClassTag
 /**
   * Interface for a sorting strategy object.
   */
-trait Sort extends Any {
+trait Sort extends Any:
   def sort[A: Ordering : ClassTag](data: Array[A]): Unit
-}
 
 /**
   * Simple implementation of insertion sort.
   *
   * Works for small arrays but due to quadratic complexity is not generally good, unless array is partially sorted.
   */
-object InsertionSort extends Sort {
+object InsertionSort extends Sort:
   final def sort[A: Ordering : ClassTag](data: Array[A]): Unit =
     sort(data, 0, data.length)
 
-  final def sort[A: Ordering](data: Array[A], start: Int, end: Int): Unit = {
+  final def sort[A: Ordering](data: Array[A], start: Int, end: Int): Unit =
     val o = summon[Ordering[A]]
     var i = start + 1
-    while (i < end) {
+    while i < end do
       val item = data(i)
       var hole = i
-      while (hole > start && o.gt(data(hole - 1), item)) {
+      while hole > start && o.gt(data(hole - 1), item) do
         data(hole) = data(hole - 1)
         hole -= 1
-      }
       data(hole) = item
       i += 1
-    }
-  }
-}
 
 /**
   * In-place merge sort implementation. This sort is stable but does mutate
@@ -49,51 +44,45 @@ object InsertionSort extends Sort {
   * array of the same size as the input. It uses InsertionSort for sorting very
   * small arrays.
   */
-object MergeSort extends Sort {
+object MergeSort extends Sort:
   @inline final def startWidth: Int = 8
 
   @inline final def startStep: Int = 16
 
-  final def sort[A: Ordering : ClassTag](data: Array[A]): Unit = {
+  final def sort[A: Ordering : ClassTag](data: Array[A]): Unit =
     val len = data.length
 
-    if (len <= startStep) InsertionSort.sort(data)
-    else {
+    if len <= startStep then InsertionSort.sort(data)
+    else
       var buf1: Array[A] = data
       var buf2: Array[A] = new Array[A](len)
       var tmp: Array[A] = null
 
       var i = 0
       var limit = len - startWidth
-      while (i < limit) {
+      while i < limit do
         InsertionSort.sort(data, i, i + startWidth)
         i += startWidth
-      }
-      if (i < len) InsertionSort.sort(data, i, len)
+      if i < len then InsertionSort.sort(data, i, len)
       var width = startWidth
       var step = startStep
-      while (width < len) {
+      while width < len do
         i = 0
         limit = len - step
-        while (i < limit) {
+        while i < limit do
           merge(buf1, buf2, i, i + width, i + step)
           i += step
-        }
-        while (i < len) {
+        while i < len do
           merge(buf1, buf2, i, Math.min(i + width, len), len)
           i += step
-        }
         tmp = buf2
         buf2 = buf1
         buf1 = tmp
 
         width *= 2
         step *= 2
-      }
 
-      if (!(buf1 sameElements data)) System.arraycopy(buf1, 0, data, 0, len)
-    }
-  }
+      if !(buf1 sameElements data) then System.arraycopy(buf1, 0, data, 0, len)
 
   /**
     * Helper method for mergeSort, used to do a single "merge" between two
@@ -101,30 +90,26 @@ object MergeSort extends Sort {
     * left and right ranges of the input to merge, as well as the area of the
     * output to write to.
     */
-  @inline final def merge[A: Ordering](in: Array[A], out: Array[A], start: Int, mid: Int, end: Int): Unit = {
+  @inline final def merge[A: Ordering](in: Array[A], out: Array[A], start: Int, mid: Int, end: Int): Unit =
     val o = summon[Ordering[A]]
     var ii = start
     var jj = mid
     var kk = start
-    while (kk < end) {
-      if (ii < mid && (jj >= end || o.lteq(in(ii), in(jj)))) {
+    while kk < end do
+      if ii < mid && (jj >= end || o.lteq(in(ii), in(jj))) then
         out(kk) = in(ii)
         ii += 1
-      } else {
+      else
         out(kk) = in(jj)
         jj += 1
-      }
       kk += 1
-    }
-  }
-}
 
 /**
   * In-place quicksort implementation. It is not stable, but does not allocate
   * extra space (other than stack). Like MergeSort, it uses InsertionSort for
   * sorting very small arrays.
   */
-object QuickSort {
+object QuickSort:
   @inline final def limit: Int = 16
 
   /**
@@ -143,14 +128,12 @@ object QuickSort {
     * @param to   the first index of the sub-array NOT to be sorted.
     * @tparam A the type of the elements of data.
     */
-  final def qsort[A: Ordering : ClassTag](data: Array[A], from: Int, to: Int): Unit = {
-    if (to - from < limit + 1) InsertionSort.sort(data, from, to)
-    else {
+  final def qsort[A: Ordering : ClassTag](data: Array[A], from: Int, to: Int): Unit =
+    if to - from < limit + 1 then InsertionSort.sort(data, from, to)
+    else
       val pivot = partition(data, from, to, from + (to - from) / 2)
       qsort(data, from, pivot)
       qsort(data, pivot, to)
-    }
-  }
 
   /**
     * Method to partition a sub-array into the smaller elements, the pivot itself, and the larger elements.
@@ -162,7 +145,7 @@ object QuickSort {
     * @tparam A the type of the elements of data.
     * @return the index at which we will now find the pivot.
     */
-  final def partition[A: Ordering](data: Array[A], from: Int, to: Int, pivot: Int): Int = {
+  final def partition[A: Ordering](data: Array[A], from: Int, to: Int, pivot: Int): Int =
 
     /**
       * Method to swap elements with indices i and j.
@@ -171,11 +154,10 @@ object QuickSort {
       * @param i one index.
       * @param j the other index.
       */
-    def swap(i: Int, j: Int): Unit = {
+    def swap(i: Int, j: Int): Unit =
       val tmp = data(i)
       data(i) = data(j)
       data(j) = tmp
-    }
 
     val value = data(pivot)
     val right = to - 1
@@ -183,17 +165,13 @@ object QuickSort {
     var store = from
     var i = from
     val ao = summon[Ordering[A]]
-    while (i < right) {
-      if (ao.lt(data(i), value)) {
+    while i < right do
+      if ao.lt(data(i), value) then
         swap(i, store)
         store += 1
-      }
       i += 1
-    }
     swap(store, right)
     store
-  }
-}
 
 /**
   * Object providing in-place sorting capability for arrays.
@@ -203,7 +181,7 @@ object QuickSort {
   * mergeSort() (in-place, stable, uses extra memory, still pretty fast) and
   * insertionSort(), which is slow except for small arrays.
   */
-object Sorting {
+object Sorting:
   final def sort[A: Ordering : ClassTag](data: Array[A]): Unit = quickSort(data)
 
   final def insertionSort[A: Ordering : ClassTag](data: Array[A]): Unit = InsertionSort.sort(data)
@@ -211,4 +189,3 @@ object Sorting {
   final def mergeSort[A: Ordering : ClassTag](data: Array[A]): Unit = MergeSort.sort(data)
 
   final def quickSort[A: Ordering : ClassTag](data: Array[A]): Unit = QuickSort.sort(data)
-}

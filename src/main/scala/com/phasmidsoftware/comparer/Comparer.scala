@@ -29,7 +29,7 @@ import scala.util.Try
   *
   * @tparam T the underlying type of the comparer. That's to say the type this Comparer knows about.
   */
-trait Comparer[T] extends (T => T => Comparison) {
+trait Comparer[T] extends (T => T => Comparison):
 
   /**
     * Method to yield a Comparison from a tuple of Ts.
@@ -275,14 +275,13 @@ trait Comparer[T] extends (T => T => Comparison) {
     * @return the resulting Comparison.
     */
   def tupled(t1: T, t2: T): Comparison = this(t2)(t1)
-}
 
 /**
   * Companion object for Comparer.
   * This is where you will find the standard given Comparer instances,
   * which are therefore available without any import.
   */
-object Comparer {
+object Comparer:
 
   /**
     * A method to construct a Comparer which always evaluates to Same.
@@ -439,7 +438,7 @@ object Comparer {
     * @return a Comparer of Option[T] which can compare two instances of Option[T] and return a Comparison.
     */
   given comparerOpt[T: Comparer]: Comparer[Option[T]] = to1 => to2 =>
-    (for (t1 <- to1; t2 <- to2) yield summon[Comparer[T]](t1)(t2)).getOrElse(Same)
+    (for t1 <- to1; t2 <- to2 yield summon[Comparer[T]](t1)(t2)).getOrElse(Same)
 
   /**
     * The Comparer of Try[T] where T is any type that has a given Comparer.
@@ -469,9 +468,8 @@ object Comparer {
     * @return a Comparison.
     */
   def comparePrefixes[T: Comparer](ts1: Iterable[T], ts2: Iterable[T]): Comparison =
-    (ts1 zip ts2).foldLeft(Same: Comparison) {
+    (ts1 zip ts2).foldLeft(Same: Comparison):
       case (c, (t1, t2)) => c orElse Compare(t1, t2)
-    }
 
   /**
     * Method to compare two Iterables such that, if the common prefixes are the same,
@@ -484,9 +482,8 @@ object Comparer {
     */
   def compareAll[T: Comparer](ts1: Iterable[T], ts2: Iterable[T]): Comparison =
     comparePrefixes(ts1, ts2) orElse intComparer.compare((ts1.size, ts2.size))
-}
 
-object Compare {
+object Compare:
   /**
     * Method to construct a Comparison from two objects of type T (tupled form).
     * The sense of the result of this comparison is the same as,
@@ -498,4 +495,3 @@ object Compare {
     * @return a Comparison, resulting from applying the comparer to the tuple of t1 and t2.
     */
   def apply[T: Comparer](t1: T, t2: T): Comparison = Comparison(t2)(t1)
-}

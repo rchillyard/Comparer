@@ -16,42 +16,35 @@ class ComparisonSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers 
 
   behavior of "Comparison"
 
-  it should "convert(Int)" in {
+  it should "convert(Int)" in:
     Comparison.convert(0) shouldBe Same
     Comparison.convert(1) shouldBe More
     Comparison.convert(-1) shouldBe Less
-  }
-  it should "toInt" in {
+  it should "toInt" in:
     Comparison.convert(-1).toInt shouldBe -1
     Comparison.convert(0).toInt shouldBe 0
     Comparison.convert(1).toInt shouldBe 1
-  }
-  it should "Comparison.apply(Option[Boolean])" in {
+  it should "Comparison.apply(Option[Boolean])" in:
     Comparison(None) shouldBe Same
     Comparison(Some(false)) shouldBe More
     Comparison(Some(true)) shouldBe Less
-  }
-  it should "Comparison.apply(Kleenean)" in {
+  it should "Comparison.apply(Kleenean)" in:
     Comparison(Maybe) shouldBe Same
     Comparison(Truth(false)) shouldBe More
     Comparison(Truth(true)) shouldBe Less
-  }
-  it should "apply() 1" in {
+  it should "apply() 1" in:
     Comparison(None)() should matchPattern { case Maybe => }
     Comparison(Some(false))() should matchPattern { case Truth(false) => }
     Comparison(Some(true))() should matchPattern { case Truth(true) => }
-  }
-  it should "apply() 2" in {
+  it should "apply() 2" in:
     Same() should matchPattern { case Maybe => }
     Different(false)() should matchPattern { case Truth(false) => }
     Different(true)() should matchPattern { case Truth(true) => }
-  }
-  it should "flip" in {
+  it should "flip" in:
     More.flip shouldBe Less
     Less.flip shouldBe More
     Same.flip shouldBe Same
-  }
-  it should "orElse" in {
+  it should "orElse" in:
     More orElse More shouldBe More
     More orElse Less shouldBe More
     Less orElse More shouldBe Less
@@ -59,8 +52,7 @@ class ComparisonSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers 
     Same orElse Less shouldBe Less
     Same orElse More shouldBe More
     Same orElse Same shouldBe Same
-  }
-  it should "implement | correctly" in {
+  it should "implement | correctly" in:
     More | Same shouldBe More
     Same | More shouldBe More
     Less | Same shouldBe Same
@@ -70,8 +62,7 @@ class ComparisonSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers 
     Less | More shouldBe More
     Same | Same shouldBe Same
     Less | Less shouldBe Less
-  }
-  it should "implement & correctly" in {
+  it should "implement & correctly" in:
     More & Same shouldBe Same
     Same & More shouldBe Same
     Less & Same shouldBe Less
@@ -81,9 +72,8 @@ class ComparisonSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers 
     Less & More shouldBe Less
     Same & Same shouldBe Same
     Less & Less shouldBe Less
-  }
 
-  it should "implement || correctly" in {
+  it should "implement || correctly" in:
     More || Same shouldBe More
     Same || More shouldBe More
     Less || Same shouldBe Same
@@ -93,8 +83,7 @@ class ComparisonSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers 
     Less || More shouldBe More
     Same || Same shouldBe Same
     Less || Less shouldBe Less
-  }
-  it should "implement && correctly" in {
+  it should "implement && correctly" in:
     More && Same shouldBe Same
     Same && More shouldBe Same
     Less && Same shouldBe Less
@@ -104,12 +93,10 @@ class ComparisonSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers 
     Less && More shouldBe Less
     Same && Same shouldBe Same
     Less && Less shouldBe Less
-  }
-  it should "implement toString correctly" in {
+  it should "implement toString correctly" in:
     Same.toString() shouldBe "Same"
     More.toString() shouldBe "More"
     Less.toString() shouldBe "Less"
-  }
   //
   //  it should "support f for Different" in {
   //    Different(true).f() shouldBe "Less"

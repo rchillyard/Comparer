@@ -3,7 +3,7 @@ package com.phasmidsoftware.generic
 /**
   * A collection of methods to manipulate tuples.
   */
-object TupleWrangler {
+object TupleWrangler:
 
   /**
     * Method to unpack a nested tuple of form ((A, B), C) into a non-nested tuple: (A, B, C).
@@ -17,4 +17,3 @@ object TupleWrangler {
     */
   def inline[A, B, C](t: ((A, B), C)): (A, B, C) = (t._1._1, t._1._2, t._2)
 
-}

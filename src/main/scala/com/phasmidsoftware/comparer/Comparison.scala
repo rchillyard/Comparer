@@ -23,7 +23,7 @@ package com.phasmidsoftware.comparer
   *
   * NOTE: the cases are exported at the package level, so that they can be referred to simply as Same and Different.
   */
-enum Comparison extends Thunk[Kleenean] {
+enum Comparison extends Thunk[Kleenean]:
 
   /**
     * Sameness (two objects compare as equal).
@@ -42,10 +42,9 @@ enum Comparison extends Thunk[Kleenean] {
     *
     * @return Maybe if this is Same, otherwise Truth(less).
     */
-  def apply(): Kleenean = this match {
+  def apply(): Kleenean = this match
     case Same => Maybe
     case Different(less) => Truth(less)
-  }
 
   /**
     * Method to yield logical AND.
@@ -69,14 +68,12 @@ enum Comparison extends Thunk[Kleenean] {
     * @param c the other Comparison (lazily evaluated: not evaluated if this is Different(true)).
     * @return a Comparison according to Kleenean logic.
     */
-  def &&(c: => Comparison): Comparison = this match {
+  def &&(c: => Comparison): Comparison = this match
     case Different(true) => this
     case Different(false) => c
-    case Same => c match {
+    case Same => c match
       case less@Different(true) => less
       case _ => Same
-    }
-  }
 
   /**
     * Method to yield logical OR with short-circuit logic.
@@ -84,24 +81,21 @@ enum Comparison extends Thunk[Kleenean] {
     * @param c the other Comparison (lazily evaluated: not evaluated if this is Different(false)).
     * @return a Comparison according to Kleenean logic.
     */
-  def ||(c: => Comparison): Comparison = this match {
+  def ||(c: => Comparison): Comparison = this match
     case Different(false) => this
     case Different(true) => c
-    case Same => c match {
+    case Same => c match
       case more@Different(false) => more
       case _ => Same
-    }
-  }
 
   /**
     * Method to return the Java-style value of this Comparison.
     *
     * @return if Same then 0 else if Different(true) then -1 else 1
     */
-  def toInt: Int = this match {
+  def toInt: Int = this match
     case Same => 0
-    case Different(less) => if (less) -1 else 1
-  }
+    case Different(less) => if less then -1 else 1
 
   /**
     * Method to compose this with another Comparison.
@@ -110,36 +104,32 @@ enum Comparison extends Thunk[Kleenean] {
     * @param c the other Comparison (lazily evaluated: only evaluated if this is Same).
     * @return the composition of this and c.
     */
-  infix def orElse(c: => Comparison): Comparison = this match {
+  infix def orElse(c: => Comparison): Comparison = this match
     case Same => c
     case _ => this
-  }
 
   /**
     * Method to yield the complementary Comparison to this Comparison, that's to say the result is flipped (i.e. negated).
     *
     * @return Same if this Comparison is Same else the complementary (flipped) value of Different.
     */
-  def flip: Comparison = this match {
+  def flip: Comparison = this match
     case Same => Same
     case Different(less) => Different(!less)
-  }
 
   /**
     * Method to yield a String representing this Comparison.
     *
     * @return "Same", "Less" or "More".
     */
-  override def toString(): String = this match {
+  override def toString(): String = this match
     case Same => "Same"
-    case Different(less) => if (less) "Less" else "More"
-  }
-}
+    case Different(less) => if less then "Less" else "More"
 
 /**
   * Companion object for Comparison.
   */
-object Comparison {
+object Comparison:
   /**
     * Different(false).
     */
@@ -163,10 +153,9 @@ object Comparison {
     * @param k a Kleenean.
     * @return the homologous Comparison for the input.
     */
-  def apply(k: Kleenean): Comparison = k match {
+  def apply(k: Kleenean): Comparison = k match
     case Truth(b) => Different(b)
     case Maybe => Same
-  }
 
   /**
     * Method to construct a Comparison from an Option[Boolean].
@@ -183,7 +172,7 @@ object Comparison {
     *          Typically, this is the result of a Java-style comparison.
     * @return the homologous Comparison for x, either Same or Different(b) where b is true if x is negative.
     */
-  def convert(x: Int): Comparison = if (x == 0) Same else Different(x < 0)
+  def convert(x: Int): Comparison = if x == 0 then Same else Different(x < 0)
 
   /**
     * Method to construct a Comparison from two objects of type T (curried form).
@@ -196,4 +185,3 @@ object Comparison {
     * @return a Comparison, resulting from applying the comparer to t1 and its result to t2.
     */
   def apply[T: Comparer](t2: T)(t1: T): Comparison = summon[Comparer[T]](t2)(t1)
-}

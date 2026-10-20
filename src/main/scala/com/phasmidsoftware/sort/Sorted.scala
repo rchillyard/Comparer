@@ -20,7 +20,7 @@ import scala.reflect.ClassTag
   * @param ct       the ClassTag[T].
   * @tparam T the underlying type of the sequence.
   */
-case class Sorted[T](ts: Seq[T])(using comparer: Comparer[T], ct: ClassTag[T]) extends (() => Seq[T]) {
+case class Sorted[T](ts: Seq[T])(using comparer: Comparer[T], ct: ClassTag[T]) extends (() => Seq[T]):
 
   given ordering: Ordering[T] = comparer.toOrdering
 
@@ -52,9 +52,8 @@ case class Sorted[T](ts: Seq[T])(using comparer: Comparer[T], ct: ClassTag[T]) e
     * @return a sorted sequence of T, wrapped in Future.
     */
   def parallel(using ExecutionContext): Future[Seq[T]] = Sorted.mergeSort(ts)
-}
 
-object Sorted {
+object Sorted:
   /**
     * Method to create a Sorted(ts).
     * The result can then be sorted using sort, async, parSort, apply (sorted).
@@ -96,10 +95,9 @@ object Sorted {
     * @return a sorted sequence of T, wrapped in Future.
     */
   def mergeSort[T: Ordering : ClassTag](ts: Seq[T], threads: Int = TotalThreads)(using ExecutionContext): Future[Seq[T]] =
-    if (threads > 1) {
+    if threads > 1 then
       val (l, r) = ts splitAt (ts.length / 2)
       map2(mergeSort(l, threads - 1), mergeSort(r, threads - 1))(merge)
-    }
     else
       Future(mergeSortThread(ts))
 
@@ -111,15 +109,13 @@ object Sorted {
   private val Cutoff = 8
 
   private def mergeSortThread[T: Ordering : ClassTag](ts: Seq[T]): Seq[T] =
-    if (ts.size > Cutoff) {
+    if ts.size > Cutoff then
       val (l, r) = ts splitAt (ts.length / 2)
       merge(mergeSortThread(l), mergeSortThread(r))
-    }
-    else {
+    else
       val a = ts.toArray
       InsertionSort.sort(a)
       a.toList
-    }
 
   /**
     * Method to merge the sorted sequences ts1 and ts2.
@@ -130,18 +126,16 @@ object Sorted {
     * @tparam T the underlying type to be sorted on, providing a given Ordering[T].
     * @return a sorted sequence of T.
     */
-  def merge[T: Ordering](ts1: Seq[T], ts2: Seq[T]): Seq[T] = {
+  def merge[T: Ordering](ts1: Seq[T], ts2: Seq[T]): Seq[T] =
     val ordering = summon[Ordering[T]]
 
-    @tailrec def inner(r: Seq[T], xs: List[T], ys: List[T]): Seq[T] = (xs, ys) match {
+    @tailrec def inner(r: Seq[T], xs: List[T], ys: List[T]): Seq[T] = (xs, ys) match
       case (_, Nil) => r ++ xs
       case (Nil, _) => r ++ ys
       case (x :: xs1, y :: _) if ordering.lt(x, y) => inner(r :+ x, xs1, ys)
       case (_, y :: ys1) => inner(r :+ y, xs, ys1)
-    }
 
     inner(Nil, ts1.toList, ts2.toList)
-  }
 
   /**
     * @param t1f a Future of Seq[T}.
@@ -151,7 +145,7 @@ object Sorted {
     * @return a Future of Seq[T].
     */
   private def map2[T](t1f: Future[Seq[T]], t2f: Future[Seq[T]])(f: (Seq[T], Seq[T]) => Seq[T])(using ExecutionContext): Future[Seq[T]] =
-    for {t1 <- t1f; t2 <- t2f} yield f(t1, t2)
+    for t1 <- t1f; t2 <- t2f yield f(t1, t2)
 
   // NOTE: This is a second, superfluous version of insertionSort. However, I actually like this version more.
   //
@@ -172,4 +166,3 @@ object Sorted {
   //    a.toList
   //  }
 
-}
