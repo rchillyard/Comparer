@@ -2,17 +2,18 @@ organization := "com.phasmidsoftware"
 
 name := "Comparer"
 
-version := "1.1.0"
+version := "2.0.0"
 
-val scala3Version = "3.3.8"
-val scala213Version = "2.13.18"
+// Build with the oldest supported Scala 3 LTS so that the artifact is usable from any later Scala 3 version.
+// CircleCI also runs the tests on the current LTS (3.9).
+scalaVersion := "3.3.8"
 
-scalaVersion := scala3Version
-
-// Cross-build so that existing Scala 2.13 users can still depend on Comparer.
-crossScalaVersions := Seq(scala3Version, scala213Version)
-
-scalacOptions += "-deprecation"
+scalacOptions ++= Seq(
+  "-deprecation",
+  "-feature",
+  "-unchecked",
+  "-Wunused:all"
+)
 
 val scalaTestVersion = "3.2.19"
 
