@@ -267,10 +267,11 @@ whereas when tupled parameters are used, it is conventional to compare the first
       def fromOrdering[T](to: Ordering[T]): Comparer[T]
     
       /**
-        * Method to derive a Comparer for a case class (or other product type), comparing its fields in order.
+        * Method to derive a Comparer for a case class (comparing its fields in order),
+        * or for an enum or sealed trait (comparing first by case, then by fields).
         * This is what makes "derives Comparer" work.
         */
-      def derived[T <: Product](using m: Mirror.ProductOf[T], ec: Comparer[m.MirroredElemTypes]): Comparer[T]
+      inline def derived[T](using m: Mirror.Of[T]): Comparer[T]
     
       /**
         * The following Comparers are given for the common scalar types.
@@ -435,6 +436,29 @@ So, if your case class happens to include a tuple, an iterable (sequence or list
 you can still derive its _Comparer_ and the types will be handled.
 There is no limit on the number of fields.
 
+You can also derive a _Comparer_ for an enum or a sealed trait.
+Values of different cases are compared by the order in which the cases are declared;
+values of the same case are compared by that case's own given _Comparer_ if it has one, otherwise by its fields:
+
+    enum Suit derives Comparer:
+      case Clubs, Diamonds, Hearts, Spades
+
+    enum Shape derives Comparer:
+      case Circle(radius: Double)
+      case Rectangle(width: Double, height: Double)
+
+    sealed trait Contact derives Comparer
+    case class Email(address: String) extends Contact
+    case class Phone(number: Long) extends Contact
+
+    Compare(Suit.Clubs, Suit.Spades) shouldBe Less
+    Compare(Shape.Circle(10), Shape.Rectangle(1, 1)) shouldBe Less
+    Compare[Contact](Email("a@x"), Phone(1)) shouldBe Less
+
+Note the type parameter in the last line: the case classes of a sealed trait keep their own types,
+so we tell _Compare_ to use the _Comparer_ of _Contact_ (enum cases don't need this).
+Recursive types, such as a tree whose nodes contain trees, are also supported.
+
 What if the case class you want to compare doesn't have its fields in descending order of significance?
 For example, you might be using a _Date_ class where the fields are laid out: day, month, year.
 Then, instead of deriving the _Comparer_, list the fields in the order you want:
@@ -490,6 +514,6 @@ Version 1.0.8 improved support for comparing tuples.
 Version 1.1.0 adds Scala 3 support: Comparer is now cross-built for Scala 3 and Scala 2.13. No logic changes.
 
 Version 2.0.0 is for Scala 3 only (built with Scala 3.3, so usable from 3.3 or later), and adopts Scala 3 idioms throughout:
-_derives Comparer_ for case classes, a single given _Comparer_ for tuples of any size,
+_derives Comparer_ for case classes, enums and sealed traits, a single given _Comparer_ for tuples of any size,
 given instances in place of implicits, and enums for _Comparison_ and _Kleenean_.
 See [Migrating from 1.x](#migrating-from-1x).

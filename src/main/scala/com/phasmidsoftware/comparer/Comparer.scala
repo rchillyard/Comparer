@@ -5,6 +5,7 @@
 package com.phasmidsoftware.comparer
 
 import scala.collection.immutable.ArraySeq
+import scala.compiletime.{erasedValue, summonFrom, summonInline}
 import scala.deriving.Mirror
 import scala.util.Try
 
@@ -346,21 +347,86 @@ object Comparer:
   def comparer[T, P: Comparer](lens: T => P): Comparer[T] = summon[Comparer[P]].snap(lens)
 
   /**
-    * Method to derive a Comparer for a case class (or any other product type), so that you can write:
+    * Method to derive a Comparer, so that you can write, for a case class:
     * {{{
     *   case class Date(year: Int, month: Int, day: Int) derives Comparer
     * }}}
-    * The fields are compared in order, from the first (most significant) to the last (least significant),
+    * or, for an enum (or a sealed trait):
+    * {{{
+    *   enum Suit derives Comparer:
+    *     case Clubs, Diamonds, Hearts, Spades
+    * }}}
+    *
+    * For a case class (or any other product type), the fields are compared in order,
+    * from the first (most significant) to the last (least significant),
     * and each field type must itself have a given Comparer.
     * If you need a different order, then build the Comparer explicitly, using same and :|.
     *
-    * @param m  the Mirror of T, supplied by the compiler.
-    * @param ec the Comparer of the tuple of T's field types.
-    * @tparam T the underlying type of the result, a product type such as a case class.
+    * For an enum or a sealed trait (a sum type), values of different cases are compared by the order in which the cases are declared.
+    * Values of the same case are compared using that case's given Comparer if it has one,
+    * otherwise using a Comparer derived for that case (i.e. by its fields).
+    *
+    * Recursive types (such as a tree whose nodes contain trees) are supported.
+    *
+    * @param m the Mirror of T, supplied by the compiler.
+    * @tparam T the underlying type of the result.
     * @return a Comparer[T].
     */
-  def derived[T <: Product](using m: Mirror.ProductOf[T], ec: Comparer[m.MirroredElemTypes]): Comparer[T] =
-    t1 => t2 => ec(Tuple.fromProductTyped(t1))(Tuple.fromProductTyped(t2))
+  inline def derived[T](using m: Mirror.Of[T]): Comparer[T] = inline m match
+    case s: Mirror.SumOf[T] => sumComparer(s, caseComparers[s.MirroredElemTypes])
+    case p: Mirror.ProductOf[T] => productComparer(p, summonInline[Comparer[p.MirroredElemTypes]])
+
+  /**
+    * Method to create a Comparer for a product type from the Comparer for the tuple of its field types.
+    *
+    * NOTE: a type with a Mirror.ProductOf (a case class, case object or enum case) is always a Product.
+    *
+    * @param p  the Mirror of T.
+    * @param ec the Comparer of the tuple of T's field types (by-name, in case T is recursive).
+    * @tparam T the product type.
+    * @return a Comparer[T].
+    */
+  private def productComparer[T](p: Mirror.ProductOf[T], ec: => Comparer[p.MirroredElemTypes]): Comparer[T] =
+    lazy val fieldsComparer = ec
+    def fields(t: T): p.MirroredElemTypes = Tuple.fromProduct(t.asInstanceOf[Product]).asInstanceOf[p.MirroredElemTypes]
+    t1 => t2 => fieldsComparer(fields(t1))(fields(t2))
+
+  /**
+    * Method to create a Comparer for a sum type (an enum or a sealed trait).
+    *
+    * NOTE: the cast is safe because the case Comparer is only used when both values have the same ordinal, i.e. are of that case.
+    *
+    * @param s     the Mirror of T.
+    * @param cases the Comparers of the cases of T, in ordinal order (by-name, in case T is recursive).
+    * @tparam T the sum type.
+    * @return a Comparer[T].
+    */
+  private def sumComparer[T](s: Mirror.SumOf[T], cases: => List[Comparer[?]]): Comparer[T] =
+    lazy val caseComparers = cases.toVector
+    t1 => t2 =>
+      val (o1, o2) = (s.ordinal(t1), s.ordinal(t2))
+      intComparer(o1)(o2) orElse caseComparers(o1).asInstanceOf[Comparer[T]](t1)(t2)
+
+  /**
+    * Method to get a Comparer for each of the types in Ts (the cases of a sum type).
+    *
+    * @tparam Ts a tuple of types.
+    * @return a list of Comparers, in the same order as Ts.
+    */
+  private inline def caseComparers[Ts <: Tuple]: List[Comparer[?]] = inline erasedValue[Ts] match
+    case _: EmptyTuple => Nil
+    case _: (t *: ts) => caseComparer[t] :: caseComparers[ts]
+
+  /**
+    * Method to get a Comparer for A: the given one if there is one; otherwise one derived for A.
+    *
+    * @tparam A the type of one case of a sum type.
+    * @return a Comparer[A].
+    */
+  private inline def caseComparer[A]: Comparer[A] = summonFrom {
+    case c: Comparer[A] => c
+    case _ => derived[A](using summonInline[Mirror.Of[A]])
+  }
 
   /**
     * Following are the Comparer definitions for the common scalar types.
@@ -388,12 +454,16 @@ object Comparer:
     * The elements are compared in order, from the first (most significant) to the last (least significant).
     * This also provides the comparison of the fields for derived Comparers.
     *
+    * NOTE: hc and rc are by-name so that a recursive type can refer to its own Comparer (which is still being defined).
+    *
     * @tparam H the type of the first element.
     * @tparam R the type of the tuple of the remaining elements.
     * @return a Comparer[H *: R].
     */
-  given tupleComparer[H, R <: Tuple](using hc: Comparer[H], rc: Comparer[R]): Comparer[H *: R] =
-    t1 => t2 => hc(t1.head)(t2.head) orElse rc(t1.tail)(t2.tail)
+  given tupleComparer[H, R <: Tuple](using hc: => Comparer[H], rc: => Comparer[R]): Comparer[H *: R] =
+    lazy val headComparer = hc
+    lazy val restComparer = rc
+    t1 => t2 => headComparer(t1.head)(t2.head) orElse restComparer(t1.tail)(t2.tail)
 
   /**
     * The Comparer of Iterable[T] where T is any type that has a given Comparer.
