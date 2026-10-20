@@ -20,10 +20,9 @@ jobs:
             - v2-dependencies-{{ checksum "build.sbt" }}-{{ checksum "project/build.properties" }}
             - v2-dependencies-
 
-      # The + prefix runs each task for every version in crossScalaVersions (Scala 3 and 2.13).
       - run:
           name: Compile
-          command: sbt +Test/compile
+          command: sbt Test/compile
 
       - save_cache:
           paths:
@@ -34,7 +33,12 @@ jobs:
 
       - run:
           name: Test
-          command: sbt +test
+          command: sbt test
+
+      # The library is built with Scala 3.3 (LTS) but should also work on the current LTS.
+      - run:
+          name: Test (Scala 3.9)
+          command: sbt "++3.9.0!" test
 
 workflows:
   version: 2

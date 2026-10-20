@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019. Phasmid Software. Comparer: functional comparison library.
+ * Copyright (c) 2026. Phasmid Software. Comparer: functional comparison library.
  */
 
 package com.phasmidsoftware.sort
@@ -8,7 +8,6 @@ import com.phasmidsoftware.comparer.Comparer
 
 import scala.annotation.tailrec
 import scala.concurrent.{ExecutionContext, Future}
-import scala.language.{implicitConversions, postfixOps}
 import scala.reflect.ClassTag
 
 /**
@@ -16,19 +15,25 @@ import scala.reflect.ClassTag
   *
   * This is not really part of the Comparer/Comparison code and should probably not be here.
   *
-  * @param ts a sequence of T values/
-  * @tparam T the underlying type of the sequence (implicitly provides Comparer[T])
+  * @param ts       a sequence of T values.
+  * @param comparer the Comparer[T] which determines the order.
+  * @param ct       the ClassTag[T].
+  * @tparam T the underlying type of the sequence.
   */
-case class Sorted[T: Comparer : ClassTag](ts: Seq[T]) extends (() => Seq[T]) {
+case class Sorted[T](ts: Seq[T])(using comparer: Comparer[T], ct: ClassTag[T]) extends (() => Seq[T]):
 
-  private val ct = implicitly[Comparer[T]]
-
-  implicit val ordering: Ordering[T] = ct.toOrdering
-
-  def sort(o: Comparer[T]): Sorted[T] = Sorted(ts)(ct orElse o, implicitly[ClassTag[T]])
+  given ordering: Ordering[T] = comparer.toOrdering
 
   /**
-    * Use the system sort, based on the ordering specified by the implicit Comparer.
+    * Method to refine the order of this Sorted, using o whenever comparer yields Same.
+    *
+    * @param o the Comparer[T] to use as a tie-breaker.
+    * @return a new Sorted[T].
+    */
+  def sort(o: Comparer[T]): Sorted[T] = Sorted(ts)(using comparer orElse o, ct)
+
+  /**
+    * Use the system sort, based on the ordering specified by the given Comparer.
     *
     * @return a sorted sequence of T.
     */
@@ -37,30 +42,28 @@ case class Sorted[T: Comparer : ClassTag](ts: Seq[T]) extends (() => Seq[T]) {
   /**
     * Use the system sort (see apply) but the sort will be performed asynchronously.
     *
-    * @param ec an ExecutionContext.
     * @return a sorted sequence of T, wrapped in Future.
     */
-  def async(implicit ec: ExecutionContext): Future[Seq[T]] = Future(apply())
+  def async(using ExecutionContext): Future[Seq[T]] = Future(apply())
 
   /**
     * Use the parallel merge sort.
     *
-    * @param ec an ExecutionContext.
     * @return a sorted sequence of T, wrapped in Future.
     */
-  def parallel(implicit ec: ExecutionContext): Future[Seq[T]] = Sorted.mergeSort(ts)(ordering, implicitly[ClassTag[T]], ec, Sorted.TotalThreads)
-}
+  def parallel(using ExecutionContext): Future[Seq[T]] = Sorted.mergeSort(ts)
 
-object Sorted {
+object Sorted:
   /**
     * Method to create a Sorted(ts).
     * The result can then be sorted using sort, async, parSort, apply (sorted).
     *
     * @param ts a sequence of T values.
-    * @tparam T the type of the elements of ts (provides implicit Ordering[T]).
+    * @tparam T the type of the elements of ts (provides a given Ordering[T]).
     * @return an instance of Sorted.
     */
-  def create[T: Ordering : ClassTag](ts: Seq[T]): Sorted[T] = Sorted(ts)(implicitly[Ordering[T]], implicitly[ClassTag[T]])
+  def create[T: Ordering : ClassTag](ts: Seq[T]): Sorted[T] =
+    Sorted(ts)(using Comparer.fromOrdering(summon[Ordering[T]]), summon[ClassTag[T]])
 
   /**
     * Verify that the sequence ts is in fact in ascending order.
@@ -69,54 +72,50 @@ object Sorted {
     * @tparam T the type of the elements of ts.
     * @return true if all consecutive pairs of elements are in the correct order.
     */
-  def verify[T: Comparer](ts: Seq[T]): Boolean = ts.zip(ts.tail).forall(z => implicitly[Comparer[T]].<=(z._2)(z._1))
+  def verify[T: Comparer](ts: Seq[T]): Boolean = ts.zip(ts.tail).forall((t1, t2) => summon[Comparer[T]].<=(t2)(t1))
 
   /**
     * Perform sort in exactly two parallel processes, each using the system sort, based on the
-    * implicit Ordering[T] parameter.
+    * given Ordering[T].
     *
     * @param tst a tuple of two Seq[T].
-    * @param ec  an ExecutionContext
-    * @tparam T the underlying type to be sorted on, providing an implicit Ordering[T].
+    * @tparam T the underlying type to be sorted on, providing a given Ordering[T].
     * @return a sorted sequence of T, wrapped in Future.
     */
-  def parSort[T: Ordering](tst: (Seq[T], Seq[T]))(implicit ec: ExecutionContext): Future[Seq[T]] = map2(Future(tst._1.sorted), Future(tst._2.sorted))(merge)
+  def parSort[T: Ordering](tst: (Seq[T], Seq[T]))(using ExecutionContext): Future[Seq[T]] =
+    map2(Future(tst._1.sorted), Future(tst._2.sorted))(merge)
 
   /**
     * Invoke parSort on two equal partitions of ts.
     * TODO: implement parallel merge sort properly.
     *
     * @param ts      the sequence of T values to be sorted.
-    * @param ec      an ExecutionContext (implicit)
-    * @param threads the number of threads (implicit)
-    * @tparam T the underlying type to be sorted on, providing an implicit Ordering[T].
+    * @param threads the number of threads (defaults to TotalThreads).
+    * @tparam T the underlying type to be sorted on, providing a given Ordering[T].
     * @return a sorted sequence of T, wrapped in Future.
     */
-  def mergeSort[T: Ordering : ClassTag](ts: Seq[T])(implicit ec: ExecutionContext, threads: Threads): Future[Seq[T]] =
-    if (threads > 1) {
-      val f: Seq[T] => Future[Seq[T]] = mergeSort(_)(implicitly[Ordering[T]], implicitly[ClassTag[T]], ec, threads - 1)
+  def mergeSort[T: Ordering : ClassTag](ts: Seq[T], threads: Int = TotalThreads)(using ExecutionContext): Future[Seq[T]] =
+    if threads > 1 then
       val (l, r) = ts splitAt (ts.length / 2)
-      map2(f(l), f(r))(merge)
-    }
+      map2(mergeSort(l, threads - 1), mergeSort(r, threads - 1))(merge)
     else
       Future(mergeSortThread(ts))
 
-  type Threads = Int
-
-  implicit val TotalThreads: Threads = 2
+  /**
+    * The default number of threads for mergeSort.
+    */
+  val TotalThreads: Int = 2
 
   private val Cutoff = 8
 
   private def mergeSortThread[T: Ordering : ClassTag](ts: Seq[T]): Seq[T] =
-    if (ts.size > Cutoff) {
+    if ts.size > Cutoff then
       val (l, r) = ts splitAt (ts.length / 2)
       merge(mergeSortThread(l), mergeSortThread(r))
-    }
-    else {
+    else
       val a = ts.toArray
       InsertionSort.sort(a)
       a.toList
-    }
 
   /**
     * Method to merge the sorted sequences ts1 and ts2.
@@ -124,38 +123,35 @@ object Sorted {
     *
     * @param ts1 a sorted sequence of T values to be merged.
     * @param ts2 a sorted sequence of T values to be merged.
-    * @tparam T the underlying type to be sorted on, providing an implicit Ordering[T].
+    * @tparam T the underlying type to be sorted on, providing a given Ordering[T].
     * @return a sorted sequence of T.
     */
-  def merge[T: Ordering](ts1: Seq[T], ts2: Seq[T]): Seq[T] = {
-    val ordering = implicitly[Ordering[T]]
+  def merge[T: Ordering](ts1: Seq[T], ts2: Seq[T]): Seq[T] =
+    val ordering = summon[Ordering[T]]
 
-    @tailrec def inner(r: Seq[T], xs: Seq[T], ys: Seq[T]): Seq[T] = (xs, ys) match {
+    // NOTE: r is a Vector because appending to a List copies it, which would make merging quadratic.
+    @tailrec def inner(r: Vector[T], xs: List[T], ys: List[T]): Seq[T] = (xs, ys) match
       case (_, Nil) => r ++ xs
       case (Nil, _) => r ++ ys
       case (x :: xs1, y :: _) if ordering.lt(x, y) => inner(r :+ x, xs1, ys)
       case (_, y :: ys1) => inner(r :+ y, xs, ys1)
-    }
 
-    inner(Nil, ts1.toList, ts2.toList)
-  }
+    inner(Vector.empty, ts1.toList, ts2.toList)
 
   /**
-    * NOTE that ec is indeed used.
-    *
     * @param t1f a Future of Seq[T}.
     * @param t2f a Future of Seq[T}.
-    * @param f function to combine two Seq[T] lists.
-    * @param ec the execution context (required).
+    * @param f   function to combine two Seq[T] lists.
     * @tparam T the underlying type.
     * @return a Future of Seq[T].
     */
-  private def map2[T: Ordering](t1f: Future[Seq[T]], t2f: Future[Seq[T]])(f: (Seq[T], Seq[T]) => Seq[T])(implicit ec: ExecutionContext): Future[Seq[T]] = for {t1 <- t1f; t2 <- t2f} yield f(t1, t2)
+  private def map2[T](t1f: Future[Seq[T]], t2f: Future[Seq[T]])(f: (Seq[T], Seq[T]) => Seq[T])(using ExecutionContext): Future[Seq[T]] =
+    for t1 <- t1f; t2 <- t2f yield f(t1, t2)
 
   // NOTE: This is a second, superfluous version of insertionSort. However, I actually like this version more.
   //
   //  private def insertionSort[T: Ordering : ClassTag](ts: Seq[T]): Seq[T] = {
-  //    val to = implicitly[Ordering[T]]
+  //    val to = summon[Ordering[T]]
   //    val a = ts.toArray
   //    for (i <- a.indices) {
   //      for (j <- Range.inclusive(i - 1, 0, -1)) {
@@ -171,4 +167,3 @@ object Sorted {
   //    a.toList
   //  }
 
-}
