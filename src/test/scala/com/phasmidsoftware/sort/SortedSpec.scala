@@ -1,10 +1,10 @@
 /*
- * Copyright (c) 2019. Phasmid Software. Comparer: functional comparison library.
+ * Copyright (c) 2024. Phasmid Software. Comparer: functional comparison library.
  */
 
-package com.phasmidsoftware.comparer
+package com.phasmidsoftware.sort
 
-import com.phasmidsoftware.sort.Sorted
+import com.phasmidsoftware.comparer.{Comparer, Composite, DateF}
 import org.scalatest.concurrent.{Futures, ScalaFutures}
 import org.scalatest.{flatspec, matchers}
 
@@ -92,7 +92,7 @@ class SortedSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers with
     val d4 = DateF(1984, 6, 6)
     val d5 = DateF(2000, 3, 2)
     val list = List(d3, d5, d1, d2, d4)
-    implicit val comparer = Comparer[DateF, Int](_.year, _.month, _.day)
+    implicit val comparer: Comparer[DateF] = Comparer[DateF, Int](_.year, _.month, _.day)
     val sorted: Sorted[DateF] = Sorted(list)
     sorted() shouldBe List(d1, d2, d3, d4, d5)
   }
@@ -148,7 +148,7 @@ class SortedSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers with
   it should "merge sort large in parallel" in {
     import scala.concurrent.ExecutionContext.Implicits.global
     val r = Random
-    val list = LazyList.from(1).take(1000).map(_ => r.nextInt)
+    val list = LazyList.from(1).take(1000).map(_ => r.nextInt())
     import Sorted._
     val xsf = mergeSort(list)
     whenReady(xsf) { xs => verify(xs) }

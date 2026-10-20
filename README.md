@@ -1,14 +1,23 @@
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/9861f150f6e04200b991de30969ea536)](https://app.codacy.com/manual/scalaprof/Comparer?utm_source=github.com&utm_medium=referral&utm_content=rchillyard/Comparer&utm_campaign=Badge_Grade_Settings)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.phasmidsoftware/comparer_2.13/badge.svg?color=blue)](https://maven-badges.herokuapp.com/maven-central/com.phasmidsoftware_2.13/comparer/)
-[![CircleCI](https://circleci.com/gh/rchillyard/Comparer.svg?style=svg)](https://circleci.com/gh/rchillyard/Comparer)
-# Comparer A functional three-way comparer.
+![Sonatype Central](https://maven-badges.sml.io/sonatype-central/com.phasmidsoftware/comparer_2.13/badge.svg?color=blue)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/9861f150f6e04200b991de30969ea536)](https://app.codacy.com/gh/rchillyard/Comparer/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
+[![CircleCI](https://dl.circleci.com/status-badge/img/gh/rchillyard/Comparer/tree/master.svg?style=shield)](https://dl.circleci.com/status-badge/redirect/gh/rchillyard/Comparer/tree/master)
+![GitHub Top Languages](https://img.shields.io/github/languages/top/rchillyard/Comparer)
+![GitHub](https://img.shields.io/github/license/rchillyard/Comparer)
+![GitHub last commit](https://img.shields.io/github/last-commit/rchillyard/Comparer)
+![GitHub issues](https://img.shields.io/github/issues-raw/rchillyard/Comparer)
+![GitHub issues by-label](https://img.shields.io/github/issues/rchillyard/Comparer/bug)
+[![API Docs](https://javadoc.io/badge2/com.phasmidsoftware/comparer_2.13/javadoc.svg)](https://javadoc.io/doc/com.phasmidsoftware/comparer_2.13)
+
+# Comparer: a functional three-way comparer.
 
 ## Making _Comparer_ a dependency
 If you're using sbt, then include the following line (see the badge above for the current version):
 
-    libraryDependencies += "com.phasmidsoftware" %% "comparer" % "1.0.8"
+    libraryDependencies += "com.phasmidsoftware" %% "comparer" % "1.1.0"
     
-Please note that Comparer is currently built for Scala 2.13 only.
+Comparer is built for Scala 3 and Scala 2.13 (from version 1.1.0; earlier versions are Scala 2.13 only).
+
+Full Scaladoc is available via [javadoc.io](https://javadoc.io/doc/com.phasmidsoftware/comparer_2.13).
 
 ## Introduction
 Why do I say that this is a functional comparer? Because _Comparers_ can be composed!
@@ -487,3 +496,5 @@ Version 1.0.6 merged 1.0.5 with master branch.
 Version 1.0.7 improved usability slightly by moving compare method of Comparison into apply method of (new) Compare object.
 
 Version 1.0.8 improved support for comparing tuples.
+
+Version 1.1.0 adds Scala 3 support: Comparer is now cross-built for Scala 3 and Scala 2.13. No logic changes.

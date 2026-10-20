@@ -302,8 +302,8 @@ class ComparerSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers wi
     val comparer1: Comparer[Int] = implicitly[Comparer[Int]]
     val comparer2: Comparer[String] = implicitly[Comparer[String]]
     val comparer3: Comparer[(Int, String)] = comparer1 compose comparer2
-    val x: (Int, String) = Composite.unapply(c1a).get
-    val y: (Int, String) = Composite.unapply(c1z).get
+    val x: (Int, String) = (c1a.i, c1a.s)
+    val y: (Int, String) = (c1z.i, c1z.s)
     comparer3.tupled(x, y) shouldBe Less
   }
 
@@ -434,8 +434,8 @@ class ComparerSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers wi
     val comparer1: Comparer[Int] = implicitly[Comparer[Int]]
     val comparer2: Comparer[String] = implicitly[Comparer[String]]
     val comparer3: Comparer[(Int, String)] = comparer1 compose comparer2
-    val x: (Int, String) = Composite.unapply(c1a).get
-    val y: (Int, String) = Composite.unapply(c1z).get
+    val x: (Int, String) = (c1a.i, c1a.s)
+    val y: (Int, String) = (c1z.i, c1z.s)
     comparer3(x)(y) shouldBe More
   }
 
@@ -604,9 +604,9 @@ object DateF {
 case class DateJ(year: Int, month: Int, day: Int)
 
 object DateJ {
-  val comparerYear: Comparer[DateJ] = t1 => t2 => Comparison(t1.year)(t2.year)
-  val comparerMonth: Comparer[DateJ] = t1 => t2 => Comparison(t1.month)(t2.month)
-  val comparerDay: Comparer[DateJ] = t1 => t2 => Comparison(t1.day)(t2.day)
+  val comparerYear: Comparer[DateJ] = Comparer.intComparer.snap(_.year)
+  val comparerMonth: Comparer[DateJ] = Comparer.intComparer.snap(_.month)
+  val comparerDay: Comparer[DateJ] = Comparer.intComparer.snap(_.day)
   implicit val comparerDateJ: Comparer[DateJ] = comparerYear orElse comparerMonth orElse comparerDay
   implicit val orderingDateJ: Ordering[DateJ] = comparerDateJ.toOrdering
 }
