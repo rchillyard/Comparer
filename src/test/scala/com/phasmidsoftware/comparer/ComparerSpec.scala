@@ -418,6 +418,11 @@ class ComparerSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers wi
     val target1 = Comparer.same[Int]
     target1(1)(2) shouldBe Same
 
+  it should "implement comparer" in:
+    val comparer: Comparer[Composite] = Comparer.comparer(_.i)
+    comparer.compare(c1a, c2a) shouldBe Less
+    comparer.compare(c1a, c1z) shouldBe Same
+
   behavior of "merge"
   it should "work" in:
     val l1 = List(1, 5, 8, 10, 11, 15)

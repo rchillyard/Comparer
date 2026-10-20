@@ -24,6 +24,9 @@ class ComparisonSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers 
     Comparison.convert(-1).toInt shouldBe -1
     Comparison.convert(0).toInt shouldBe 0
     Comparison.convert(1).toInt shouldBe 1
+  it should "Comparison.apply(Boolean)" in:
+    Comparison(true) shouldBe Less
+    Comparison(false) shouldBe More
   it should "Comparison.apply(Option[Boolean])" in:
     Comparison(None) shouldBe Same
     Comparison(Some(false)) shouldBe More

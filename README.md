@@ -505,7 +505,7 @@ Version 2.0.0 is for Scala 3 only, and some of the API has changed:
 If you need Scala 2.13, use version 1.1.0, which is cross-built for Scala 2.13 and Scala 3.
 
 ### Colophon
-The specifications (i.e. unit tests) cover every class and nearly every method,
+The specifications (i.e. unit tests) cover every statement and every branch of the code (as of version 2.0.0),
 so it makes sense to resolve any doubtful points about usage by consulting them.
 To measure the coverage with sbt, run `sbt clean coverage test coverageReport`
 and open _target/scala-3.3.8/scoverage-report/index.html_.

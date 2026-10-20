@@ -59,3 +59,13 @@ class SortingSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers wit
     Sorting.mergeSort(array)
     Sorted.verify(array.toList) shouldBe true
     array.reverse.take(5) shouldBe Array(9054633673849498218L, 8937230293740383692L, 8613213585075034408L, 8543763135442756639L, 8358116205139703580L)
+  it should "sort a small array (by insertion sort)" in:
+    val array = Array(5, 3, 9, 1, 7, 2)
+    Sorting.mergeSort(array)
+    array shouldBe Array(1, 2, 3, 5, 7, 9)
+  it should "sort an array needing an odd number of merge passes" in:
+    // 50 elements need passes of width 8, 16 and 32, which leaves the result in the temporary buffer.
+    val array = RandomState(1L).stream.take(50).toArray
+    Sorting.mergeSort(array)
+    Sorted.verify(array.toList) shouldBe true
+    array.sorted shouldBe array

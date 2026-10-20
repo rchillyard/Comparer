@@ -67,7 +67,8 @@ object MergeSort extends Sort:
       while i < limit do
         InsertionSort.sort(data, i, i + startWidth)
         i += startWidth
-      if i < len then InsertionSort.sort(data, i, len)
+      // The loop above always leaves i < len (and, if i == len, this would do nothing).
+      InsertionSort.sort(data, i, len)
       var width = startWidth
       var step = startStep
       while width < len do
@@ -86,7 +87,8 @@ object MergeSort extends Sort:
         width *= 2
         step *= 2
 
-      if !(buf1 sameElements data) then System.arraycopy(buf1, 0, data, 0, len)
+      // After an odd number of passes, the result is in the temporary buffer.
+      if buf1 ne data then System.arraycopy(buf1, 0, data, 0, len)
 
   /**
     * Helper method for mergeSort, used to do a single "merge" between two

@@ -124,6 +124,11 @@ class SortedSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers with
     val xsf = sorted.parallel
     whenReady(xsf) { xs => xs shouldBe List(1, 2, 3, 4, 5, 6) }
 
+  it should "parSort" in:
+    import scala.concurrent.ExecutionContext.Implicits.global
+    val xsf = Sorted.parSort((List(5, 1, 3), List(4, 2, 6)))
+    whenReady(xsf) { xs => xs shouldBe List(1, 2, 3, 4, 5, 6) }
+
   it should "merge sort not in parallel" in:
     import scala.concurrent.ExecutionContext.Implicits.global
     val list = List(3, 1, 2, 4, 6, 5, 13, 7, 8)
