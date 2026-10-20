@@ -4,7 +4,6 @@
 
 package com.phasmidsoftware.comparer
 
-import com.phasmidsoftware.comparer.Comparison.{Less, More}
 import com.phasmidsoftware.sort.Sorted
 import org.scalatest.concurrent.{Futures, ScalaFutures}
 import org.scalatest.{flatspec, matchers}

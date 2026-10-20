@@ -118,8 +118,7 @@ The _apply_ method takes a variable list of lens functions, but they must all be
 Now, we've got the compiler doing some serious work for us.
 For each of the lens functions, the compiler will find the given _Comparer_ and apply the lens function to it (via _snap_).
 
-A typical usage of this in a specification might be
-(_Less_ and _More_ are in the companion object of _Comparison_, so this needs `import com.phasmidsoftware.comparer.Comparison.{Less, More}`):
+A typical usage of this in a specification might be:
 
     val today = Date(2019, 6, 5)
     val tomorrow = Date(2019, 6, 6)
@@ -416,7 +415,8 @@ From the application programmer's perspective, the following methods of _Compari
         */
       def apply[T: Comparer](t2: T)(t1: T): Comparison
 
-The cases _Same_ and _Different_ are exported at the package level, so you can refer to them without the _Comparison_ prefix.
+The cases _Same_ and _Different_, together with _Less_ and _More_, are exported at the package level,
+so `import com.phasmidsoftware.comparer.*` lets you refer to them without the _Comparison_ prefix.
 
 ### Kleenean
 A _Comparison_ is itself a form of three-valued logic, in which _More_ is true, _Less_ is false and _Same_ is indeterminate:
@@ -499,6 +499,7 @@ Version 2.0.0 is for Scala 3 only, and some of the API has changed:
 | `comparison()`, which yielded a `Kleenean` in which `Truth(true)` meant `Less` | `comparison.toKleenean`, in which `Truth(true)` means `More` (see [Kleenean](#kleenean)) |
 | `Comparison(Truth(true))` was `Less` | `Comparison(Truth(true))` is `More` (the inverse of `toKleenean`) |
 | `kleenean()` | `kleenean.toOption` |
+| `import com.phasmidsoftware.comparer.Comparison.{Less, More}` | No longer needed (but still works): they are exported at the package level |
 | `Thunk`, `Predicate`, `Sorted.Threads` (type aliases) | Removed |
 | `TupleWrangler.strip` | Removed |
 
@@ -519,7 +520,7 @@ This is a more functional approach and gives us the invaluable option of easily 
 Version 1.0.2 introduces a _Comparers_ trait which allows a programmer easily to get a comparer
 for a case class, assuming that the fields are in order from most to least significant.
 
-Version 1.0.3 adds compareIterable, compareList, compareArray, compareTry, compareEither and compare7 thru compare10. Also _Comparer of Boolean_.
+Version 1.0.3 adds comparerIterable, comparerList, comparerArray, comparerTry, comparerEither and comparer7 thru comparer10. Also _Comparer of Boolean_.
 
 Version 1.0.4 adds Functional module and provides support for Scala 2.13
 
