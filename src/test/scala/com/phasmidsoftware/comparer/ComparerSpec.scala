@@ -214,9 +214,9 @@ class ComparerSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers wi
 
   it should "evaluate operators on Int (tupled)" in:
     val comparer: Comparer[Int] = Comparer.fromOrdering(Ordering[Int])
-    comparer.>(1, 2) shouldBe false
-    comparer.>(1, 1) shouldBe false
-    comparer.>(2, 1) shouldBe true
+    comparer > (1, 2) shouldBe false
+    comparer > (1, 1) shouldBe false
+    comparer > (2, 1) shouldBe true
     comparer.<(1, 2) shouldBe true
     comparer.<(1, 1) shouldBe false
     comparer.<(2, 1) shouldBe false

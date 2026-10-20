@@ -51,7 +51,8 @@ enum Comparison:
     * @param c the other Comparison (eagerly evaluated).
     * @return a Comparison according to Kleenean logic.
     */
-  def &(c: Comparison): Comparison = Comparison.convert(math.min(toInt, c.toInt))
+  def &(c: Comparison): Comparison =
+    Comparison.convert(math.min(toInt, c.toInt))
 
   /**
     * Method to yield logical OR.
@@ -59,7 +60,8 @@ enum Comparison:
     * @param c the other Comparison (eagerly evaluated).
     * @return a Comparison according to Kleenean logic.
     */
-  def |(c: Comparison): Comparison = Comparison.convert(math.max(toInt, c.toInt))
+  def |(c: Comparison): Comparison =
+    Comparison.convert(math.max(toInt, c.toInt))
 
   /**
     * Method to yield logical AND with short-circuit logic.
@@ -68,11 +70,15 @@ enum Comparison:
     * @return a Comparison according to Kleenean logic.
     */
   def &&(c: => Comparison): Comparison = this match
-    case Different(true) => this
-    case Different(false) => c
+    case Different(true) =>
+      this
+    case Different(false) =>
+      c
     case Same => c match
-      case less@Different(true) => less
-      case _ => Same
+      case less@Different(true) =>
+        less
+      case _ =>
+        Same
 
   /**
     * Method to yield logical OR with short-circuit logic.
@@ -81,8 +87,10 @@ enum Comparison:
     * @return a Comparison according to Kleenean logic.
     */
   def ||(c: => Comparison): Comparison = this match
-    case Different(false) => this
-    case Different(true) => c
+    case Different(false) =>
+      this
+    case Different(true) =>
+      c
     case Same => c match
       case more@Different(false) => more
       case _ => Same
@@ -93,8 +101,10 @@ enum Comparison:
     * @return if Same then 0 else if Different(true) then -1 else 1
     */
   def toInt: Int = this match
-    case Same => 0
-    case Different(less) => if less then -1 else 1
+    case Same =>
+      0
+    case Different(less) =>
+      if less then -1 else 1
 
   /**
     * Method to compose this with another Comparison.
@@ -121,9 +131,11 @@ enum Comparison:
     *
     * @return "Same", "Less" or "More".
     */
-  override def toString(): String = this match
-    case Same => "Same"
-    case Different(less) => if less then "Less" else "More"
+  override def toString: String = this match
+    case Same =>
+      "Same"
+    case Different(less) =>
+      if less then "Less" else "More"
 
 /**
   * Companion object for Comparison.
@@ -162,7 +174,8 @@ object Comparison:
     * @param bo Some(true) for Less, Some(false) for More, None for Same.
     * @return the corresponding Comparison.
     */
-  def apply(bo: Option[Boolean]): Comparison = bo.fold(Same)(Different(_))
+  def apply(bo: Option[Boolean]): Comparison =
+    bo.fold(Same)(Different(_))
 
   /**
     * Method to construct a Comparison from a Java-style comparison result.
@@ -171,7 +184,8 @@ object Comparison:
     *          Typically, this is the result of a Java-style comparison.
     * @return the homologous Comparison for x, either Same or Different(b) where b is true if x is negative.
     */
-  def convert(x: Int): Comparison = if x == 0 then Same else Different(x < 0)
+  def convert(x: Int): Comparison =
+    if x == 0 then Same else Different(x < 0)
 
   /**
     * Method to construct a Comparison from two objects of type T (curried form).
