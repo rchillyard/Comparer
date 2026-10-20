@@ -479,7 +479,7 @@ object Comparer:
     * @return a Comparer of Iterable[T] which can compare two instances of Iterable[T] and return a Comparison.
     */
   given comparerIterable[T: Comparer]: Comparer[Iterable[T]] =
-  ts2 => ts1 => comparePrefixes(ts1, ts2)
+    ts2 => ts1 => comparePrefixes(ts1, ts2)
 
   /**
     * The Comparer of Seq[T] where T is any type that has a given Comparer (see comparerIterable).
