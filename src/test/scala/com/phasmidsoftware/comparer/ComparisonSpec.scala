@@ -30,16 +30,22 @@ class ComparisonSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers 
     Comparison(Some(true)) shouldBe Less
   it should "Comparison.apply(Kleenean)" in:
     Comparison(Maybe) shouldBe Same
-    Comparison(Truth(false)) shouldBe More
-    Comparison(Truth(true)) shouldBe Less
-  it should "apply() 1" in:
-    Comparison(None)() should matchPattern { case Maybe => }
-    Comparison(Some(false))() should matchPattern { case Truth(false) => }
-    Comparison(Some(true))() should matchPattern { case Truth(true) => }
-  it should "apply() 2" in:
-    Same() should matchPattern { case Maybe => }
-    Different(false)() should matchPattern { case Truth(false) => }
-    Different(true)() should matchPattern { case Truth(true) => }
+    Comparison(Truth(true)) shouldBe More
+    Comparison(Truth(false)) shouldBe Less
+  it should "toKleenean" in:
+    Same.toKleenean shouldBe Maybe
+    More.toKleenean shouldBe Truth(true)
+    Less.toKleenean shouldBe Truth(false)
+  it should "convert to and from Kleenean" in:
+    for c <- List(Less, Same, More) do Comparison(c.toKleenean) shouldBe c
+  it should "convert to Kleenean consistently with the logical operators and toInt" in:
+    val all = List(Less, Same, More)
+    for c <- all do c.toKleenean.toInt shouldBe c.toInt
+    for c1 <- all; c2 <- all do
+      (c1 & c2).toKleenean shouldBe (c1.toKleenean & c2.toKleenean)
+      (c1 | c2).toKleenean shouldBe (c1.toKleenean | c2.toKleenean)
+      (c1 && c2).toKleenean shouldBe (c1.toKleenean & c2.toKleenean)
+      (c1 || c2).toKleenean shouldBe (c1.toKleenean | c2.toKleenean)
   it should "flip" in:
     More.flip shouldBe Less
     Less.flip shouldBe More

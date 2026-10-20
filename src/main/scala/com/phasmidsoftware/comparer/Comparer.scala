@@ -59,7 +59,7 @@ trait Comparer[T] extends (T => T => Comparison):
     * @return a Boolean which is true if the left T is greater than the right T.
     */
   def >(t1: T)(t2: T): Boolean =
-    this(t1)(t2).flip().getOrElse(false)
+    this(t1)(t2) == Comparison.More
 
   /**
     * Method to yield a Boolean from this Comparer, given two curried Ts.
@@ -69,7 +69,7 @@ trait Comparer[T] extends (T => T => Comparison):
     * @return a Boolean which is true if the left T is less than the right T.
     */
   def <(t1: T)(t2: T): Boolean =
-    this(t1)(t2)().getOrElse(false)
+    this(t1)(t2) == Comparison.Less
 
   /**
     * Method to yield a Boolean from this Comparer, given two curried Ts.
@@ -79,7 +79,7 @@ trait Comparer[T] extends (T => T => Comparison):
     * @return a Boolean which is true if the Ts compare as the same.
     */
   def ==(t1: T)(t2: T): Boolean =
-    this(t1)(t2)() == Maybe
+    this(t1)(t2) == Same
 
   /**
     * Method to yield a Boolean from this Comparer, given two curried Ts.

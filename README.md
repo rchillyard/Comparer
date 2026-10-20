@@ -324,7 +324,7 @@ All of these given instances are in the companion object of _Comparer_, so you n
 
 From the application programmer's perspective, the following methods of _Comparison_ are important:
 
-    enum Comparison extends (() => Kleenean):
+    enum Comparison:
     
       /**
         * Sameness (two objects compare as equal).
@@ -339,11 +339,12 @@ From the application programmer's perspective, the following methods of _Compari
       case Different(less: Boolean)
     
       /**
-        * Method to eagerly evaluate this Comparison.
+        * Method to convert this Comparison into a Kleenean:
+        * More is Truth(true), Less is Truth(false) and Same is Maybe.
         *
-        * @return a Kleenean.
+        * @return the homologous Kleenean.
         */
-      def apply(): Kleenean
+      def toKleenean: Kleenean
     
       /**
         * Method to yield logical AND with short-circuit logic.
@@ -410,9 +411,12 @@ From the application programmer's perspective, the following methods of _Compari
 The cases _Same_ and _Different_ are exported at the package level, so you can refer to them without the _Comparison_ prefix.
 
 ### Kleenean
-The result of evaluating a _Comparison_ is a _Kleenean_: a three-valued logic type.
-It is an enum whose cases are _Maybe_ and _Truth(b)_ (also exported at the package level).
-_Kleenean_ evaluates to an _Option of Boolean_.
+A _Comparison_ is itself a form of three-valued logic, in which _More_ is true, _Less_ is false and _Same_ is indeterminate:
+that is the sense of its _&_, _|_, _&&_, _||_ and _toInt_ methods.
+Its _toKleenean_ method converts it into the equivalent _Kleenean_, a general three-valued logic type,
+such that the logical operators give the same results either side of the conversion.
+_Kleenean_ is an enum whose cases are _Maybe_ and _Truth(b)_ (also exported at the package level).
+Its _toOption_ method yields an _Option of Boolean_.
 
 ### Derived comparers
 You can derive a _Comparer_ for a case class (or other _Product_) simply by adding _derives Comparer_.
@@ -481,6 +485,10 @@ Version 2.0.0 is for Scala 3 only, and some of the API has changed:
 | `Comparison.convert(x)` as an implicit conversion | `Comparison.convert(x)`, called explicitly |
 | `implicit val c: Comparer[T] = ...` | `given Comparer[T] = ...` (`implicit val` still works) |
 | `Sorted.mergeSort(ts)` with an implicit `Threads` | `Sorted.mergeSort(ts)` or `Sorted.mergeSort(ts, threads)` |
+| `comparison()`, which yielded a `Kleenean` in which `Truth(true)` meant `Less` | `comparison.toKleenean`, in which `Truth(true)` means `More` (see [Kleenean](#kleenean)) |
+| `Comparison(Truth(true))` was `Less` | `Comparison(Truth(true))` is `More` (the inverse of `toKleenean`) |
+| `kleenean()` | `kleenean.toOption` |
+| `Thunk`, `Predicate` (type aliases) | Removed |
 | `TupleWrangler.strip` | Removed |
 
 If you need Scala 2.13, use version 1.1.0, which is cross-built for Scala 2.13 and Scala 3.
@@ -515,5 +523,6 @@ Version 1.1.0 adds Scala 3 support: Comparer is now cross-built for Scala 3 and 
 
 Version 2.0.0 is for Scala 3 only (built with Scala 3.3, so usable from 3.3 or later), and adopts Scala 3 idioms throughout:
 _derives Comparer_ for case classes, enums and sealed traits, a single given _Comparer_ for tuples of any size,
-given instances in place of implicits, and enums for _Comparison_ and _Kleenean_.
+given instances in place of implicits, and enums for _Comparison_ and _Kleenean_
+(which are no longer functions: use _toKleenean_ and _toOption_).
 See [Migrating from 1.x](#migrating-from-1x).

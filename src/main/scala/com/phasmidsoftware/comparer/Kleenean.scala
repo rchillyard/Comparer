@@ -8,11 +8,11 @@ package com.phasmidsoftware.comparer
   * Enumeration which models a three-valued logic based on the algebra of Stephen C. Kleene.
   * See https://en.wikipedia.org/wiki/Three-valued_logic
   *
-  * A Kleenean can be lazily converted to an Option[Boolean] when required.
+  * A Kleenean can be converted to an Option[Boolean] when required (see toOption).
   *
   * NOTE: the cases are exported at the package level, so that they can be referred to simply as Maybe and Truth.
   */
-enum Kleenean extends Thunk[Option[Boolean]]:
+enum Kleenean:
 
   /**
     * The indeterminate state of a Kleenean, neither true nor false.
@@ -27,11 +27,11 @@ enum Kleenean extends Thunk[Option[Boolean]]:
   case Truth(b: Boolean)
 
   /**
-    * Apply method to convert this Kleenean to an Option[Boolean].
+    * Method to convert this Kleenean to an Option[Boolean].
     *
     * @return None if this is Maybe, otherwise Some(b).
     */
-  def apply(): Option[Boolean] = this match
+  def toOption: Option[Boolean] = this match
     case Maybe => None
     case Truth(b) => Some(b)
 

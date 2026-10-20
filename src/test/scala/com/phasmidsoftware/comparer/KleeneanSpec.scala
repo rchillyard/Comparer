@@ -25,10 +25,10 @@ class KleeneanSpec extends AnyFlatSpec with Matchers:
     Truth(true).getOrElse(false) shouldBe true
     Truth(false).getOrElse(false) shouldBe false
 
-  it should "apply()" in:
-    Maybe() shouldBe None
-    Truth(true)() shouldBe Some(true)
-    Truth(false)() shouldBe Some(false)
+  it should "toOption" in:
+    Maybe.toOption shouldBe None
+    Truth(true).toOption shouldBe Some(true)
+    Truth(false).toOption shouldBe Some(false)
 
   it should "apply" in:
     Kleenean(0) shouldBe Maybe

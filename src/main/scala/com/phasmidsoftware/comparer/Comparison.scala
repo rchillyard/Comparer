@@ -5,7 +5,7 @@
 package com.phasmidsoftware.comparer
 
 /**
-  * Enumeration which embodies the behavior of a lazy, three-way comparison.
+  * Enumeration which embodies the result of a three-way comparison.
   *
   * The problem with the Java style of comparing, which Scala also uses, is that you cannot easily compose
   * comparisons. A typical comparison of two quantities compares the two most significant quantities, then,
@@ -13,17 +13,15 @@ package com.phasmidsoftware.comparer
   * less significant quantities is returned. This requires saving the value of the first comparison in a (final) variable.
   * But yuck!
   *
-  * Although it would be possible to write this eagerly, or simply replace it with an Option[Boolean],
-  * there is some slight advantage in defining it lazily.
-  * In many situations we use pattern-matching rather than evaluation of the Comparison value.
+  * Comparisons compose lazily: orElse (and the short-circuit operators) only evaluate their other Comparison when needed.
+  * In many situations we use pattern-matching on the Comparison value.
   *
-  * NOTE: also that Comparison is a form of three-valued logic.
-  * which does not correspond exactly to the the indeterminate state.
-  * We can generate a Kleenean object by invoking the Comparison's apply method.
+  * NOTE: also that Comparison is a form of three-valued logic, in which More is true, Less is false and Same is indeterminate.
+  * That is the sense of &, |, &&, || and toInt, and of the Kleenean yielded by toKleenean.
   *
   * NOTE: the cases are exported at the package level, so that they can be referred to simply as Same and Different.
   */
-enum Comparison extends Thunk[Kleenean]:
+enum Comparison:
 
   /**
     * Sameness (two objects compare as equal).
@@ -38,13 +36,14 @@ enum Comparison extends Thunk[Kleenean]:
   case Different(less: Boolean)
 
   /**
-    * Method to eagerly evaluate this Comparison.
+    * Method to convert this Comparison into a Kleenean.
+    * The conversion is consistent with &, |, and toInt: More is Truth(true), Less is Truth(false) and Same is Maybe.
     *
-    * @return Maybe if this is Same, otherwise Truth(less).
+    * @return the homologous Kleenean.
     */
-  def apply(): Kleenean = this match
+  def toKleenean: Kleenean = this match
     case Same => Maybe
-    case Different(less) => Truth(less)
+    case Different(less) => Truth(!less)
 
   /**
     * Method to yield logical AND.
@@ -140,28 +139,28 @@ object Comparison:
   val Less: Comparison = Different(true)
 
   /**
-    * Method to construct a Comparison from a Boolean.
+    * Method to construct a Comparison from a Boolean which, as with Different, says whether the comparison is less.
     *
-    * @param b true or false.
+    * @param b true for Less, false for More.
     * @return Different(b)
     */
   def apply(b: Boolean): Comparison = Different(b)
 
   /**
-    * Method to construct a Comparison from a Kleenean.
+    * Method to construct a Comparison from a Kleenean (the inverse of toKleenean).
     *
     * @param k a Kleenean.
-    * @return the homologous Comparison for the input.
+    * @return More if k is Truth(true), Less if k is Truth(false), otherwise Same.
     */
   def apply(k: Kleenean): Comparison = k match
-    case Truth(b) => Different(b)
+    case Truth(b) => Different(!b)
     case Maybe => Same
 
   /**
-    * Method to construct a Comparison from an Option[Boolean].
+    * Method to construct a Comparison from an Option[Boolean] which, as with Different, says whether the comparison is less.
     *
-    * @param bo an optional Boolean.
-    * @return the homologous Comparison for the input.
+    * @param bo Some(true) for Less, Some(false) for More, None for Same.
+    * @return the corresponding Comparison.
     */
   def apply(bo: Option[Boolean]): Comparison = bo.fold(Same)(Different(_))
 
