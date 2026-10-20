@@ -181,6 +181,6 @@ object Comparison:
     * @param t2 the inner T.
     * @param t1 the outer T.
     * @tparam T the type of both t1 and t2, which type must also provide a given Comparer[T].
-    * @return a Comparison, resulting from applying the comparer to t1 and its result to t2.
+    * @return a Comparison, resulting from applying the comparer to t2 and its result to t1.
     */
   def apply[T: Comparer](t2: T)(t1: T): Comparison = summon[Comparer[T]](t2)(t1)

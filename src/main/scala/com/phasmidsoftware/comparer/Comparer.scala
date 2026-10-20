@@ -226,13 +226,13 @@ trait Comparer[T] extends (T => T => Comparison):
   /**
     * Method to invert the sense of a Comparer.
     *
-    * @return a Compare[T] which, given the same tuple of Ts, yields the complementary Comparison to this Comparer.
+    * @return a Comparer[T] which, given the same tuple of Ts, yields the complementary Comparison to this Comparer.
     */
   def invert: Comparer[T] = transform(_.flip)
 
   /**
     * Method to compose this Comparer[T] with a Comparer[U] that is formed from the given "lens" function.
-    * See, for example, the definition of the Comparer in object DateF (in CompareSpec).
+    * See, for example, the definition of the Comparer in object DateF (in ComparerSpec).
     * Of all the methods which result in a new Comparer, this one is probably the most useful.
     *
     * The resulting Comparer[T] is formed by using orElse to compose this Comparer[T] with a Comparer[T] that:
@@ -251,7 +251,7 @@ trait Comparer[T] extends (T => T => Comparison):
 
   /**
     * Method to compose this Comparer[T] with a "lens" function that operates on a T.
-    * See, for example, the definition of the Comparer in object DateF (in CompareSpec).
+    * See, for example, the definition of the Comparer in object DateF (in ComparerSpec).
     *
     * The resulting Comparer[T] is formed by using orElseNot to compose this Comparer[T] with a Comparer[T] that:
     * is formed by using the "lens" function lens to snap the given Comparer[U] into a Comparer[T].

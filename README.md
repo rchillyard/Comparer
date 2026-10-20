@@ -118,7 +118,8 @@ The _apply_ method takes a variable list of lens functions, but they must all be
 Now, we've got the compiler doing some serious work for us.
 For each of the lens functions, the compiler will find the given _Comparer_ and apply the lens function to it (via _snap_).
 
-A typical usage of this in a specification might be:
+A typical usage of this in a specification might be
+(_Less_ and _More_ are in the companion object of _Comparison_, so this needs `import com.phasmidsoftware.comparer.Comparison.{Less, More}`):
 
     val today = Date(2019, 6, 5)
     val tomorrow = Date(2019, 6, 6)
@@ -152,7 +153,7 @@ This makes sense since the T values being compared are not related and so don't 
 part of a tuple.
 It also allows the use of a partially applied comparer.
 Note that, when curried parameters are used, we compare the outer (last) parameter with the inner,
-whereas when tupled parameters are used, it is conventional to compare the first parameter the second.
+whereas when tupled parameters are used, it is conventional to compare the first parameter with the second.
 
     trait Comparer[T] extends (T => T => Comparison):
     
@@ -227,19 +228,19 @@ whereas when tupled parameters are used, it is conventional to compare the first
       /**
         * Method to invert the sense of a Comparer.
         *
-        * @return a Compare[T] which, given the same tuple of Ts, yields the complementary Comparison to this Comparer.
+        * @return a Comparer[T] which, given the same tuple of Ts, yields the complementary Comparison to this Comparer.
         */
       def invert: Comparer[T]
     
       /**
         * Method to compose this Comparer[T] with a "lens" function that operates on a T.
-        * See, for example, the definition of the Comparer in object Date (in CompareSpec).
+        * See, for example, the definition of the Comparer in object DateF (in ComparerSpec).
         *
         * The resulting Comparer[T] is formed by using orElse to compose this Comparer[T] with a Comparer[T] that:
         * is formed by using the "lens" function lens to snap the given Comparer[U] into a Comparer[T].
         *
         * This method is used primarily when chaining together several Comparers, each of which is derived from the given function
-        * by invoking snap on a given Comparer, with the a specified function.
+        * by invoking snap on a given Comparer, with a specified function.
         * The initial value is typically provided by the "same" method of Comparer's companion object.
         * 
         * There is a similar method :|! which invokes orElseNot instead of orElse.
@@ -260,6 +261,13 @@ whereas when tupled parameters are used, it is conventional to compare the first
         * @return a Comparer[T] which always evaluates to Same.
         */
       def same[T]: Comparer[T]
+    
+      /**
+        * Method to construct a Comparer from a variable-length list of lens functions, all of the same type (T=>U).
+        *
+        * @return a Comparer[T] which applies each lens (via :|) in turn.
+        */
+      def apply[T, U: Comparer](lenses: (T => U)*): Comparer[T]
     
       /**
         * Method to create a Comparer[T] from an Ordering[T].
@@ -292,7 +300,7 @@ whereas when tupled parameters are used, it is conventional to compare the first
       /**
         * The Comparer for a tuple of any size, whose elements are compared in order.
         */
-      given tupleComparer[H, R <: Tuple](using hc: Comparer[H], rc: Comparer[R]): Comparer[H *: R]
+      given tupleComparer[H, R <: Tuple](using hc: => Comparer[H], rc: => Comparer[R]): Comparer[H *: R]
     
       /**
         * Comparers for "wrapper" types (see below).
@@ -404,7 +412,7 @@ From the application programmer's perspective, the following methods of _Compari
         * @param t2 the inner T.
         * @param t1 the outer T.
         * @tparam T the type of both t1 and t2, which type must also provide a given Comparer[T].
-        * @return a Comparison, resulting from applying the comparer to the tuple of t1 and t2.
+        * @return a Comparison, resulting from applying the comparer to t2 and its result to t1.
         */
       def apply[T: Comparer](t2: T)(t1: T): Comparison
 
@@ -434,10 +442,13 @@ so long as the type they wrap has a given _Comparer_:
 * _comparerArray_: _Comparer[Array[T]]_
 * _comparerOpt_: _Comparer[Option[T]]_
 * _comparerTry_: _Comparer[Try[T]]_
-* _comparerEither: Comparer[Either[_,T]]_
+* _comparerEither_: _Comparer[Either[L, T]]_
 
 So, if your case class happens to include a tuple, an iterable (sequence or list), array, optional, try or "either" types,
 you can still derive its _Comparer_ and the types will be handled.
+Note two conventions of these _Comparers_: iterables (and arrays) are compared only as far as the shorter of the two
+(use _Comparer.compareAll_ if the longer one should count as greater);
+and any comparison involving _None_, a _Failure_ or a _Left_ yields _Same_.
 There is no limit on the number of fields.
 
 You can also derive a _Comparer_ for an enum or a sealed trait.
@@ -481,14 +492,14 @@ Version 2.0.0 is for Scala 3 only, and some of the API has changed:
 | `extends Comparers` to get `comparerOpt`, `comparerSeq`, etc. | Nothing: they are given in `Comparer`'s companion |
 | `Comparers.comparePrefixes`, `compareAll` | `Comparer.comparePrefixes`, `Comparer.compareAll` |
 | `tuple2` thru `tuple9` | `tupleComparer`, for tuples of any size |
-| `val c: Comparer[Int] = Ordering[Int]` (implicit conversion) | `val c = Comparer.fromOrdering(Ordering[Int])` |
+| `val c: Comparer[Int] = Ordering[Int]` (implicit conversion), or `Comparer.convert(ordering)` | `val c = Comparer.fromOrdering(Ordering[Int])` |
 | `Comparison.convert(x)` as an implicit conversion | `Comparison.convert(x)`, called explicitly |
 | `implicit val c: Comparer[T] = ...` | `given Comparer[T] = ...` (`implicit val` still works) |
 | `Sorted.mergeSort(ts)` with an implicit `Threads` | `Sorted.mergeSort(ts)` or `Sorted.mergeSort(ts, threads)` |
 | `comparison()`, which yielded a `Kleenean` in which `Truth(true)` meant `Less` | `comparison.toKleenean`, in which `Truth(true)` means `More` (see [Kleenean](#kleenean)) |
 | `Comparison(Truth(true))` was `Less` | `Comparison(Truth(true))` is `More` (the inverse of `toKleenean`) |
 | `kleenean()` | `kleenean.toOption` |
-| `Thunk`, `Predicate` (type aliases) | Removed |
+| `Thunk`, `Predicate`, `Sorted.Threads` (type aliases) | Removed |
 | `TupleWrangler.strip` | Removed |
 
 If you need Scala 2.13, use version 1.1.0, which is cross-built for Scala 2.13 and Scala 3.
