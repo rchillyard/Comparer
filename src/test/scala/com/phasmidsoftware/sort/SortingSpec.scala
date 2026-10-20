@@ -46,7 +46,7 @@ class SortingSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers wit
 
   it should "sort List[DateJ]" in {
     def getRandomIntStream(n: Int): LazyList[Int] = {
-      def modulo(n: Int): Long => Int = { l: Long => math.abs(l.toInt) % n }
+      def modulo(n: Int): Long => Int = { (l: Long) => math.abs(l.toInt) % n }
 
       RandomState(0L).stream.take(100).map(modulo(n))
     }

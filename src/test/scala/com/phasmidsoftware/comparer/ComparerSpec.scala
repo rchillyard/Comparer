@@ -302,8 +302,8 @@ class ComparerSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers wi
     val comparer1: Comparer[Int] = implicitly[Comparer[Int]]
     val comparer2: Comparer[String] = implicitly[Comparer[String]]
     val comparer3: Comparer[(Int, String)] = comparer1 compose comparer2
-    val x: (Int, String) = Composite.unapply(c1a).get
-    val y: (Int, String) = Composite.unapply(c1z).get
+    val x: (Int, String) = (c1a.i, c1a.s)
+    val y: (Int, String) = (c1z.i, c1z.s)
     comparer3.tupled(x, y) shouldBe Less
   }
 
@@ -434,8 +434,8 @@ class ComparerSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers wi
     val comparer1: Comparer[Int] = implicitly[Comparer[Int]]
     val comparer2: Comparer[String] = implicitly[Comparer[String]]
     val comparer3: Comparer[(Int, String)] = comparer1 compose comparer2
-    val x: (Int, String) = Composite.unapply(c1a).get
-    val y: (Int, String) = Composite.unapply(c1z).get
+    val x: (Int, String) = (c1a.i, c1a.s)
+    val y: (Int, String) = (c1z.i, c1z.s)
     comparer3(x)(y) shouldBe More
   }
 

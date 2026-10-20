@@ -8,7 +8,7 @@ If you're using sbt, then include the following line (see the badge above for th
 
     libraryDependencies += "com.phasmidsoftware" %% "comparer" % "1.0.8"
     
-Please note that Comparer is currently built for Scala 2.13 only.
+Comparer is built for Scala 3 and Scala 2.13 (from version 1.1.0; earlier versions are Scala 2.13 only).
 
 Full Scaladoc is available via [javadoc.io](https://javadoc.io/doc/com.phasmidsoftware/comparer_2.13).
 
@@ -489,3 +489,5 @@ Version 1.0.6 merged 1.0.5 with master branch.
 Version 1.0.7 improved usability slightly by moving compare method of Comparison into apply method of (new) Compare object.
 
 Version 1.0.8 improved support for comparing tuples.
+
+Version 1.1.0 adds Scala 3 support: Comparer is now cross-built for Scala 3 and Scala 2.13. No logic changes.
