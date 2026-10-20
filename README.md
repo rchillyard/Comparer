@@ -143,167 +143,78 @@ Now, we've really got the compiler doing some serious work for us!
 
 ## API
 
-The chief methods of the API are as follows:
+This is a summary of the public API. The Scaladoc (see the badge above) has the details.
 
 ### Comparer
 
-Comparer extends the (curried) function _T => T => Comparison_.
-This makes sense since the T values being compared are not related and so don't naturally form
-part of a tuple.
-It also allows the use of a partially applied comparer.
-Note that, when curried parameters are used, we compare the outer (last) parameter with the inner,
-whereas when tupled parameters are used, it is conventional to compare the first parameter with the second.
+_Comparer_ extends the curried function _T => T => Comparison_.
+That makes sense, since the two _T_ values being compared are unrelated and so don't naturally form a tuple,
+and it allows a partially applied comparer.
+With the curried form, the outer (second) parameter is compared with the inner (first) one:
+_comparer(1)(2)_ is _More_, because 2 is more than 1.
+With the tupled forms, the first parameter is compared with the second, as usual:
+_comparer.compare(1, 2)_ is _Less_.
 
     trait Comparer[T] extends (T => T => Comparison):
-    
-      /**
-        * Method to convert this Comparer[T] into an Ordering[T] which can then be used for more typical Java/Scala-style comparisons.
-        *
-        * @return a new Ordering[T].
-        */
-      def toOrdering: Ordering[T]
-    
-      /**
-        * The following methods are defined both in tupled and curried signatures (only the tupled forms are shown here).
-        * When you use these tupled forms, the compiler doesn't need an extra set of parentheses.
-        */
-      def >(tt: (T, T)): Boolean
-    
-      def <(tt: (T, T)): Boolean
-    
-      def ==(tt: (T, T)): Boolean
-    
-      def >=(tt: (T, T)): Boolean
-    
-      def <=(tt: (T, T)): Boolean
-    
-      def !=(tt: (T, T)): Boolean
-    
-      /**
-        * Method to apply a lens function U=>T to this Comparer[T], resulting in a Comparer[U].
-        * The U values that are the inputs to the resulting Comparer, are passed to the lens function to
-        * yield a suitable pair of T values which can then be passed into this Comparer.
-        *
-        * I originally considered this the infamous "unMap" method which is part of an un-monad.
-        * Observe that the lens function is U=>T instead of T=>U which would be the parameter of a monadic map method.
-        * In case you're wondering, an un-monad is the wrappee as opposed to the wrapper (which would be a monad).
-        * However, I think it makes slightly more sense to call this snap because it creates something (kind of like a picture)
-        * by using a lens.
-        *
-        * @param lens a function which takes a U and returns a T.
-        * @tparam U the underlying type of the returned Comparer.
-        * @return a Comparer[U].
-        */
-      infix def snap[U](lens: U => T): Comparer[U]
-    
-      /**
-        * A method to compose this Comparer with another Comparer of a different underlying type.
-        *
-        * @param uc a Comparer[U].
-        * @tparam U the underlying type of uc.
-        * @return a Comparer of tuples each comprising a T and a U.
-        */
-      infix def compose[U](uc: => Comparer[U]): Comparer[(T, U)]
-    
-      /**
-        * Compose this Comparer with another Comparer of the same underlying type.
-        *
-        * There is also a similar method orElseNot which flips the sense of tc.
-        *
-        * @param tc the other Comparer (lazily evaluated).
-        * @return the result of applying this Comparer unless it yields Same, in which case we invoke the other Comparer.
-        */
-      infix def orElse(tc: => Comparer[T]): Comparer[T]
-    
-      /**
-        * A non-monadic transform method which transforms this Comparer into a different Comparer,
-        * but of the same underlying type. NOTE: this was formerly called map.
-        *
-        * @param f the function which takes a Comparison and yields a different Comparison.
-        * @return a new Comparer[T].
-        */
-      def transform(f: Comparison => Comparison): Comparer[T]
-    
-      /**
-        * Method to invert the sense of a Comparer.
-        *
-        * @return a Comparer[T] which, given the same tuple of Ts, yields the complementary Comparison to this Comparer.
-        */
-      def invert: Comparer[T]
-    
-      /**
-        * Method to compose this Comparer[T] with a "lens" function that operates on a T.
-        * See, for example, the definition of the Comparer in object DateF (in ComparerSpec).
-        *
-        * The resulting Comparer[T] is formed by using orElse to compose this Comparer[T] with a Comparer[T] that:
-        * is formed by using the "lens" function lens to snap the given Comparer[U] into a Comparer[T].
-        *
-        * This method is used primarily when chaining together several Comparers, each of which is derived from the given function
-        * by invoking snap on a given Comparer, with a specified function.
-        * The initial value is typically provided by the "same" method of Comparer's companion object.
-        * 
-        * There is a similar method :|! which invokes orElseNot instead of orElse.
-        *
-        * @param lens a function which takes a T (the underlying type of this and the result) and returns a U.
-        * @tparam U the underlying type of the given comparer.
-        * @return a Comparer[T] which is composed from this and the unmapped form of comparer.
-        */
-      def :|[U: Comparer](lens: T => U): Comparer[T]
-    
+
+      // Comparing.
+      def compare(tt: (T, T)): Comparison      // compares tt._1 with tt._2
+      def tupled(t1: T, t2: T): Comparison     // compares t1 with t2
+      def toOrdering: Ordering[T]              // for use with the Scala and Java libraries
+
+      // Boolean tests, each in a tupled and a curried form:
+      // comparer.<((1, 2)) is true (1 is less than 2), while comparer.<(1) is the predicate "is less than 1".
+      def <(tt: (T, T)): Boolean               // also <(t1: T)(t2: T)
+      def <=(tt: (T, T)): Boolean              // also <=(t1: T)(t2: T)
+      def >(tt: (T, T)): Boolean               // also >(t1: T)(t2: T)
+      def >=(tt: (T, T)): Boolean              // also >=(t1: T)(t2: T)
+      def ==(tt: (T, T)): Boolean              // also ==(t1: T)(t2: T)
+      def !=(tt: (T, T)): Boolean              // also !=(t1: T)(t2: T)
+
+      // Building new Comparers.
+      infix def snap[U](lens: U => T): Comparer[U]                // compares Us by the T that lens yields
+      def :|[U: Comparer](lens: T => U): Comparer[T]              // this, then the given Comparer[U] applied via lens
+      def :|![U: Comparer](lens: T => U): Comparer[T]             // the same, but with the second Comparer inverted
+      infix def orElse(tc: => Comparer[T]): Comparer[T]           // this, then tc where this yields Same
+      infix def orElseNot(tc: => Comparer[T]): Comparer[T]        // this, then tc inverted where this yields Same
+      infix def compose[U](uc: => Comparer[U]): Comparer[(T, U)]  // compares pairs: by this, then by uc
+      def transform(f: Comparison => Comparison): Comparer[T]     // applies f to every result (formerly map)
+      def invert: Comparer[T]                                     // reverses the sense of this Comparer
+
     object Comparer:
-    
-      /**
-        * A method to construct a Comparer which always evaluates to Same.
-        * This is used, for example, in the apply method following.
-        *
-        * @tparam T the underlying type of the Comparer.
-        * @return a Comparer[T] which always evaluates to Same.
-        */
-      def same[T]: Comparer[T]
-    
-      /**
-        * Method to construct a Comparer from a variable-length list of lens functions, all of the same type (T=>U).
-        *
-        * @return a Comparer[T] which applies each lens (via :|) in turn.
-        */
-      def apply[T, U: Comparer](lenses: (T => U)*): Comparer[T]
-    
-      /**
-        * Method to create a Comparer[T] from an Ordering[T].
-        */
-      def fromOrdering[T](to: Ordering[T]): Comparer[T]
-    
-      /**
-        * Method to derive a Comparer for a case class (comparing its fields in order),
-        * or for an enum or sealed trait (comparing first by case, then by fields).
-        * This is what makes "derives Comparer" work.
-        */
-      inline def derived[T](using m: Mirror.Of[T]): Comparer[T]
-    
-      /**
-        * The following Comparers are given for the common scalar types.
-        */
+
+      // Creating Comparers.
+      def same[T]: Comparer[T]                                    // always Same: the usual start of a :| chain
+      def different[T](less: Boolean): Comparer[T]                // always Different(less)
+      def apply[T, U: Comparer](lenses: (T => U)*): Comparer[T]   // same :| lens1 :| lens2 ..., for lenses of one type
+      def create[T](comparers: Comparer[T]*): Comparer[T]         // comparer1 orElse comparer2 ...
+      def comparer[T, P: Comparer](lens: T => P): Comparer[T]     // the given Comparer[P], snapped by lens
+      def fromOrdering[T](to: Ordering[T]): Comparer[T]           // a Comparer with the behavior of an Ordering
+      inline def derived[T](using m: Mirror.Of[T]): Comparer[T]   // what makes "derives Comparer" work (see below)
+
+      // Comparing Iterables.
+      def comparePrefixes[T: Comparer](ts1: Iterable[T], ts2: Iterable[T]): Comparison  // as far as the shorter one
+      def compareAll[T: Comparer](ts1: Iterable[T], ts2: Iterable[T]): Comparison       // ...then the longer is More
+
+      // Given instances: scalar types.
       given unitComparer: Comparer[Unit]
+      given booleanComparer: Comparer[Boolean]
       given byteComparer: Comparer[Byte]
       given charComparer: Comparer[Char]
       given shortComparer: Comparer[Short]
       given intComparer: Comparer[Int]
-      given booleanComparer: Comparer[Boolean]
-      given stringComparer: Comparer[String]
-      given doubleComparer: Comparer[Double]
-      given floatComparer: Comparer[Float]
       given longComparer: Comparer[Long]
+      given floatComparer: Comparer[Float]        // total ordering
+      given doubleComparer: Comparer[Double]      // total ordering
       given bigIntComparer: Comparer[BigInt]
       given bigDecimalComparer: Comparer[BigDecimal]
-    
-      /**
-        * The Comparer for a tuple of any size, whose elements are compared in order.
-        */
+      given stringComparer: Comparer[String]
+
+      // Given instances: tuples of any size, compared element by element.
+      given emptyTupleComparer: Comparer[EmptyTuple]
       given tupleComparer[H, R <: Tuple](using hc: => Comparer[H], rc: => Comparer[R]): Comparer[H *: R]
-    
-      /**
-        * Comparers for "wrapper" types (see below).
-        */
+
+      // Given instances: "wrapper" types (see Derived comparers, below, for how None, Failure and Left compare).
       given comparerIterable[T: Comparer]: Comparer[Iterable[T]]
       given comparerSeq[T: Comparer]: Comparer[Seq[T]]
       given comparerList[T: Comparer]: Comparer[List[T]]
@@ -311,111 +222,39 @@ whereas when tupled parameters are used, it is conventional to compare the first
       given comparerOpt[T: Comparer]: Comparer[Option[T]]
       given comparerTry[T: Comparer]: Comparer[Try[T]]
       given comparerEither[L, R: Comparer]: Comparer[Either[L, R]]
-      
+
     object Compare:
-      /**
-        * Method to construct a Comparison from two objects of type T (tupled form).
-        * The sense of the result of this comparison is the same as,
-        * for example, Double.compare(t1, t2).
-        *
-        * @param t1 the first T.
-        * @param t2 the second T.
-        * @tparam T the type of both t1 and t2, such type providing a given Comparer[T].
-        * @return a Comparison, resulting from applying the comparer to the tuple of t1 and t2.
-        */
-      def apply[T: Comparer](t1: T, t2: T): Comparison = Comparison(t2)(t1)
+      def apply[T: Comparer](t1: T, t2: T): Comparison            // compares t1 with t2, like Double.compare(t1, t2)
 
 All of these given instances are in the companion object of _Comparer_, so you never need to import them.
 
 ### Comparison
 
-From the application programmer's perspective, the following methods of _Comparison_ are important:
-
     enum Comparison:
-    
-      /**
-        * Sameness (two objects compare as equal).
-        */
       case Same
-    
-      /**
-        * A Comparison which is different.
-        *
-        * @param less true or false. By conventions, we yield a true value when we compare a lesser object with a greater object.
-        */
-      case Different(less: Boolean)
-    
-      /**
-        * Method to convert this Comparison into a Kleenean:
-        * More is Truth(true), Less is Truth(false) and Same is Maybe.
-        *
-        * @return the homologous Kleenean.
-        */
-      def toKleenean: Kleenean
-    
-      /**
-        * Method to yield logical AND with short-circuit logic.
-        *
-        * @param c the other Comparison (lazily evaluated).
-        * @return a Comparison according to Kleenean logic.
-        */
-      def &&(c: => Comparison): Comparison
-    
-      /**
-        * Method to yield logical OR with short-circuit logic.
-        *
-        * @param c the other Comparison (lazily evaluated).
-        * @return a Comparison according to Kleenean logic.
-        */
-      def ||(c: => Comparison): Comparison
-    
-      /**
-        * Method to return the Java-style value of this Comparison.
-        *
-        * @return if Same then 0 else if Different(true) then -1 else 1
-        */
-      def toInt: Int
-    
-      /**
-        * Method to compose this with another Comparison.
-        * That is to say we yield either this or, in the case that this is Same, a default value of Comparison.
-        *
-        * @param c the other Comparison (lazily evaluated).
-        * @return the composition of this and c.
-        */
-      infix def orElse(c: => Comparison): Comparison
-    
-      /**
-        * Method to yield the complementary Comparison to this Comparison, that's to say the result is flipped (i.e. negated).
-        *
-        * @return Same if this Comparison is Same else the complementary (flipped) value of Different.
-        */
-      def flip: Comparison
-    
-    /**
-      * Companion object for Comparison.
-      */
-    object Comparison:
-      /**
-        * Different(false)
-        */
-      val More: Comparison
-      /**
-        * Different(true)
-        */
-      val Less: Comparison
-    
-      /**
-        * Method to construct a Comparison from two objects of type T (curried form).
-        * NOTE: the sense of the result will be similar to invoking, for example, Double.compare(t1, t2).
-        * @param t2 the inner T.
-        * @param t1 the outer T.
-        * @tparam T the type of both t1 and t2, which type must also provide a given Comparer[T].
-        * @return a Comparison, resulting from applying the comparer to t2 and its result to t1.
-        */
-      def apply[T: Comparer](t2: T)(t1: T): Comparison
+      case Different(less: Boolean)       // less is true if the first value is less than the second
 
-The cases _Same_ and _Different_, together with _Less_ and _More_, are exported at the package level,
+      def toInt: Int                      // -1 (Less), 0 (Same) or 1 (More), as in Java
+      def flip: Comparison                // Less and More swap; Same stays Same
+      infix def orElse(c: => Comparison): Comparison   // this, or c if this is Same
+
+      // Three-valued logic, in which More is true, Less is false and Same is indeterminate.
+      def &(c: Comparison): Comparison    // AND
+      def |(c: Comparison): Comparison    // OR
+      def &&(c: => Comparison): Comparison  // AND, evaluating c only when needed
+      def ||(c: => Comparison): Comparison  // OR, evaluating c only when needed
+      def toKleenean: Kleenean            // More is Truth(true), Less is Truth(false), Same is Maybe
+
+    object Comparison:
+      val Less: Comparison                // Different(true)
+      val More: Comparison                // Different(false)
+      def apply(b: Boolean): Comparison           // Different(b): b says whether it is less
+      def apply(bo: Option[Boolean]): Comparison  // Some(b) is Different(b); None is Same
+      def apply(k: Kleenean): Comparison          // the inverse of toKleenean
+      def convert(x: Int): Comparison             // from a Java-style comparison result
+      def apply[T: Comparer](t2: T)(t1: T): Comparison  // curried: compares t1 with t2
+
+_Same_, _Different_, _Less_ and _More_ are exported at the package level,
 so `import com.phasmidsoftware.comparer.*` lets you refer to them without the _Comparison_ prefix.
 
 ### Kleenean
@@ -423,8 +262,23 @@ A _Comparison_ is itself a form of three-valued logic, in which _More_ is true, 
 that is the sense of its _&_, _|_, _&&_, _||_ and _toInt_ methods.
 Its _toKleenean_ method converts it into the equivalent _Kleenean_, a general three-valued logic type,
 such that the logical operators give the same results either side of the conversion.
-_Kleenean_ is an enum whose cases are _Maybe_ and _Truth(b)_ (also exported at the package level).
-Its _toOption_ method yields an _Option of Boolean_.
+
+    enum Kleenean:
+      case Maybe
+      case Truth(b: Boolean)
+
+      def toOption: Option[Boolean]       // None for Maybe, otherwise Some(b)
+      def toInt: Int                      // -1, 0 or 1
+      def |(k: => Kleenean): Kleenean     // OR (evaluates k only when needed)
+      def &(k: => Kleenean): Kleenean     // AND (evaluates k only when needed)
+      def ! : Kleenean                    // NOT
+      def getOrElse(x: => Boolean): Boolean  // b, or x if this is Maybe
+
+    object Kleenean:
+      def apply(b: Boolean): Kleenean     // Truth(b)
+      def apply(x: Int): Kleenean         // Maybe if x is 0, otherwise Truth(x > 0)
+
+_Maybe_ and _Truth_ are also exported at the package level.
 
 ### Derived comparers
 You can derive a _Comparer_ for a case class (or other _Product_) simply by adding _derives Comparer_.
