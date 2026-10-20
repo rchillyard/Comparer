@@ -2,9 +2,9 @@ organization := "com.phasmidsoftware"
 
 name := "Comparer"
 
-version := "1.0.10"
+version := "1.0.11"
 
-scalaVersion := "2.13.16"
+scalaVersion := "2.13.18"
 
 scalacOptions += "-deprecation"
 

@@ -10,7 +10,7 @@ package com.phasmidsoftware.comparer
   *
   * A Kleenean can be lazily converted to an Option[Boolean] when required.
   */
-sealed trait Kleenean extends (() => Option[Boolean]) {
+sealed trait Kleenean extends Thunk[Option[Boolean]] {
 
   /**
     * Yield an Int corresponding to a Java-style comparison for this Kleenean.

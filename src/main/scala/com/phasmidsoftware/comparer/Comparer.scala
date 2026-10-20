@@ -33,14 +33,16 @@ trait Comparer[T] extends (T => T => Comparison) {
     * @param tt a tuple (T,T).
     * @return a Comparison
     */
-  def compare(tt: (T, T)): Comparison = self(tt._2)(tt._1)
+  def compare(tt: (T, T)): Comparison =
+    self(tt._2)(tt._1)
 
   /**
     * Method to convert this Comparer[T] into an Ordering[T] which can then be used for more typical Java/Scala-style comparisons.
     *
     * @return a new Ordering[T].
     */
-  def toOrdering: Ordering[T] = (t1: T, t2: T) => self(t2)(t1).toInt
+  def toOrdering: Ordering[T] =
+    (t1: T, t2: T) => self(t2)(t1).toInt
 
   /**
     * Method to yield a Boolean from this Comparer, given two curried Ts.
@@ -49,7 +51,8 @@ trait Comparer[T] extends (T => T => Comparison) {
     * @param t2 the second value of T.
     * @return a Boolean which is true if the left T is greater than the right T.
     */
-  def >(t1: T)(t2: T): Boolean = self(t1)(t2).flip().getOrElse(false)
+  def >(t1: T)(t2: T): Boolean =
+    self(t1)(t2).flip().getOrElse(false)
 
   /**
     * Method to yield a Boolean from this Comparer, given two curried Ts.

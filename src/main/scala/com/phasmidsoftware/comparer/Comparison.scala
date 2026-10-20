@@ -25,7 +25,7 @@ import scala.language.{implicitConversions, postfixOps}
   *
   * This trait is sealed because there can only be two concrete sub-types.
   */
-sealed trait Comparison extends (() => Kleenean) {
+sealed trait Comparison extends Thunk[Kleenean] {
 
   /**
     * Method to eagerly evaluate this Comparison.
