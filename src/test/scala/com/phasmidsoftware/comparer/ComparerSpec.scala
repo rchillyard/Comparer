@@ -9,8 +9,6 @@ import com.phasmidsoftware.sort.Sorted
 import org.scalatest.concurrent.{Futures, ScalaFutures}
 import org.scalatest.{flatspec, matchers}
 
-import scala.language.postfixOps
-
 /**
   * @author scalaprof
   */
@@ -20,7 +18,7 @@ class ComparerSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers wi
   private val c2a = Composite(2, "a")
   private val c1z = Composite(1, "z")
 
-  // NOTE these tests of Compare all use the implicit Comparer defined for their type.
+  // NOTE these tests of Compare all use the given Comparer defined for their type.
   behavior of "Compare"
 
   it should "compare short" in {
@@ -112,17 +110,9 @@ class ComparerSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers wi
   }
 
   it should "compare more complex Tuple2" in {
-    // NOTE: this mechanism is necessary if the types of the Tuple members themselves are non-simple types,
-    // or if your tuple has 10 or 11 fields in it.
-    // You could also define a case class of course (as, for example, you will see in ComparersSpec).
-    def makeTuple(p1: Int, p2: Option[String]): (Int, Option[String]) = (p1, p2)
-
-    val x = makeTuple(1, Some("a"))
-    val y = makeTuple(1, Some("b"))
-    object MyComparers extends Comparers {
-      val comparer: Comparer[(Int, Option[String])] = comparer2(makeTuple)
-    }
-    import MyComparers._
+    // NOTE: the elements of a tuple can be of any type which has a given Comparer.
+    val x: (Int, Option[String]) = (1, Some("a"))
+    val y: (Int, Option[String]) = (1, Some("b"))
     Compare(x, y) shouldBe Less
     Compare(x, x) shouldBe Same
     Compare(y, x) shouldBe More
@@ -199,35 +189,35 @@ class ComparerSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers wi
   behavior of "Comparer"
 
   it should "compare Ints (1)" in {
-    val comparer: Comparer[Int] = Ordering[Int]
+    val comparer: Comparer[Int] = Comparer.fromOrdering(Ordering[Int])
     comparer(1)(2) shouldBe Comparison.More
     comparer(1)(1) shouldBe Same
     comparer(2)(1) shouldBe Comparison.Less
   }
 
   it should "compare" in {
-    val comparer: Comparer[Int] = Ordering[Int]
+    val comparer: Comparer[Int] = Comparer.fromOrdering(Ordering[Int])
     comparer.compare(1, 2) shouldBe Comparison.Less
     comparer.compare(1, 1) shouldBe Same
     comparer.compare(2, 1) shouldBe Comparison.More
   }
 
   it should "compare tupled" in {
-    val comparer: Comparer[Int] = Ordering[Int]
+    val comparer: Comparer[Int] = Comparer.fromOrdering(Ordering[Int])
     comparer.tupled(1, 2) shouldBe Comparison.Less
     comparer.tupled(1, 1) shouldBe Same
     comparer.tupled(2, 1) shouldBe Comparison.More
   }
 
   it should "compare Booleans" in {
-    val comparer: Comparer[Boolean] = Ordering[Boolean]
+    val comparer: Comparer[Boolean] = Comparer.fromOrdering(Ordering[Boolean])
     comparer(true)(false) shouldBe Comparison.Less
     comparer(true)(true) shouldBe Same
     comparer(false)(true) shouldBe Comparison.More
   }
 
   it should "evaluate operators on Int" in {
-    val comparer: Comparer[Int] = Ordering[Int]
+    val comparer: Comparer[Int] = Comparer.fromOrdering(Ordering[Int])
     comparer.>(1)(2) shouldBe true
     comparer.>(1)(1) shouldBe false
     comparer.>(2)(1) shouldBe false
@@ -249,7 +239,7 @@ class ComparerSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers wi
   }
 
   it should "evaluate operators on Int (tupled)" in {
-    val comparer: Comparer[Int] = Ordering[Int]
+    val comparer: Comparer[Int] = Comparer.fromOrdering(Ordering[Int])
     comparer.>(1, 2) shouldBe false
     comparer.>(1, 1) shouldBe false
     comparer.>(2, 1) shouldBe true
@@ -270,7 +260,7 @@ class ComparerSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers wi
     comparer.!=(2, 1) shouldBe true
   }
   it should "map with function" in {
-    val comparer: Comparer[Int] = Comparer.intComparer.transform(_ flip)
+    val comparer: Comparer[Int] = Comparer.intComparer.transform(_.flip)
     comparer(1)(2) shouldBe Comparison.Less
   }
 
@@ -280,8 +270,8 @@ class ComparerSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers wi
   }
 
   it should "snap" in {
-    val comparer1a: Comparer[Composite] = implicitly[Comparer[Int]].snap(_.i)
-    val comparer1b: Comparer[Composite] = implicitly[Comparer[String]].snap(_.s)
+    val comparer1a: Comparer[Composite] = summon[Comparer[Int]].snap(_.i)
+    val comparer1b: Comparer[Composite] = summon[Comparer[String]].snap(_.s)
     val comparer: Comparer[Composite] = comparer1b orElse comparer1a
     comparer(c1z)(c1a) shouldBe Less
     comparer(c2a)(c1a) shouldBe Less
@@ -299,8 +289,8 @@ class ComparerSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers wi
   }
 
   it should "compose" in {
-    val comparer1: Comparer[Int] = implicitly[Comparer[Int]]
-    val comparer2: Comparer[String] = implicitly[Comparer[String]]
+    val comparer1: Comparer[Int] = summon[Comparer[Int]]
+    val comparer2: Comparer[String] = summon[Comparer[String]]
     val comparer3: Comparer[(Int, String)] = comparer1 compose comparer2
     val x: (Int, String) = (c1a.i, c1a.s)
     val y: (Int, String) = (c1z.i, c1z.s)
@@ -308,8 +298,8 @@ class ComparerSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers wi
   }
 
   it should "compose using orElse" in {
-    val comparer1: Comparer[Composite] = Composite.OrderingCompositeString
-    val comparer2: Comparer[Composite] = Composite.OrderingCompositeInt
+    val comparer1: Comparer[Composite] = Comparer.fromOrdering(Composite.OrderingCompositeString)
+    val comparer2: Comparer[Composite] = Comparer.fromOrdering(Composite.OrderingCompositeInt)
     val comparer3 = comparer1 orElse comparer2
     comparer3(c1z)(c1a) shouldBe Less
     comparer3(c2a)(c1a) shouldBe Less
@@ -327,8 +317,8 @@ class ComparerSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers wi
   }
 
   it should "compose using orElseNot" in {
-    val comparer1: Comparer[Composite] = Composite.OrderingCompositeString
-    val comparer2: Comparer[Composite] = Composite.OrderingCompositeInt
+    val comparer1: Comparer[Composite] = Comparer.fromOrdering(Composite.OrderingCompositeString)
+    val comparer2: Comparer[Composite] = Comparer.fromOrdering(Composite.OrderingCompositeInt)
     val comparer3 = comparer1 orElseNot comparer2
     comparer3(c1z)(c1a) shouldBe Less
     comparer3(c2a)(c1a) shouldBe More
@@ -348,14 +338,14 @@ class ComparerSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers wi
   behavior of "partially applied comparer"
 
   it should "compare Ints (1)" in {
-    val comparer: Comparer[Int] = Ordering[Int]
+    val comparer: Comparer[Int] = Comparer.fromOrdering(Ordering[Int])
     val compareWithOne: Int => Comparison = comparer(1)
     compareWithOne(2) shouldBe Comparison.More
     compareWithOne(1) shouldBe Same
   }
 
   it should "evaluate operators on Int" in {
-    val comparer: Comparer[Int] = Ordering[Int]
+    val comparer: Comparer[Int] = Comparer.fromOrdering(Ordering[Int])
     val greaterThanOne: Int => Boolean = comparer.>(1)
     val greaterThanOrEqualToOne: Int => Boolean = comparer.>=(1)
     val equalToOne: Int => Boolean = comparer.==(1)
@@ -377,7 +367,7 @@ class ComparerSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers wi
   }
 
   it should "map with function" in {
-    val comparer: Comparer[Int] = Comparer.intComparer.transform(_ flip)
+    val comparer: Comparer[Int] = Comparer.intComparer.transform(_.flip)
     val inverseCompareWithOne: Int => Comparison = comparer(1)
     inverseCompareWithOne(2) shouldBe Comparison.Less
   }
@@ -389,8 +379,8 @@ class ComparerSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers wi
   }
 
   it should "snap" in {
-    val comparer1a: Comparer[Composite] = implicitly[Comparer[Int]].snap(_.i)
-    val comparer1b: Comparer[Composite] = implicitly[Comparer[String]].snap(_.s)
+    val comparer1a: Comparer[Composite] = summon[Comparer[Int]].snap(_.i)
+    val comparer1b: Comparer[Composite] = summon[Comparer[String]].snap(_.s)
     val comparer: Comparer[Composite] = comparer1b orElse comparer1a
     comparer(c1z)(c1a) shouldBe Less
     comparer(c2a)(c1a) shouldBe Less
@@ -408,7 +398,7 @@ class ComparerSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers wi
   }
 
   it should "snap on Date object" in {
-    val ic = implicitly[Comparer[Int]]
+    val ic = summon[Comparer[Int]]
     val comparerY: Comparer[DateJ] = ic.snap(_.year)
     val comparerM: Comparer[DateJ] = ic.snap(_.month)
     val comparerD: Comparer[DateJ] = ic.snap(_.day)
@@ -431,8 +421,8 @@ class ComparerSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers wi
   }
 
   it should "compose" in {
-    val comparer1: Comparer[Int] = implicitly[Comparer[Int]]
-    val comparer2: Comparer[String] = implicitly[Comparer[String]]
+    val comparer1: Comparer[Int] = summon[Comparer[Int]]
+    val comparer2: Comparer[String] = summon[Comparer[String]]
     val comparer3: Comparer[(Int, String)] = comparer1 compose comparer2
     val x: (Int, String) = (c1a.i, c1a.s)
     val y: (Int, String) = (c1z.i, c1z.s)
@@ -440,8 +430,8 @@ class ComparerSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers wi
   }
 
   it should "compose using orElse" in {
-    val comparer1: Comparer[Composite] = Composite.OrderingCompositeString
-    val comparer2: Comparer[Composite] = Composite.OrderingCompositeInt
+    val comparer1: Comparer[Composite] = Comparer.fromOrdering(Composite.OrderingCompositeString)
+    val comparer2: Comparer[Composite] = Comparer.fromOrdering(Composite.OrderingCompositeInt)
     val comparer3 = comparer1 orElse comparer2
     comparer3(c1z)(c1a) shouldBe Less
     comparer3(c2a)(c1a) shouldBe Less
@@ -486,7 +476,7 @@ class ComparerSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers wi
     val lastMonth = DateJ(2019, 5, 5)
     val nextYear = DateJ(2020, 6, 5)
     val lastYear = DateJ(2018, 6, 5)
-    val ordering = implicitly[Ordering[DateJ]]
+    val ordering = summon[Ordering[DateJ]]
     ordering.compare(today, today) shouldBe 0
     ordering.compare(tomorrow, today) shouldBe 1
     ordering.compare(today, tomorrow) shouldBe -1
@@ -509,7 +499,7 @@ class ComparerSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers wi
     val orderingYear: Comparer[DateJ] = t1 => t2 => Comparison(t1.year)(t2.year)
     val orderingMonth: Comparer[DateJ] = t1 => t2 => Comparison(t1.month)(t2.month)
     val orderingDay: Comparer[DateJ] = t1 => t2 => Comparison(t1.day)(t2.day)
-    implicit val orderingDate: Comparer[DateJ] = orderingYear orElse orderingMonth orElse orderingDay
+    given orderingDate: Comparer[DateJ] = orderingYear orElse orderingMonth orElse orderingDay
 
     Compare(today, today) shouldBe Same
     Compare(tomorrow, today) shouldBe More
@@ -547,7 +537,7 @@ class ComparerSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers wi
     val lastMonth = DateF(2019, 5, 5)
     val nextYear = DateF(2020, 6, 5)
     val lastYear = DateF(2018, 6, 5)
-    val comparedToToday = Comparison(today) _
+    val comparedToToday: DateF => Comparison = Comparison(today)
     comparedToToday(today) shouldBe Same
     comparedToToday(tomorrow) shouldBe More
     comparedToToday(yesterday) shouldBe Less
@@ -580,7 +570,7 @@ case class Composite(i: Int, s: String)
 
 object Composite {
 
-  implicit val comparer: Comparer[Composite] = Comparer.same[Composite] :| (_.s) :| (_.i)
+  given comparer: Comparer[Composite] = Comparer.same[Composite] :| (_.s) :| (_.i)
 
   object OrderingCompositeInt extends Ordering[Composite] {
     def compare(x: Composite, y: Composite): Int = x.i.compare(y.i)
@@ -595,9 +585,9 @@ object Composite {
 case class DateF(year: Int, month: Int, day: Int)
 
 object DateF {
-  implicit val dateComparer: Comparer[DateF] = Comparer.same[DateF] :| (_.year) :| (_.month) :| (_.day)
+  given dateComparer: Comparer[DateF] = Comparer.same[DateF] :| (_.year) :| (_.month) :| (_.day)
 
-  //  implicit val dateComparer: Comparer[DateF] = Comparer(_.year, _.month, _.day)
+  //  given dateComparer: Comparer[DateF] = Comparer(_.year, _.month, _.day)
 
 }
 
@@ -607,8 +597,8 @@ object DateJ {
   val comparerYear: Comparer[DateJ] = Comparer.intComparer.snap(_.year)
   val comparerMonth: Comparer[DateJ] = Comparer.intComparer.snap(_.month)
   val comparerDay: Comparer[DateJ] = Comparer.intComparer.snap(_.day)
-  implicit val comparerDateJ: Comparer[DateJ] = comparerYear orElse comparerMonth orElse comparerDay
-  implicit val orderingDateJ: Ordering[DateJ] = comparerDateJ.toOrdering
+  given comparerDateJ: Comparer[DateJ] = comparerYear orElse comparerMonth orElse comparerDay
+  given orderingDateJ: Ordering[DateJ] = comparerDateJ.toOrdering
 }
 
 

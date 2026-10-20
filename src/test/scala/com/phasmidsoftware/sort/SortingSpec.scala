@@ -52,7 +52,7 @@ class SortingSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers wit
     }
 
     val tuples = getRandomIntStream(2030) zip getRandomIntStream(12) zip getRandomIntStream(31)
-    val toDateJ: ((Int, Int, Int)) => DateJ = (DateJ.apply _).tupled
+    val toDateJ: ((Int, Int, Int)) => DateJ = DateJ.apply.tupled
     val list = ((tuples.map(TupleWrangler.inline) map toDateJ) take 5).toArray
     Sorting.sort(list)
     list.take(5) shouldBe Array(DateJ(0, 0, 0), DateJ(59, 3, 20), DateJ(560, 8, 0), DateJ(1675, 11, 25), DateJ(1976, 10, 20))

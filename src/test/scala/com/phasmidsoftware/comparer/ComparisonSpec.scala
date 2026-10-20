@@ -8,7 +8,6 @@ import com.phasmidsoftware.comparer.Comparison.{Less, More}
 import org.scalatest.concurrent.{Futures, ScalaFutures}
 import org.scalatest.{flatspec, matchers}
 
-import scala.language.postfixOps
 
 /**
   * @author scalaprof

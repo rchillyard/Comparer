@@ -5,8 +5,6 @@
 
 package com.phasmidsoftware.generic
 
-import scala.language.postfixOps
-
 /**
   * This is a collection of methods to manipulate functions.
   * NOTE: these methods are not available in the Scala library.

@@ -28,7 +28,7 @@ object InsertionSort extends Sort {
     sort(data, 0, data.length)
 
   final def sort[A: Ordering](data: Array[A], start: Int, end: Int): Unit = {
-    val o = implicitly[Ordering[A]]
+    val o = summon[Ordering[A]]
     var i = start + 1
     while (i < end) {
       val item = data(i)
@@ -101,8 +101,8 @@ object MergeSort extends Sort {
     * left and right ranges of the input to merge, as well as the area of the
     * output to write to.
     */
-  @inline final def merge[A: Ordering : ClassTag](in: Array[A], out: Array[A], start: Int, mid: Int, end: Int): Unit = {
-    val o = implicitly[Ordering[A]]
+  @inline final def merge[A: Ordering](in: Array[A], out: Array[A], start: Int, mid: Int, end: Int): Unit = {
+    val o = summon[Ordering[A]]
     var ii = start
     var jj = mid
     var kk = start
@@ -162,7 +162,7 @@ object QuickSort {
     * @tparam A the type of the elements of data.
     * @return the index at which we will now find the pivot.
     */
-  final def partition[A: Ordering : ClassTag](data: Array[A], from: Int, to: Int, pivot: Int): Int = {
+  final def partition[A: Ordering](data: Array[A], from: Int, to: Int, pivot: Int): Int = {
 
     /**
       * Method to swap elements with indices i and j.
@@ -182,7 +182,7 @@ object QuickSort {
     swap(pivot, right)
     var store = from
     var i = from
-    val ao = implicitly[Ordering[A]]
+    val ao = summon[Ordering[A]]
     while (i < right) {
       if (ao.lt(data(i), value)) {
         swap(i, store)

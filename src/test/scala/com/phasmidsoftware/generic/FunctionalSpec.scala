@@ -1,7 +1,7 @@
 package com.phasmidsoftware.generic
 
-import com.phasmidsoftware.generic.Functional._
-import org.scalatest._
+import com.phasmidsoftware.generic.Functional.*
+import org.scalatest.*
 
 /**
   *
@@ -22,7 +22,7 @@ class FunctionalSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers 
 
     combine(2, "a", z = true) shouldBe "aa"
     combine(2, "3", z = false) shouldBe "5"
-    val g = invert3(combine _)
+    val g = invert3(combine)
     g(true, "a", 2) shouldBe "aa"
     g(false, "3", 2) shouldBe "5"
   }
