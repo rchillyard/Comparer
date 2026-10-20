@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2026. Phasmid Software. Comparer: functional comparison library.
+ */
+
 package com.phasmidsoftware.generic
 
 /**

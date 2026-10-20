@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2026. Phasmid Software. Comparer: functional comparison library.
+ */
+
 organization := "com.phasmidsoftware"
 
 name := "Comparer"

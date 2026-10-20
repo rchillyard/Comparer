@@ -1,4 +1,8 @@
 /*
+ * Copyright (c) 2026. Phasmid Software. Comparer: functional comparison library.
+ */
+
+/*
  * This code is borrowed from math.spire with love, if not actual permission.
  *
  * It is not really part of the Comparer project and is only here to help with practical usage.

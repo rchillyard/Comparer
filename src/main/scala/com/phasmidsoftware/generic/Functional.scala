@@ -1,6 +1,5 @@
 /*
- * LaScala
- * Copyright (c) 2017. Phasmid Software
+ * Copyright (c) 2026. Phasmid Software. Comparer: functional comparison library.
  */
 
 package com.phasmidsoftware.generic

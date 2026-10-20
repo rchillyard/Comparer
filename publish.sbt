@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2026. Phasmid Software. Comparer: functional comparison library.
+ */
+
 ThisBuild / organizationName := "Phasmid Software"
 ThisBuild / organizationHomepage := Some(url("https://phasmidsoftware.com/"))
 
