@@ -5,42 +5,86 @@
 package com.phasmidsoftware.comparer
 
 /**
-  * Trait which models a three-valued logic based on the algebra of Stephen C. Kleene.
+  * Enumeration which models a three-valued logic based on the algebra of Stephen C. Kleene.
   * See https://en.wikipedia.org/wiki/Three-valued_logic
   *
   * A Kleenean can be lazily converted to an Option[Boolean] when required.
+  *
+  * NOTE: the cases are exported at the package level, so that they can be referred to simply as Maybe and Truth.
   */
-sealed trait Kleenean extends Thunk[Option[Boolean]] {
+enum Kleenean extends Thunk[Option[Boolean]] {
+
+  /**
+    * The indeterminate state of a Kleenean, neither true nor false.
+    */
+  case Maybe
+
+  /**
+    * The Boolean equivalent of a Kleenean.
+    *
+    * @param b either true or false.
+    */
+  case Truth(b: Boolean)
+
+  /**
+    * Apply method to convert this Kleenean to an Option[Boolean].
+    *
+    * @return None if this is Maybe, otherwise Some(b).
+    */
+  def apply(): Option[Boolean] = this match {
+    case Maybe => None
+    case Truth(b) => Some(b)
+  }
 
   /**
     * Yield an Int corresponding to a Java-style comparison for this Kleenean.
     *
     * @return an Int which is either -1, 0 or 1.
     */
-  def toInt: Int
+  def toInt: Int = this match {
+    case Maybe => 0
+    case Truth(b) => if (b) 1 else -1
+  }
 
   /**
     * Return the logical OR of this and k.
     *
-    * @param k the other Kleenean (call-by-name).
+    * @param k the other Kleenean (call-by-name, evaluated unless this is Truth(true)).
     * @return the logical OR.
     */
-  def |(k: => Kleenean): Kleenean
+  def |(k: => Kleenean): Kleenean = this match {
+    case Truth(true) => this
+    case Truth(false) => k
+    case Maybe => k match {
+      case t@Truth(true) => t
+      case _ => Maybe
+    }
+  }
 
   /**
     * Return the logical AND of this and k.
     *
-    * @param k the other Kleenean (call-by-name).
+    * @param k the other Kleenean (call-by-name, evaluated unless this is Truth(false)).
     * @return the logical AND.
     */
-  def &(k: => Kleenean): Kleenean
+  def &(k: => Kleenean): Kleenean = this match {
+    case Truth(false) => this
+    case Truth(true) => k
+    case Maybe => k match {
+      case f@Truth(false) => f
+      case _ => Maybe
+    }
+  }
 
   /**
     * Negate this Kleenean.
     *
     * @return the complement of this Kleenean.
     */
-  def ! : Kleenean
+  def ! : Kleenean = this match {
+    case Maybe => Maybe
+    case Truth(b) => Truth(!b)
+  }
 
   /**
     * Convert this Kleenean into a Boolean by providing a default value for the Maybe case.
@@ -48,128 +92,18 @@ sealed trait Kleenean extends Thunk[Option[Boolean]] {
     * @param x the result if this is Maybe.
     * @return a Boolean corresponding to this Kleenean.
     */
-  def getOrElse(x: => Boolean): Boolean
-}
-
-/**
-  * The indeterminate state of a Kleenean, neither true nor false.
-  */
-case object Maybe extends Kleenean {
-
-  /**
-    * Apply method to convert this Kleenean to an Option[Boolean].
-    * NOTE do not define as a lazy val.
-    *
-    * @return None
-    */
-  def apply(): Option[Boolean] = None
-
-  /**
-    * @return 0.
-    */
-  lazy val toInt: Int = 0
-
-  /**
-    * The logical OR of this and k.
-    *
-    * Equivalent to
-    * <code>
-    * val int = k.toInt
-    * if (int == 0) this else Kleenean(math.max(toInt, int))
-    * </code>
-    *
-    * @param k the other Kleenean (always evaluated).
-    * @return the logical OR.
-    */
-  def |(k: => Kleenean): Kleenean =
-    k match {
-      case Truth(true) => k
-      case _ => this
-    }
-
-  /**
-    * The logical AND of this and k.
-    *
-    * Equivalent to
-    * <code>
-    * val int = k.toInt
-    * if (int == 0) this else Kleenean(math.min(toInt, int))
-    * </code>
-    *
-    * @param k the other Kleenean (always evaluated).
-    * @return the logical AND.
-    */
-  def &(k: => Kleenean): Kleenean = k match {
-    case Truth(false) => k
-    case _ => this
+  def getOrElse(x: => Boolean): Boolean = this match {
+    case Maybe => x
+    case Truth(b) => b
   }
 
-  override def toString(): String = "?"
-
   /**
-    * Convert this Kleenean into a Boolean by providing a default value for the Maybe case.
-    *
-    * @param x the result.
-    * @return x.
+    * @return "?" for Maybe, otherwise "T" or "F".
     */
-  def getOrElse(x: => Boolean): Boolean = x
-
-  /**
-    * Negate this Maybe: return Maybe.
-    *
-    * @return Maybe.
-    */
-  lazy val ! : Kleenean = Maybe
-}
-
-/**
-  * The Boolean equivalent of a Kleenean.
-  *
-  * @param b either true or false.
-  */
-case class Truth(b: Boolean) extends Kleenean {
-
-  /**
-    * Apply method to convert this Truth value to an Option[Boolean].
-    * NOTE do not define as a lazy val.
-    *
-    * @return Some(b)
-    */
-  def apply(): Option[Boolean] = Some(b)
-
-  /**
-    * @return an Int which is -1 if b is false, otherwise 1.
-    */
-  lazy val toInt: Int = if (b) 1 else -1
-
-  /**
-    * @param k the other Kleenean (call-by-name, only evaluated if b is false).
-    * @return the logical OR.
-    */
-  def |(k: => Kleenean): Kleenean = if (b) this else k
-
-  /**
-    * @param k the other Kleenean (call-by-name, only evaluated if b is true).
-    * @return the logical AND.
-    */
-  def &(k: => Kleenean): Kleenean = if (b) k else this
-
-  /**
-    * Convert this Kleenean into a Boolean by providing a default value for the Maybe case.
-    *
-    * @param x ignored.
-    * @return a Boolean corresponding to this Truth value.
-    */
-  def getOrElse(x: => Boolean): Boolean = b
-
-  /**
-    * Negate this Truth value.
-    *
-    * @return the complement of this Kleenean.
-    */
-  lazy val ! : Kleenean = Truth(!b)
-
-  override def toString(): String = if (b) "T" else "F"
+  override def toString(): String = this match {
+    case Maybe => "?"
+    case Truth(b) => if (b) "T" else "F"
+  }
 }
 
 object Kleenean {

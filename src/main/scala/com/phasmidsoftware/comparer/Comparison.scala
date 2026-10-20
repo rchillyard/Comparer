@@ -4,10 +4,8 @@
 
 package com.phasmidsoftware.comparer
 
-import scala.language.{implicitConversions, postfixOps}
-
 /**
-  * Function trait which embodies the behavior of a lazy, three-way comparison.
+  * Enumeration which embodies the behavior of a lazy, three-way comparison.
   *
   * The problem with the Java style of comparing, which Scala also uses, is that you cannot easily compose
   * comparisons. A typical comparison of two quantities compares the two most significant quantities, then,
@@ -23,16 +21,31 @@ import scala.language.{implicitConversions, postfixOps}
   * which does not correspond exactly to the the indeterminate state.
   * We can generate a Kleenean object by invoking the Comparison's apply method.
   *
-  * This trait is sealed because there can only be two concrete sub-types.
+  * NOTE: the cases are exported at the package level, so that they can be referred to simply as Same and Different.
   */
-sealed trait Comparison extends Thunk[Kleenean] {
+enum Comparison extends Thunk[Kleenean] {
+
+  /**
+    * Sameness (two objects compare as equal).
+    */
+  case Same
+
+  /**
+    * A Comparison which is different.
+    *
+    * @param less true or false. By conventions, we yield a true value when we compare a lesser object with a greater object.
+    */
+  case Different(less: Boolean)
 
   /**
     * Method to eagerly evaluate this Comparison.
     *
-    * @return a Kleenean.
+    * @return Maybe if this is Same, otherwise Truth(less).
     */
-  def apply(): Kleenean
+  def apply(): Kleenean = this match {
+    case Same => Maybe
+    case Different(less) => Truth(less)
+  }
 
   /**
     * Method to yield logical AND.
@@ -53,163 +66,74 @@ sealed trait Comparison extends Thunk[Kleenean] {
   /**
     * Method to yield logical AND with short-circuit logic.
     *
-    * @param c the other Comparison (lazily evaluated).
+    * @param c the other Comparison (lazily evaluated: not evaluated if this is Different(true)).
     * @return a Comparison according to Kleenean logic.
     */
-  def &&(c: => Comparison): Comparison
+  def &&(c: => Comparison): Comparison = this match {
+    case Different(true) => this
+    case Different(false) => c
+    case Same => c match {
+      case less@Different(true) => less
+      case _ => Same
+    }
+  }
 
   /**
     * Method to yield logical OR with short-circuit logic.
     *
-    * @param c the other Comparison (lazily evaluated).
+    * @param c the other Comparison (lazily evaluated: not evaluated if this is Different(false)).
     * @return a Comparison according to Kleenean logic.
     */
-  def ||(c: => Comparison): Comparison
+  def ||(c: => Comparison): Comparison = this match {
+    case Different(false) => this
+    case Different(true) => c
+    case Same => c match {
+      case more@Different(false) => more
+      case _ => Same
+    }
+  }
 
   /**
     * Method to return the Java-style value of this Comparison.
     *
     * @return if Same then 0 else if Different(true) then -1 else 1
     */
-  def toInt: Int
+  def toInt: Int = this match {
+    case Same => 0
+    case Different(less) => if (less) -1 else 1
+  }
 
   /**
     * Method to compose this with another Comparison.
     * That is to say we yield either this or, in the case that this is Same, a default value of Comparison.
     *
-    * @param c the other Comparison (lazily evaluated).
+    * @param c the other Comparison (lazily evaluated: only evaluated if this is Same).
     * @return the composition of this and c.
     */
-  def orElse(c: => Comparison): Comparison
+  infix def orElse(c: => Comparison): Comparison = this match {
+    case Same => c
+    case _ => this
+  }
 
   /**
     * Method to yield the complementary Comparison to this Comparison, that's to say the result is flipped (i.e. negated).
     *
     * @return Same if this Comparison is Same else the complementary (flipped) value of Different.
     */
-  def flip: Comparison
-}
-
-/**
-  * Case class which represents a Comparison which is different.
-  *
-  * @param less true or false. By conventions, we yield a true value when we compare a lesser object with a greater object.
-  */
-case class Different(less: Boolean) extends Comparison {
-  /**
-    * Eagerly evaluate this Different.
-    *
-    * @return Truth(less).
-    */
-  def apply(): Kleenean = Truth(less)
-
-  /**
-    * Short-circuited AND.
-    *
-    * @param c the other Comparison (lazily evaluated).
-    * @return if (less) this else c.
-    */
-  def &&(c: => Comparison): Comparison = if (less) this else c
-
-  /**
-    * Short-circuited OR.
-    *
-    * @param c the other Comparison (lazily evaluated).
-    * @return if (less) c else this.
-    */
-  def ||(c: => Comparison): Comparison = if (less) c else this
-
-  /**
-    * Method to compose this with another Comparison.
-    *
-    * @param c the other Comparison (never evaluated).
-    * @return this.
-    */
-  def orElse(c: => Comparison): Comparison = this
-
-  /**
-    * Flip the sense of this Different Comparison.
-    *
-    * @return Different(!less).
-    */
-  def flip: Comparison = Different(!less)
-
-  /**
-    * Yield the Java-style comparison value, i.e. -1 or 1.
-    *
-    * @return if less then -1 else 1.
-    */
-  def toInt: Int = if (less) -1 else 1
+  def flip: Comparison = this match {
+    case Same => Same
+    case Different(less) => Different(!less)
+  }
 
   /**
     * Method to yield a String representing this Comparison.
     *
-    * @return "Less" if less, otherwise "More".
+    * @return "Same", "Less" or "More".
     */
-  override def toString(): String = if (less) "Less" else "More"
-}
-
-/**
-  * Case class which represents sameness (two objects compare as equal).
-  */
-case object Same extends Comparison {
-  /**
-    * Eagerly evaluate this Same as a Kleenean (Maybe).
-    *
-    * @return Maybe.
-    */
-  def apply(): Kleenean = Maybe
-
-  /**
-    * Short-circuited AND -- but in this case (Same) there is no short circuit.
-    *
-    * @param c the other Comparison (always evaluated).
-    * @return c & this.
-    */
-  def &&(c: => Comparison): Comparison = c match {
-    case Different(true) => c
-    case _ => Same
+  override def toString(): String = this match {
+    case Same => "Same"
+    case Different(less) => if (less) "Less" else "More"
   }
-
-  /**
-    * Short-circuited OR -- but in this case (Same) there is no short circuit.
-    *
-    * @param c the other Comparison (always evaluated).
-    * @return c | this.
-    */
-  def ||(c: => Comparison): Comparison = c match {
-    case Different(false) => c
-    case _ => Same
-  }
-
-  /**
-    * Method to compose this with another Comparison.
-    *
-    * @param c the other Comparison (always evaluated).
-    * @return c.
-    */
-  def orElse(c: => Comparison): Comparison = c
-
-  /**
-    * No-op.
-    *
-    * @return this.
-    */
-  def flip: Comparison = this
-
-  /**
-    * Return the Java-style comparison value, in this case, always 0.
-    *
-    * @return 0.
-    */
-  def toInt: Int = 0
-
-  /**
-    * Method to yield a String representing this Comparison.
-    *
-    * @return "Same".
-    */
-  override def toString(): String = "Same"
 }
 
 /**
@@ -240,8 +164,8 @@ object Comparison {
     * @return the homologous Comparison for the input.
     */
   def apply(k: Kleenean): Comparison = k match {
-    case Truth(b) => apply(b);
-    case _ => Same
+    case Truth(b) => Different(b)
+    case Maybe => Same
   }
 
   /**
@@ -250,7 +174,7 @@ object Comparison {
     * @param bo an optional Boolean.
     * @return the homologous Comparison for the input.
     */
-  def apply(bo: Option[Boolean]): Comparison = (bo map Comparison.apply).getOrElse(Same)
+  def apply(bo: Option[Boolean]): Comparison = bo.fold(Same)(Different(_))
 
   /**
     * Method to construct a Comparison from a Java-style comparison result.
@@ -259,10 +183,7 @@ object Comparison {
     *          Typically, this is the result of a Java-style comparison.
     * @return the homologous Comparison for x, either Same or Different(b) where b is true if x is negative.
     */
-  implicit def convert(x: Int): Comparison = x match {
-    case 0 => Same;
-    case _ => Comparison(Some(x < 0))
-  }
+  def convert(x: Int): Comparison = if (x == 0) Same else Different(x < 0)
 
   /**
     * Method to construct a Comparison from two objects of type T (curried form).
@@ -271,8 +192,8 @@ object Comparison {
     *
     * @param t2 the inner T.
     * @param t1 the outer T.
-    * @tparam T the type of both t1 and t2, which type must also provide implicit evidence of type Comparer[T].
+    * @tparam T the type of both t1 and t2, which type must also provide a given Comparer[T].
     * @return a Comparison, resulting from applying the comparer to t1 and its result to t2.
     */
-  def apply[T: Comparer](t2: T)(t1: T): Comparison = implicitly[Comparer[T]].apply(t2)(t1)
+  def apply[T: Comparer](t2: T)(t1: T): Comparison = summon[Comparer[T]](t2)(t1)
 }
