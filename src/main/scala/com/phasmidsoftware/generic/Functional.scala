@@ -10,7 +10,7 @@ package com.phasmidsoftware.generic
   *
   * @author scalaprof
   */
-object Functional {
+object Functional:
 
   /**
     * This method inverts the order of the first two parameters of a two-(or more-)parameter curried function.
@@ -312,4 +312,3 @@ object Functional {
     */
   def untupled[T1, T2, T3, T4, T5, T6, T7, R](f: ((T1, T2, T3, T4, T5, T6, T7)) => R): (T1, T2, T3, T4, T5, T6, T7) => R =
     (x1, x2, x3, x4, x5, x6, x7) => f(Tuple7(x1, x2, x3, x4, x5, x6, x7))
-}

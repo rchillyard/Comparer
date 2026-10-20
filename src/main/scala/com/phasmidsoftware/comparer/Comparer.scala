@@ -423,10 +423,9 @@ object Comparer:
     * @tparam A the type of one case of a sum type.
     * @return a Comparer[A].
     */
-  private inline def caseComparer[A]: Comparer[A] = summonFrom {
+  private inline def caseComparer[A]: Comparer[A] = summonFrom:
     case c: Comparer[A] => c
     case _ => derived[A](using summonInline[Mirror.Of[A]])
-  }
 
   /**
     * Following are the Comparer definitions for the common scalar types.

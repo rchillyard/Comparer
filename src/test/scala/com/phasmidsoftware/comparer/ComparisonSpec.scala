@@ -10,7 +10,7 @@ import org.scalatest.{flatspec, matchers}
 /**
   * @author scalaprof
   */
-class ComparisonSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers with Futures with ScalaFutures {
+class ComparisonSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers with Futures with ScalaFutures:
 
   behavior of "Comparison"
 
@@ -113,5 +113,3 @@ class ComparisonSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers 
   //  it should "support f for Same" in {
   //    Same.f() shouldBe "Same"
   //  }
-
-}
