@@ -61,7 +61,8 @@ trait Comparer[T] extends (T => T => Comparison) {
     * @param t2 the second value of T.
     * @return a Boolean which is true if the left T is less than the right T.
     */
-  def <(t1: T)(t2: T): Boolean = self(t1)(t2)().getOrElse(false)
+  def <(t1: T)(t2: T): Boolean =
+    self(t1)(t2)().getOrElse(false)
 
   /**
     * Method to yield a Boolean from this Comparer, given two curried Ts.
@@ -70,7 +71,8 @@ trait Comparer[T] extends (T => T => Comparison) {
     * @param t2 the second value of T.
     * @return a Boolean which is true if the Ts compare as the same.
     */
-  def ==(t1: T)(t2: T): Boolean = self(t1)(t2)() == Maybe
+  def ==(t1: T)(t2: T): Boolean =
+    self(t1)(t2)() == Maybe
 
   /**
     * Method to yield a Boolean from this Comparer, given two curried Ts.
@@ -79,7 +81,8 @@ trait Comparer[T] extends (T => T => Comparison) {
     * @param t2 the second value of T.
     * @return a Boolean which is true if the left T is greater than or equal to the right T.
     */
-  def >=(t1: T)(t2: T): Boolean = ! <(t1)(t2)
+  def >=(t1: T)(t2: T): Boolean =
+    ! <(t1)(t2)
 
   /**
     * Method to yield a Boolean from this Comparer, given two curried Ts.
@@ -88,7 +91,8 @@ trait Comparer[T] extends (T => T => Comparison) {
     * @param t2 the second value of T.
     * @return a Boolean which is true if the left T is less than or equal to the right T.
     */
-  def <=(t1: T)(t2: T): Boolean = ! >(t1)(t2)
+  def <=(t1: T)(t2: T): Boolean =
+    ! >(t1)(t2)
 
   /**
     * Method to yield a Boolean from this Comparer, given two curried Ts.
@@ -97,7 +101,8 @@ trait Comparer[T] extends (T => T => Comparison) {
     * @param t2 the second value of T.
     * @return a Boolean which is true if the two Ts do not compare as the same.
     */
-  def !=(t1: T)(t2: T): Boolean = ! ==(t1)(t2)
+  def !=(t1: T)(t2: T): Boolean =
+    ! ==(t1)(t2)
 
   /**
     * Method to yield a Boolean from this Comparer, given two tupled Ts.
@@ -106,7 +111,8 @@ trait Comparer[T] extends (T => T => Comparison) {
     * @param tt the tuple of Ts. Try saying that a few times!
     * @return a Boolean which is true if the left T is greater than the right T.
     */
-  def >(tt: (T, T)): Boolean = >(tt._2)(tt._1)
+  def >(tt: (T, T)): Boolean =
+    >(tt._2)(tt._1)
 
   /**
     * Method to yield a Boolean from this Comparer, given two tupled Ts.
@@ -114,7 +120,8 @@ trait Comparer[T] extends (T => T => Comparison) {
     * @param tt the tuple of Ts.
     * @return a Boolean which is true if the left T is less than the right T.
     */
-  def <(tt: (T, T)): Boolean = <(tt._2)(tt._1)
+  def <(tt: (T, T)): Boolean =
+    <(tt._2)(tt._1)
 
   /**
     * Method to yield a Boolean from this Comparer, given two tupled Ts.
@@ -122,7 +129,8 @@ trait Comparer[T] extends (T => T => Comparison) {
     * @param tt the tuple of Ts.
     * @return a Boolean which is true if the Ts compare as the same.
     */
-  def ==(tt: (T, T)): Boolean = ==(tt._2)(tt._1)
+  def ==(tt: (T, T)): Boolean =
+    ==(tt._2)(tt._1)
 
   /**
     * Method to yield a Boolean from this Comparer, given two tupled Ts.
@@ -163,7 +171,8 @@ trait Comparer[T] extends (T => T => Comparison) {
     * @tparam U the underlying type of the returned Comparer.
     * @return a Comparer[U].
     */
-  def snap[U](lens: U => T): Comparer[U] = u1 => u2 => self(lens(u1))(lens(u2))
+  def snap[U](lens: U => T): Comparer[U] =
+    u1 => u2 => self(lens(u1))(lens(u2))
 
   /**
     * A method to compose this Comparer with another Comparer of a different underlying type.
@@ -172,7 +181,8 @@ trait Comparer[T] extends (T => T => Comparison) {
     * @tparam U the underlying type of uc.
     * @return a Comparer of tuples each comprising a T and a U.
     */
-  def compose[U](uc: => Comparer[U]): Comparer[(T, U)] = tu1 => tu2 => self(tu1._1)(tu2._1) orElse uc(tu1._2)(tu2._2)
+  def compose[U](uc: => Comparer[U]): Comparer[(T, U)] =
+    tu1 => tu2 => self(tu1._1)(tu2._1) orElse uc(tu1._2)(tu2._2)
 
   /**
     * Compose this Comparer with another Comparer of the same underlying type.
@@ -181,7 +191,8 @@ trait Comparer[T] extends (T => T => Comparison) {
     * @param tc the other Comparer (lazily evaluated).
     * @return the result of applying this Comparer unless it yields Same, in which case we invoke the other Comparer.
     */
-  def orElse(tc: => Comparer[T]): Comparer[T] = t1 => t2 => self(t1)(t2).orElse(tc(t1)(t2))
+  def orElse(tc: => Comparer[T]): Comparer[T] =
+    t1 => t2 => self(t1)(t2).orElse(tc(t1)(t2))
 
   /**
     * Compose this Comparer with another Comparer of the same underlying type.
@@ -190,7 +201,8 @@ trait Comparer[T] extends (T => T => Comparison) {
     * @param tc the other Comparer (lazily evaluated) which is evaluated in the contrary sense.
     * @return the result of applying this Comparer unless it yields Same, in which case we invoke the inverse of the other Comparer.
     */
-  def orElseNot(tc: => Comparer[T]): Comparer[T] = t1 => t2 => self(t1)(t2).orElse(tc.invert(t1)(t2))
+  def orElseNot(tc: => Comparer[T]): Comparer[T] =
+    t1 => t2 => self(t1)(t2).orElse(tc.invert(t1)(t2))
 
   /**
     * A method which maps this Comparer into a different Comparer,
@@ -198,10 +210,11 @@ trait Comparer[T] extends (T => T => Comparison) {
     *
     * NOTE: formerly called map.
     *
-    * @param f the function which takes a Comparison and yields a different Comparison.
+    * @param f the function that takes a Comparison and yields a different Comparison.
     * @return a new Comparer[T].
     */
-  def transform(f: Comparison => Comparison): Comparer[T] = t1 => t2 => f(self(t1)(t2))
+  def transform(f: Comparison => Comparison): Comparer[T] =
+    t1 => t2 => f(self(t1)(t2))
 
   /**
     * Method to invert the sense of a Comparer.
@@ -222,11 +235,12 @@ trait Comparer[T] extends (T => T => Comparison) {
     * by invoking snap on an implicitly-defined Comparer, with the specified function.
     * The initial value is typically provided by the "same" method of Comparer's companion object.
     *
-    * @param lens a function which takes a T (the underlying type of this and the result) and returns a U.
+    * @param lens a function that takes a T (the underlying type of this and the result) and returns a U.
     * @tparam U the underlying type of the implicit comparer.
-    * @return a Comparer[T] which is composed from this and the unmapped form of comparer.
+    * @return a Comparer[T] which is composed of this and the unmapped form of comparer.
     */
-  def :|[U: Comparer](lens: T => U): Comparer[T] = orElse(implicitly[Comparer[U]].snap(lens))
+  def :|[U: Comparer](lens: T => U): Comparer[T] =
+    orElse(implicitly[Comparer[U]].snap(lens))
 
   /**
     * Method to compose this Comparer[T] with a "lens" function that operates on a T.
@@ -239,11 +253,12 @@ trait Comparer[T] extends (T => T => Comparison) {
     * by invoking snap on an implicitly-defined Comparer, with the specified function.
     * The initial value is typically provided by the "same" method of Comparer's companion object.
     *
-    * @param lens a function which takes a T (the underlying type of this and the result) and returns a U.
+    * @param lens a function that takes a T (the underlying type of this and the result) and returns a U.
     * @tparam U the underlying type of the implicit comparer.
-    * @return a Comparer[T] which is composed from this and the unmapped form of comparer.
+    * @return a Comparer[T] which is composed of this and the unmapped form of comparer.
     */
-  def :|![U: Comparer](lens: T => U): Comparer[T] = orElseNot(implicitly[Comparer[U]].snap(lens))
+  def :|![U: Comparer](lens: T => U): Comparer[T] =
+    orElseNot(implicitly[Comparer[U]].snap(lens))
 
   /**
     * Method to apply this Comparer to two (tupled) parameters rather than the curried form.
@@ -269,7 +284,8 @@ object Comparer {
     * @tparam T the underlying type of the Comparer.
     * @return a Comparer[T] which always evaluates to Same.
     */
-  def same[T]: Comparer[T] = _ => _ => Same
+  def same[T]: Comparer[T] =
+    _ => _ => Same
 
   /**
     * A method to construct a Comparer which always evaluates to Different(less).
@@ -277,7 +293,8 @@ object Comparer {
     * @tparam T the underlying type of the Comparer.
     * @return a Comparer[T] which always evaluates to Different(less).
     */
-  def different[T](less: Boolean): Comparer[T] = _ => _ => Different(less)
+  def different[T](less: Boolean): Comparer[T] =
+    _ => _ => Different(less)
 
   /**
     * Method to construct a Comparer from a variable-length list of Comparers.
@@ -286,7 +303,8 @@ object Comparer {
     * @tparam T the underlying type of all Comparers and the result.
     * @return a Comparer[T] which applies each Comparer in turn.
     */
-  def create[T](comparers: Comparer[T]*): Comparer[T] = comparers.foldLeft[Comparer[T]](same)(_.orElse(_))
+  def create[T](comparers: Comparer[T]*): Comparer[T] =
+    comparers.foldLeft[Comparer[T]](same)(_.orElse(_))
 
   /**
     * Method to construct a Comparer from a variable-length list of Lenses.
@@ -297,7 +315,8 @@ object Comparer {
     * @tparam U the type by which the actual comparisons will be made.
     * @return a Comparer[T] which applies each Comparer in turn.
     */
-  def apply[T, U: Comparer](lenses: (T => U)*): Comparer[T] = lenses.foldLeft[Comparer[T]](same)(_ :| _)
+  def apply[T, U: Comparer](lenses: (T => U)*): Comparer[T] =
+    lenses.foldLeft[Comparer[T]](same)(_ :| _)
 
   /**
     * Following are the Comparer definitions for the common scalar types.
@@ -321,21 +340,29 @@ object Comparer {
     * then define an explicit case class for your tuple (or you could just define a method which constructs your tuple and use that).
     * Then, you can use the mechanism of extending Comparers and invoking comparerN where N is the number of fields (up to N = 11)
     */
-  implicit def tuple2[T1: Comparer, T2: Comparer]: Comparer[(T1, T2)] = Ordering.Tuple2[T1, T2](implicitly[Comparer[T1]].toOrdering, implicitly[Comparer[T2]].toOrdering)
+  implicit def tuple2[T1: Comparer, T2: Comparer]: Comparer[(T1, T2)] =
+    Ordering.Tuple2[T1, T2](implicitly[Comparer[T1]].toOrdering, implicitly[Comparer[T2]].toOrdering)
 
-  implicit def tuple3[T1: Comparer, T2: Comparer, T3: Comparer]: Comparer[(T1, T2, T3)] = Ordering.Tuple3[T1, T2, T3](implicitly[Comparer[T1]].toOrdering, implicitly[Comparer[T2]].toOrdering, implicitly[Comparer[T3]].toOrdering)
+  implicit def tuple3[T1: Comparer, T2: Comparer, T3: Comparer]: Comparer[(T1, T2, T3)] =
+    Ordering.Tuple3[T1, T2, T3](implicitly[Comparer[T1]].toOrdering, implicitly[Comparer[T2]].toOrdering, implicitly[Comparer[T3]].toOrdering)
 
-  implicit def tuple4[T1: Comparer, T2: Comparer, T3: Comparer, T4: Comparer]: Comparer[(T1, T2, T3, T4)] = Ordering.Tuple4[T1, T2, T3, T4](implicitly[Comparer[T1]].toOrdering, implicitly[Comparer[T2]].toOrdering, implicitly[Comparer[T3]].toOrdering, implicitly[Comparer[T4]].toOrdering)
+  implicit def tuple4[T1: Comparer, T2: Comparer, T3: Comparer, T4: Comparer]: Comparer[(T1, T2, T3, T4)] =
+    Ordering.Tuple4[T1, T2, T3, T4](implicitly[Comparer[T1]].toOrdering, implicitly[Comparer[T2]].toOrdering, implicitly[Comparer[T3]].toOrdering, implicitly[Comparer[T4]].toOrdering)
 
-  implicit def tuple5[T1: Comparer, T2: Comparer, T3: Comparer, T4: Comparer, T5: Comparer]: Comparer[(T1, T2, T3, T4, T5)] = Ordering.Tuple5[T1, T2, T3, T4, T5](implicitly[Comparer[T1]].toOrdering, implicitly[Comparer[T2]].toOrdering, implicitly[Comparer[T3]].toOrdering, implicitly[Comparer[T4]].toOrdering, implicitly[Comparer[T5]].toOrdering)
+  implicit def tuple5[T1: Comparer, T2: Comparer, T3: Comparer, T4: Comparer, T5: Comparer]: Comparer[(T1, T2, T3, T4, T5)] =
+    Ordering.Tuple5[T1, T2, T3, T4, T5](implicitly[Comparer[T1]].toOrdering, implicitly[Comparer[T2]].toOrdering, implicitly[Comparer[T3]].toOrdering, implicitly[Comparer[T4]].toOrdering, implicitly[Comparer[T5]].toOrdering)
 
-  implicit def tuple6[T1: Comparer, T2: Comparer, T3: Comparer, T4: Comparer, T5: Comparer, T6: Comparer]: Comparer[(T1, T2, T3, T4, T5, T6)] = Ordering.Tuple6[T1, T2, T3, T4, T5, T6](implicitly[Comparer[T1]].toOrdering, implicitly[Comparer[T2]].toOrdering, implicitly[Comparer[T3]].toOrdering, implicitly[Comparer[T4]].toOrdering, implicitly[Comparer[T5]].toOrdering, implicitly[Comparer[T6]].toOrdering)
+  implicit def tuple6[T1: Comparer, T2: Comparer, T3: Comparer, T4: Comparer, T5: Comparer, T6: Comparer]: Comparer[(T1, T2, T3, T4, T5, T6)] =
+    Ordering.Tuple6[T1, T2, T3, T4, T5, T6](implicitly[Comparer[T1]].toOrdering, implicitly[Comparer[T2]].toOrdering, implicitly[Comparer[T3]].toOrdering, implicitly[Comparer[T4]].toOrdering, implicitly[Comparer[T5]].toOrdering, implicitly[Comparer[T6]].toOrdering)
 
-  implicit def tuple7[T1: Comparer, T2: Comparer, T3: Comparer, T4: Comparer, T5: Comparer, T6: Comparer, T7: Comparer]: Comparer[(T1, T2, T3, T4, T5, T6, T7)] = Ordering.Tuple7[T1, T2, T3, T4, T5, T6, T7](implicitly[Comparer[T1]].toOrdering, implicitly[Comparer[T2]].toOrdering, implicitly[Comparer[T3]].toOrdering, implicitly[Comparer[T4]].toOrdering, implicitly[Comparer[T5]].toOrdering, implicitly[Comparer[T6]].toOrdering, implicitly[Comparer[T7]].toOrdering)
+  implicit def tuple7[T1: Comparer, T2: Comparer, T3: Comparer, T4: Comparer, T5: Comparer, T6: Comparer, T7: Comparer]: Comparer[(T1, T2, T3, T4, T5, T6, T7)] =
+    Ordering.Tuple7[T1, T2, T3, T4, T5, T6, T7](implicitly[Comparer[T1]].toOrdering, implicitly[Comparer[T2]].toOrdering, implicitly[Comparer[T3]].toOrdering, implicitly[Comparer[T4]].toOrdering, implicitly[Comparer[T5]].toOrdering, implicitly[Comparer[T6]].toOrdering, implicitly[Comparer[T7]].toOrdering)
 
-  implicit def tuple8[T1: Comparer, T2: Comparer, T3: Comparer, T4: Comparer, T5: Comparer, T6: Comparer, T7: Comparer, T8: Comparer]: Comparer[(T1, T2, T3, T4, T5, T6, T7, T8)] = Ordering.Tuple8[T1, T2, T3, T4, T5, T6, T7, T8](implicitly[Comparer[T1]].toOrdering, implicitly[Comparer[T2]].toOrdering, implicitly[Comparer[T3]].toOrdering, implicitly[Comparer[T4]].toOrdering, implicitly[Comparer[T5]].toOrdering, implicitly[Comparer[T6]].toOrdering, implicitly[Comparer[T7]].toOrdering, implicitly[Comparer[T8]].toOrdering)
+  implicit def tuple8[T1: Comparer, T2: Comparer, T3: Comparer, T4: Comparer, T5: Comparer, T6: Comparer, T7: Comparer, T8: Comparer]: Comparer[(T1, T2, T3, T4, T5, T6, T7, T8)] =
+    Ordering.Tuple8[T1, T2, T3, T4, T5, T6, T7, T8](implicitly[Comparer[T1]].toOrdering, implicitly[Comparer[T2]].toOrdering, implicitly[Comparer[T3]].toOrdering, implicitly[Comparer[T4]].toOrdering, implicitly[Comparer[T5]].toOrdering, implicitly[Comparer[T6]].toOrdering, implicitly[Comparer[T7]].toOrdering, implicitly[Comparer[T8]].toOrdering)
 
-  implicit def tuple9[T1: Comparer, T2: Comparer, T3: Comparer, T4: Comparer, T5: Comparer, T6: Comparer, T7: Comparer, T8: Comparer, T9: Comparer]: Comparer[(T1, T2, T3, T4, T5, T6, T7, T8, T9)] = Ordering.Tuple9[T1, T2, T3, T4, T5, T6, T7, T8, T9](implicitly[Comparer[T1]].toOrdering, implicitly[Comparer[T2]].toOrdering, implicitly[Comparer[T3]].toOrdering, implicitly[Comparer[T4]].toOrdering, implicitly[Comparer[T5]].toOrdering, implicitly[Comparer[T6]].toOrdering, implicitly[Comparer[T7]].toOrdering, implicitly[Comparer[T8]].toOrdering, implicitly[Comparer[T9]].toOrdering)
+  implicit def tuple9[T1: Comparer, T2: Comparer, T3: Comparer, T4: Comparer, T5: Comparer, T6: Comparer, T7: Comparer, T8: Comparer, T9: Comparer]: Comparer[(T1, T2, T3, T4, T5, T6, T7, T8, T9)] =
+    Ordering.Tuple9[T1, T2, T3, T4, T5, T6, T7, T8, T9](implicitly[Comparer[T1]].toOrdering, implicitly[Comparer[T2]].toOrdering, implicitly[Comparer[T3]].toOrdering, implicitly[Comparer[T4]].toOrdering, implicitly[Comparer[T5]].toOrdering, implicitly[Comparer[T6]].toOrdering, implicitly[Comparer[T7]].toOrdering, implicitly[Comparer[T8]].toOrdering, implicitly[Comparer[T9]].toOrdering)
 
   /**
     * Implicit converter from Ordering[T] to Comparer[T].
@@ -344,7 +371,8 @@ object Comparer {
     * @tparam T the underlying type of to and the result.
     * @return a Comparer[T] which has the same intrinsic behavior as "to".
     */
-  implicit def convert[T](to: Ordering[T]): Comparer[T] = t1 => t2 => Comparison.convert(to.compare(t2, t1))
+  implicit def convert[T](to: Ordering[T]): Comparer[T] =
+    t1 => t2 => Comparison.convert(to.compare(t2, t1))
 
   /**
     * This method creates a Comparer[T] based on an implicitly defined Comparer[P] and a lens function--

@@ -604,9 +604,9 @@ object DateF {
 case class DateJ(year: Int, month: Int, day: Int)
 
 object DateJ {
-  val comparerYear: Comparer[DateJ] = t1 => t2 => Comparison(t1.year)(t2.year)
-  val comparerMonth: Comparer[DateJ] = t1 => t2 => Comparison(t1.month)(t2.month)
-  val comparerDay: Comparer[DateJ] = t1 => t2 => Comparison(t1.day)(t2.day)
+  val comparerYear: Comparer[DateJ] = Comparer.intComparer.snap(_.year)
+  val comparerMonth: Comparer[DateJ] = Comparer.intComparer.snap(_.month)
+  val comparerDay: Comparer[DateJ] = Comparer.intComparer.snap(_.day)
   implicit val comparerDateJ: Comparer[DateJ] = comparerYear orElse comparerMonth orElse comparerDay
   implicit val orderingDateJ: Ordering[DateJ] = comparerDateJ.toOrdering
 }
