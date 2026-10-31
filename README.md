@@ -1,12 +1,12 @@
 [![Sonatype Central](https://maven-badges.sml.io/sonatype-central/com.phasmidsoftware/comparer_3/badge.svg?color=blue)](https://central.sonatype.com/artifact/com.phasmidsoftware/comparer_3)
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/9861f150f6e04200b991de30969ea536)](https://app.codacy.com/gh/rchillyard/Comparer/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
+[![API Docs](https://img.shields.io/badge/api-docs-blue)](https://rchillyard.github.io/Comparer/latest/api/)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/9861f150f6e04200b991de30969ea536)](https://app.codacy.com/gh/rchillyard/Comparer/dashboard)
 [![CircleCI](https://dl.circleci.com/status-badge/img/gh/rchillyard/Comparer/tree/master.svg?style=shield)](https://dl.circleci.com/status-badge/redirect/gh/rchillyard/Comparer/tree/master)
-![GitHub Top Languages](https://img.shields.io/github/languages/top/rchillyard/Comparer)
-![GitHub](https://img.shields.io/github/license/rchillyard/Comparer)
-![GitHub last commit](https://img.shields.io/github/last-commit/rchillyard/Comparer)
-![GitHub issues](https://img.shields.io/github/issues-raw/rchillyard/Comparer)
-![GitHub issues by-label](https://img.shields.io/github/issues/rchillyard/Comparer/bug)
-[![API Docs](https://javadoc.io/badge2/com.phasmidsoftware/comparer_3/javadoc.svg)](https://javadoc.io/doc/com.phasmidsoftware/comparer_3)
+[![GitHub Top Languages](https://img.shields.io/github/languages/top/rchillyard/Comparer)](https://github.com/rchillyard/Comparer)
+[![GitHub](https://img.shields.io/github/license/rchillyard/Comparer)](https://github.com/rchillyard/Comparer/blob/master/LICENSE)
+[![GitHub last commit](https://img.shields.io/github/last-commit/rchillyard/Comparer)](https://github.com/rchillyard/Comparer/commits/master)
+[![GitHub issues](https://img.shields.io/github/issues-raw/rchillyard/Comparer)](https://github.com/rchillyard/Comparer/issues)
+[![GitHub issues by-label](https://img.shields.io/github/issues/rchillyard/Comparer/bug)](https://github.com/rchillyard/Comparer/issues?q=is%3Aissue+is%3Aopen+label%3Abug)
 
 # Comparer: a functional three-way comparer.
 
@@ -18,7 +18,7 @@ If you're using sbt, then include the following line (see the badge above for th
 Comparer 2.x is for Scala 3 only, and can be used from Scala 3.3 or later.
 If you are using Scala 2.13, then use version 1.1.0 (see [Migrating from 1.x](#migrating-from-1x)).
 
-Full Scaladoc is available via [javadoc.io](https://javadoc.io/doc/com.phasmidsoftware/comparer_3).
+Full Scaladoc is at <https://rchillyard.github.io/Comparer/latest/api/>.
 
 ## Introduction
 Why do I say that this is a functional comparer? Because _Comparers_ can be composed!
