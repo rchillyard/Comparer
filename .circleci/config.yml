@@ -1,47 +1,63 @@
-# Scala CircleCI 2.1 configuration file
+# CircleCI configuration for Comparer (the standard Phasmid template)
+#
+# Check https://circleci.com/docs/configuration-reference/ for more details
+#
 version: 2.1
 
 jobs:
   build:
     docker:
-      - image: cimg/openjdk:17.0
+      # cimg/openjdk ships Maven and Gradle but not sbt, so sbt is installed below
+      - image: cimg/openjdk:21.0
 
-    working_directory: ~/Comparer
+    working_directory: ~/repo
 
     environment:
+      # Customize the JVM maximum heap limit
       JVM_OPTS: -Xmx3200m
       TERM: dumb
 
     steps:
       - checkout
 
+      - run:
+          name: Install sbt (version pinned in project/build.properties)
+          command: |
+            SBT_VERSION=$(sed -n 's/^sbt.version=//p' project/build.properties)
+            curl -fsSL --retry 3 "https://github.com/sbt/sbt/releases/download/v${SBT_VERSION}/sbt-${SBT_VERSION}.tgz" | tar -xz -C ~
+            echo 'export PATH="$HOME/sbt/bin:$PATH"' >> "$BASH_ENV"
+
+      # Download and cache dependencies
       - restore_cache:
           keys:
-            - v2-dependencies-{{ checksum "build.sbt" }}-{{ checksum "project/build.properties" }}
+            - v2-dependencies-{{ checksum "build.sbt" }}-{{ checksum "project/build.properties" }}-{{ checksum "project/plugins.sbt" }}
+            # fallback to using the latest cache if no exact match is found
             - v2-dependencies-
 
       - run:
           name: Compile
-          command: sbt Test/compile
+          command: cat /dev/null | sbt Test/compile
 
       - save_cache:
           paths:
-            - ~/.sbt
             - ~/.ivy2/cache
+            - ~/.sbt
             - ~/.cache/coursier
-          key: v2-dependencies-{{ checksum "build.sbt" }}-{{ checksum "project/build.properties" }}
+          key: v2-dependencies-{{ checksum "build.sbt" }}-{{ checksum "project/build.properties" }}-{{ checksum "project/plugins.sbt" }}
 
       - run:
           name: Test
-          command: sbt test
+          command: cat /dev/null | sbt test
 
-      # The library is built with Scala 3.3 (LTS) but should also work on the current LTS.
+      # Generate Scaladoc (catches doc warnings, and the docs are published to GitHub Pages)
       - run:
-          name: Test (Scala 3.9)
-          command: sbt "++3.9.0!" test
+          name: Doc
+          command: cat /dev/null | sbt doc
+
+      - store_test_results:
+          path: target/test-reports
 
 workflows:
-  version: 2
-  build-and-test:
+  build:
     jobs:
       - build
