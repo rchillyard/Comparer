@@ -15,7 +15,7 @@ If you're using sbt, then include the following line (see the badge above for th
 
     libraryDependencies += "com.phasmidsoftware" %% "comparer" % "2.1.0"
     
-Comparer 2.x is for Scala 3 only, and can be used from Scala 3.3 or later.
+Comparer 2.x is for Scala 3 only. Comparer 2.1.0 and later need Scala 3.9 or later; for Scala 3.3 to 3.8, use 2.0.0.
 If you are using Scala 2.13, then use version 1.1.0 (see [Migrating from 1.x](#migrating-from-1x)).
 
 Full Scaladoc is at <https://rchillyard.github.io/Comparer/latest/api/>.
