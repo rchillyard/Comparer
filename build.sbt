@@ -24,8 +24,6 @@ libraryDependencies ++= Seq(
 	"org.scalatest" %% "scalatest" % scalaTestVersion % "test"
 )
 
-// JUnit-style reports, collected by CircleCI
-Test / testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-u", "target/test-reports")
 
 // Scaladoc is published to https://rchillyard.github.io/Comparer/latest/api/ by `sbt ghpagesPushSite`
 enablePlugins(GhpagesPlugin, SiteScaladocPlugin)
