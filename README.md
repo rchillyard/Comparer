@@ -13,7 +13,7 @@
 ## Making _Comparer_ a dependency
 If you're using sbt, then include the following line (see the badge above for the current version):
 
-    libraryDependencies += "com.phasmidsoftware" %% "comparer" % "2.0.0"
+    libraryDependencies += "com.phasmidsoftware" %% "comparer" % "2.1.0"
     
 Comparer 2.x is for Scala 3 only, and can be used from Scala 3.3 or later.
 If you are using Scala 2.13, then use version 1.1.0 (see [Migrating from 1.x](#migrating-from-1x)).
@@ -363,7 +363,7 @@ If you need Scala 2.13, use version 1.1.0, which is cross-built for Scala 2.13 a
 The specifications (i.e. unit tests) cover every statement and every branch of the code (as of version 2.0.0),
 so it makes sense to resolve any doubtful points about usage by consulting them.
 To measure the coverage with sbt, run `sbt clean coverage test coverageReport`
-and open _target/scala-3.3.8/scoverage-report/index.html_.
+and open _target/scala-3.9.0/scoverage-report/index.html_.
 ### Versioning
 For the current version, see the badge at the top of the README page.
 
@@ -394,3 +394,5 @@ _derives Comparer_ for case classes, enums and sealed traits, a single given _Co
 given instances in place of implicits, and enums for _Comparison_ and _Kleenean_
 (which are no longer functions: use _toKleenean_ and _toOption_).
 See [Migrating from 1.x](#migrating-from-1x).
+
+Version 2.1.0 is built with Scala 3.9.0 (the current LTS), so it needs Scala 3.9 or later (for Scala 3.3, use 2.0.0).

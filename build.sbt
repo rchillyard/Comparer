@@ -6,7 +6,7 @@ organization := "com.phasmidsoftware"
 
 name := "Comparer"
 
-version := "2.0.0"
+version := "2.1.0"
 
 // The current Scala 3 LTS. Code built with 3.9 can only be used from Scala 3.9 or later.
 scalaVersion := "3.9.0"
