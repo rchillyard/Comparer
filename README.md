@@ -2,10 +2,10 @@
 [![API Docs](https://img.shields.io/badge/api-docs-blue)](https://rchillyard.github.io/Comparer/latest/api/)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/9861f150f6e04200b991de30969ea536)](https://app.codacy.com/gh/rchillyard/Comparer/dashboard)
 [![Codacy Coverage](https://app.codacy.com/project/badge/Coverage/9861f150f6e04200b991de30969ea536)](https://app.codacy.com/gh/rchillyard/Comparer/dashboard)
-[![CircleCI](https://dl.circleci.com/status-badge/img/gh/rchillyard/Comparer/tree/master.svg?style=shield)](https://dl.circleci.com/status-badge/redirect/gh/rchillyard/Comparer/tree/master)
+[![CircleCI](https://dl.circleci.com/status-badge/img/gh/rchillyard/Comparer/tree/main.svg?style=shield)](https://dl.circleci.com/status-badge/redirect/gh/rchillyard/Comparer/tree/main)
 [![GitHub Top Languages](https://img.shields.io/github/languages/top/rchillyard/Comparer)](https://github.com/rchillyard/Comparer)
-[![GitHub](https://img.shields.io/github/license/rchillyard/Comparer)](https://github.com/rchillyard/Comparer/blob/master/LICENSE)
-[![GitHub last commit](https://img.shields.io/github/last-commit/rchillyard/Comparer)](https://github.com/rchillyard/Comparer/commits/master)
+[![GitHub](https://img.shields.io/github/license/rchillyard/Comparer)](https://github.com/rchillyard/Comparer/blob/main/LICENSE)
+[![GitHub last commit](https://img.shields.io/github/last-commit/rchillyard/Comparer)](https://github.com/rchillyard/Comparer/commits/main)
 [![GitHub issues](https://img.shields.io/github/issues-raw/rchillyard/Comparer)](https://github.com/rchillyard/Comparer/issues)
 [![GitHub issues by-label](https://img.shields.io/github/issues/rchillyard/Comparer/bug)](https://github.com/rchillyard/Comparer/issues?q=is%3Aissue+is%3Aopen+label%3Abug)
 
