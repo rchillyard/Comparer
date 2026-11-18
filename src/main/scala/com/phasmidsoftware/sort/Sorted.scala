@@ -87,7 +87,8 @@ object Sorted:
 
   /**
     * Invoke parSort on two equal partitions of ts.
-    * TODO: implement parallel merge sort properly.
+    * TODO: implement parallel merge sort properly. See issue #25: the `threads` parameter is
+    * a recursion depth, so the number of futures is 2^(threads-1), not `threads`.
     *
     * @param ts      the sequence of T values to be sorted.
     * @param threads the number of threads (defaults to TotalThreads).
