@@ -65,6 +65,32 @@ sbt clean publishSigned sonaUpload      # then publish in the Central Portal (or
 - **Visibility:** never choose public/private for a new repository without asking.
 - **Before and during edits:** look at Robin's existing style first (e.g. Gambit) and match it. Say when editing a file Robin may have open.
 
+### 3.1 Comments
+
+- **A comment has to earn its place.** A long comment that adds little isn't wanted: restating
+  what the code already says costs a reader time, and it goes stale the moment the code moves.
+  Prefer the shortest form that carries the information.
+- **A design decision goes in `docs/design-decisions.md`, not into the comments.** If the same
+  reasoning would otherwise be repeated at several sites, record it once in that file and let
+  each site carry at most a one-line pointer to it. The file holds decisions *already taken*,
+  kept because the reasoning is useful to a reader of the code and is not recoverable from a
+  diff. **It is not a backlog** — work still to be done is a GitHub issue, which is the only
+  place it is tracked. Visitor's `docs/design-decisions.md` is the model, and as of 2026-11-20
+  the only one; add one per project as the need arises.
+- **Tag the comments that remain.** The vocabulary is fixed — don't invent new tags:
+
+| Tag | Means |
+|---|---|
+| `NOTE` | Slightly surprising information: why it's done this way, a trap, a non-obvious consequence. This is what most surviving comments are for. It is documentation, not backlog, so it needs no issue. |
+| `XXX` | A comment that doesn't rise to `NOTE`. Keep it if it helps, but the tag marks it as low value, so it can be pruned later without having to think about it. **This is a house meaning:** outside these projects `XXX` usually flags a hack or a danger. It is kept because it is already the usage here — 212 of them across six of the twelve projects on 2026-11-20, all in this sense ("XXX could use copy", "XXX yes, we are using var here"). |
+| `TODO` | Work to be done. Gets a GitHub issue, named in the comment; the issue names the file and line. |
+| `CONSIDER` | An option not taken. Promoted to an issue *before* it is ever acted on, so the reasoning survives the diff. |
+| `FIXME` | Known to be wrong. |
+| `TESTME` / `TEST` | Untested, or a test that ought to exist. The two mean the same thing. |
+
+- When sweeping a project for tags, word-boundary the grep so bare `TEST` isn't swallowed by
+  `TESTME`: `git grep -nwE 'TODO|NOTE|CONSIDER|FIXME|TESTME|TEST|XXX'`.
+
 ---
 
 ## 4. Cross-building 2.13 and 3: the fixes that compile on both
