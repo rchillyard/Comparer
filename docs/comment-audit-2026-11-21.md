@@ -114,21 +114,21 @@ Ordered by library urgency, per `triage-2026-11-20.md`.
 
 ### XmlDoc
 
-| file:line | tag | text | verdict |
-|---|---|---|---|
-| `NamedFunction.scala:57` | NOTE | *"for now we do nothing to actually evaluate the implicit evidence of NamedFunction[N]"* | **→ TODO.** "For now" is a promise to someone. |
-| `Extractor.scala:505` | NOTE | *"an empty element has no children at all — that's just empty text content, not a failure"* | correct as `NOTE` |
-| `KML.scala:969` | NOTE | explains why `sequenceRenderer` is not used here | correct as `NOTE` |
-| `Renderer.scala:239` | ASIDE | *"if maybeAttribute is defined, then isInternal will usually be true"* | correct |
-| `Renderer.scala:381` | CONSIDER | already cites #133 | tracked |
+| file:line                | tag      | text                                                                                        | verdict                                        | Robin's update                  |
+|--------------------------|----------|---------------------------------------------------------------------------------------------|------------------------------------------------|---------------------------------|
+| `NamedFunction.scala:57` | NOTE     | *"for now we do nothing to actually evaluate the implicit evidence of NamedFunction[N]"*    | **→ TODO.** "For now" is a promise to someone. | retag as CONSIDER, create issue | 
+| `Extractor.scala:505`    | NOTE     | *"an empty element has no children at all — that's just empty text content, not a failure"* | correct as `NOTE`                              |
+| `KML.scala:969`          | NOTE     | explains why `sequenceRenderer` is not used here                                            | correct as `NOTE`                              |
+| `Renderer.scala:239`     | ASIDE    | *"if maybeAttribute is defined, then isInternal will usually be true"*                      | correct                                        |
+| `Renderer.scala:381`     | CONSIDER | already cites #133                                                                          | tracked                                        |
 
 ### TableParser
 
-| file:line | tag | text | verdict |
-|---|---|---|---|
+| file:line | tag | text | verdict | Robin's update                                                                            |
+|---|---|---|---|-------------------------------------------------------------------------------------------|
 | `zio/.../TableSpec.scala:73` | NOTE | ***"this test can be flaky. Perhaps we should just use zip instead of parProduct."*** | **→ TODO.** A defect *and* a proposed fix. Same spec as [#141](https://github.com/rchillyard/TableParser/issues/141), now Tier 1 item 2 — this comment names a likely cause the issue does not. |
-| `CellParser.scala:69` | NOTE | *"not used"* | **→ CONSIDER** — dead code is a decision, not documentation |
-| `CellParsers.scala:110`, `:117` | NOTE | *"not used"* | as above |
+| `CellParser.scala:69` | NOTE | *"not used"* | **→ CONSIDER** — dead code is a decision, not documentation | Note is incorrect                                                                         |
+| `CellParsers.scala:110`, `:117` | NOTE | *"not used"* | as above | Note is correct for this implementation: but we need a TODO/Issue that covers this design |
 | `Aggregation.scala:7` | NOTE | *"unused"* | as above |
 | `TableParserSpec.scala:26` | NOTE | *"unused"* | as above |
 | `Table.scala:403` | NOTE | *"up to 2.0.2, this didn't close the file … nor report a failure"* | correct — history, and the fix shipped |
@@ -140,9 +140,9 @@ Ordered by library urgency, per `triage-2026-11-20.md`.
 
 ### Number
 
-| file:line | tag | text | verdict |
-|---|---|---|---|
-| `GeneralNumber.scala:844` | NOTE | ***"this is not used, but it doesn't seem to handle fuzziness (of the exponent) properly either"*** | **→ TODO.** A suspected defect, stated, untracked. |
+| file:line | tag | text | verdict | Robin's update |
+|---|---|---|---|---|
+| `GeneralNumber.scala:844` | NOTE | ***"this is not used, but it doesn't seem to handle fuzziness (of the exponent) properly either"*** | **→ TODO.** A suspected defect, stated, untracked. | Create issue |
 | `ComplexFunctionSpec.scala:143`, `:173` | NOTE | ***"Using explicit wide Gaussian tolerance as workaround pending fix to Fuzziness.combine"*** | **→ TODO.** A workaround awaiting a named fix — and it names the thing to fix. |
 | `PrimesSpec.scala:52` | NOTE | ***"This has been known to fail occasionally"*** | **→ TODO.** The #601 pattern exactly. |
 | `BenchmarkSpec.scala:35` | NOTE | *"this takes a long time and may fail"* | **→ TODO** or a `Slow` tag honoured in CI |
@@ -155,8 +155,8 @@ Ordered by library urgency, per `triage-2026-11-20.md`.
 
 ### Flog — ten in one file
 
-| file:line | tag | text |
-|---|---|---|
+| file:line | tag | text | verdict | Robin's update |
+|---|---|---|---|---|
 | `FlogSpec.scala:110`, `:341`, `:423` | NOTE | ***"sometimes this test will fail. Not to worry."*** |
 | `FlogSpec.scala:123`, `:154`, `:163`, `:180`, `:190`, `:354`, `:436` | NOTE | ***"sb should not be empty but it might be if you run this unit test on its own"*** |
 
@@ -167,10 +167,10 @@ is a defect in the suite, not a quirk to document.
 
 ### LaScala
 
-| file:line | tag | text | verdict |
-|---|---|---|---|
-| `Tree.scala:974` | NOTE | ***"this looks totally wrong!!"*** | **→ FIXME.** Nothing is tracking it. |
-| `FPSpec.scala:332` | NOTE | ***"this was originally a Failure and I have broken that."*** | **→ FIXME.** An admitted regression. |
+| file:line | tag | text | verdict | Robin's update |
+|---|---|---|---|---|
+| `Tree.scala:974` | NOTE | ***"this looks totally wrong!!"*** | **→ FIXME.** Nothing is tracking it. | Create issue |
+| `FPSpec.scala:332` | NOTE | ***"this was originally a Failure and I have broken that."*** | **→ FIXME.** An admitted regression. | Create issue |
 | `CSVSpec.scala:48`, `:67` | NOTE | *"works only with 2.11"* / *"only works with Scala 2.11"* | **stale** — LaScala is on 3.9 |
 | `PredicateSpec.scala:240`, `:265` | NOTE | *"fails for 2.10"* | **stale** |
 | `AccountRecordTest.scala:133` | NOTE | *"only works with Scala 2.11"* | **stale** |
