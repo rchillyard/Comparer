@@ -19,7 +19,7 @@ class SortedFuncSpec extends flatspec.AnyFlatSpec with matchers.should.Matchers 
 
   behavior of "merge"
 
-  // TODO Find out why this takes so long
+  // TODO Find out why this takes so long (#36)
   it should "sort in parallel" in {
     import scala.concurrent.ExecutionContext.Implicits.global
     val r = Random
